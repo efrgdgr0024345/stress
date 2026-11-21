@@ -11,7 +11,7 @@ Setup performs a clean virtual-environment dependency install, locked npm instal
 
 ## Automated coverage
 
-The API/domain/hosting suite contains **36 tests** covering the original unit, upload, authorization, revision, numbering, native-PDF and coordinate regressions, plus catalog mapping, controlled approvals, units, unknown values, bolting scopes, ambiguity rejection, source integrity, independent project manufacturer confirmation, immutable source snapshots, free annotations and revision recovery.
+The API/domain/hosting suite contains **42 tests** covering the original unit, upload, authorization, revision, numbering, native-PDF and coordinate regressions, plus catalog mapping, controlled approvals, units, unknown values, bolting scopes, ambiguity rejection, source integrity, independent project manufacturer confirmation, immutable source snapshots, free annotations and revision recovery.
 
 The cPanel package test extracts the actual downloadable ZIP, verifies its file
 hashes and absence of private/runtime directories, and uses its Passenger WSGI
@@ -38,6 +38,17 @@ CAESAR_TEST_MOUNT=/stress .venv/bin/python tests/e2e/smoke.py
 Browser coverage includes loader navigation, every lesson card/icon, direct project-to-canvas loading, original PDF rendering, native drawing-note creation/editing, graphic-only node edits, exact stations/support reasons, provisional points, route overlay, page/zoom controls, material review, workbook upload and source mapping, normalized record inspection, approval, exact match saving, exceptions, native bundle download, generated-PDF preview, rotated/nonzero-CropBox input, saved project reload and mobile navigation/layout.
 
 The native PDF checks enumerate stable object names, edit/save/reopen representative types, retain original content streams, and inspect actual source-derived schedule text and provenance. The generated PDF is also opened by the browser's independent PDF renderer. No test result is a claim of universal editing support in every external PDF application.
+
+## Command-line installer
+
+Six additional tests cover the account-level installer using a simulated
+CloudLinux Selector and a real local HTTP server: first installation, repeat
+runs, backups, preserved credentials/data, provider startup templates,
+dependency failure and resume, application conflicts, checksum/path rejection,
+private diagnostic logs and public-folder URL verification. Existing tests
+continue exercising the real Passenger adapter and PDF workflow. See
+[command-line setup](CPANEL_COMMAND_LINE.md). The tests do not constitute an
+installation on the user's hosting account.
 
 ## Container trust and execution
 
