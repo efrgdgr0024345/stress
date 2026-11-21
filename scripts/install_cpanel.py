@@ -181,7 +181,10 @@ class Installer:
     def write_application(self, files):
         if self.app.is_symlink() or (self.app.exists() and not self.app.is_dir()):
             raise InstallError("Private application path is not a regular directory.")
-        self.app.mkdir(exist_ok=True, mode=0o700)
+        # The web server may need to traverse the code root to detect WSGI.
+        # Drawings and credentials live separately with owner-only permissions.
+        self.app.mkdir(exist_ok=True, mode=0o711)
+        self.app.chmod(self.app.stat().st_mode & 0o777 | 0o011)
         for name, data in files.items():
             path = self.app / name
             if any(parent.is_symlink() for parent in [path, *path.parents] if parent != self.home):

@@ -121,6 +121,8 @@ class InstallerTests(unittest.TestCase):
         self.assertEqual(self.selector.calls.count("restart"), 2)
         self.assertEqual(self.selector.calls.count("stop"), 1)
         self.assertEqual(self.settings.read_bytes(), credentials)
+        self.assertEqual((self.home / "caesar-system").stat().st_mode & 0o011, 0o011)
+        self.assertEqual(self.settings.stat().st_mode & 0o777, 0o600)
         self.assertEqual((first.backup / "public/loader.php").read_text(), "original PHP loader")
         self.assertEqual((first.backup / "public/.htaccess").read_text(), "original routing")
         self.assertEqual((first.backup / "provider-startup-template.py").read_text(), "# generated provider starter\n")

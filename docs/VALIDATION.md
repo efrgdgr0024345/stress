@@ -11,7 +11,7 @@ Setup performs a clean virtual-environment dependency install, locked npm instal
 
 ## Automated coverage
 
-The API/domain/hosting suite contains **45 tests** covering the original unit, upload, authorization, revision, numbering, native-PDF and coordinate regressions, plus catalog mapping, controlled approvals, units, unknown values, bolting scopes, ambiguity rejection, source integrity, independent project manufacturer confirmation, immutable source snapshots, free annotations and revision recovery.
+The API/domain/hosting suite contains **51 tests** covering the original unit, upload, authorization, revision, numbering, native-PDF and coordinate regressions, plus catalog mapping, controlled approvals, units, unknown values, bolting scopes, ambiguity rejection, source integrity, independent project manufacturer confirmation, immutable source snapshots, free annotations and revision recovery.
 
 The cPanel package test extracts the actual downloadable ZIP, verifies its file
 hashes and absence of private/runtime directories, and uses its Passenger WSGI
@@ -55,6 +55,13 @@ failure without blind retries, and verify that diagnostic output redacts known
 secrets and omits environment/rewrite values. The hosting diagnostic uses the
 installed Python environment with a temporary private database; it does not
 change real project data or web-server routing.
+
+Six routing-repair tests simulate web-server responses and check exact backups,
+scoped rewrite matching, preserved PHP/source data, code-directory permissions,
+explicit WSGI fallback, reruns and rollback. These are filesystem/control-flow
+checks, not an emulation of Apache/LiteSpeed. See
+[routing repair](CPANEL_ROUTING_REPAIR.md). Actual-host health/frontend checks
+remain necessary.
 
 ## Container trust and execution
 
