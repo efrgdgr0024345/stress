@@ -273,6 +273,14 @@ class Installer:
                 if status.get("mode") == "authenticated":
                     break
                 raise InstallError("Hosted API is not in authenticated mode; restrict the URL and check configuration.")
+            except HTTPError as exc:
+                if exc.code == 404:
+                    kind = "web-server HTML" if "text/html" in exc.headers.get("Content-Type", "") else "API"
+                    raise InstallError(f"Health URL returns a {kind} HTTP 404. Check the /{self.uri}/ Python URL mapping, its .htaccess and any existing PHP index; this does not establish a Python startup failure.") from None
+                if attempt == 14:
+                    raise InstallError(f"Health URL still returns HTTP {exc.code}. Check private Passenger logs and hosting configuration.") from None
+                print(f"Waiting for Passenger startup (HTTP {exc.code}) …", flush=True)
+                time.sleep(2)
             except (OSError, URLError, ValueError):
                 if attempt == 14:
                     raise InstallError("Python application did not become healthy. Check the private Passenger error log and hosting resource limits.") from None

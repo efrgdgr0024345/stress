@@ -17,6 +17,7 @@ from unittest.mock import patch
 import zipfile
 
 from scripts import install_cpanel as setup
+from scripts import diagnose_cpanel as diagnostic
 
 
 class FakeSelector:
@@ -175,3 +176,26 @@ class InstallerTests(unittest.TestCase):
         self.assertEqual(self.selector.calls, ["get"])
         self.assertEqual((self.public / ".htaccess").read_text(), "original routing")
         self.assertFalse(list(self.public.glob("caesar-check-*")))
+
+    def test_html_404_is_reported_as_routing_failure_without_startup_retries(self):
+        failure = setup.HTTPError("https://easyai.com.au/stress/api/v1/health", 404, "Not Found", {"Content-Type": "text/html"}, io.BytesIO(b"<html>404</html>"))
+        with patch.object(setup, "build_opener") as opener, patch.object(setup.time, "sleep") as sleep:
+            opener.return_value.open.side_effect = failure
+            with self.assertRaisesRegex(setup.InstallError, "web-server HTML HTTP 404"):
+                self.installer().verify(self.values)
+            self.assertEqual(opener.return_value.open.call_count, 1)
+            sleep.assert_not_called()
+
+    def test_diagnostic_routing_does_not_show_environment_or_rewrite_secrets(self):
+        text = 'PassengerBaseURI "/stress"\nPassengerPython "/home/example/virtualenv/python"\nSetEnv API_TOKEN hidden-secret\nRewriteRule ^ /index.php?token=hidden-secret [L]\nDirectoryIndex index.php\n'
+        output = "\n".join(diagnostic.routing_lines(text))
+        self.assertIn('PassengerBaseURI "/stress"', output)
+        self.assertIn('DirectoryIndex index.php', output)
+        self.assertIn('RewriteRule [present; values omitted]', output)
+        self.assertNotIn('hidden-secret', output)
+        self.assertNotIn('SetEnv', output)
+
+    def test_diagnostic_exception_output_redacts_configured_secrets(self):
+        text = 'failure: hidden-password, hidden-token, module not found'
+        output = diagnostic.redact(text, {"CAESAR_ADMIN_PASSWORD": "hidden-password", "API_TOKEN": "hidden-token"})
+        self.assertEqual(output, 'failure: [REDACTED], [REDACTED], module not found')

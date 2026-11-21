@@ -85,3 +85,19 @@ malformed packages and incorrect URL mappings. Separate package tests exercise
 the actual Passenger WSGI adapter, uploads and exports. This workspace is not
 the user's CloudLinux server; a live installation is verified only when the
 operator successfully runs the command there.
+
+## Diagnose a health URL that returns 404
+
+A successful Selector restart does not prove requests reach Python. If
+`/stress/api/v1/health` returns a web-server HTML 404 and `/stress/` still serves
+an existing PHP site, inspect URL routing and the directory index before
+assuming dependency or memory failure. The installer now reports this case
+separately instead of repeating startup waits.
+
+Download and run `scripts/diagnose_cpanel.py` with the account's Python 3.12.
+It reports only selected Passenger/index directives, existing index filenames,
+HTTP statuses/titles and isolated WSGI startup. Environment variable values and
+rewrite arguments are omitted; configured secrets are redacted from exception
+output. WSGI initialization uses a temporary private database and leaves real
+projects, credentials, routing and existing PHP files intact. Review output
+before sharing; do not share the private configuration or full server logs.

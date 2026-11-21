@@ -11,7 +11,7 @@ Setup performs a clean virtual-environment dependency install, locked npm instal
 
 ## Automated coverage
 
-The API/domain/hosting suite contains **42 tests** covering the original unit, upload, authorization, revision, numbering, native-PDF and coordinate regressions, plus catalog mapping, controlled approvals, units, unknown values, bolting scopes, ambiguity rejection, source integrity, independent project manufacturer confirmation, immutable source snapshots, free annotations and revision recovery.
+The API/domain/hosting suite contains **45 tests** covering the original unit, upload, authorization, revision, numbering, native-PDF and coordinate regressions, plus catalog mapping, controlled approvals, units, unknown values, bolting scopes, ambiguity rejection, source integrity, independent project manufacturer confirmation, immutable source snapshots, free annotations and revision recovery.
 
 The cPanel package test extracts the actual downloadable ZIP, verifies its file
 hashes and absence of private/runtime directories, and uses its Passenger WSGI
@@ -49,6 +49,12 @@ private diagnostic logs and public-folder URL verification. Existing tests
 continue exercising the real Passenger adapter and PDF workflow. See
 [command-line setup](CPANEL_COMMAND_LINE.md). The tests do not constitute an
 installation on the user's hosting account.
+
+Three further checks distinguish a web-server HTML 404 from application startup
+failure without blind retries, and verify that diagnostic output redacts known
+secrets and omits environment/rewrite values. The hosting diagnostic uses the
+installed Python environment with a temporary private database; it does not
+change real project data or web-server routing.
 
 ## Container trust and execution
 
