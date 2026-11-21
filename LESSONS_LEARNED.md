@@ -75,3 +75,11 @@ Use the existing entry format: a unique `LESSON-###` heading, category, status, 
 - Lesson: A catalog row can document a manufacturer's verified values without proving that the actual drawing uses that manufacturer or model.
 - Action: Keep catalog source quality separate from project match status. Require explicit manufacturer and model constraints plus drawing/vendor evidence before marking the project match manufacturer-confirmed.
 - Evidence: `test_catalog_manufacturer_does_not_confirm_the_drawing_manufacturer` verifies that an approved manufacturer row stays reference-only until the project identity is explicitly confirmed.
+
+## LESSON-010 — A PHP loader does not install a Python application
+
+- Category: Hosting
+- Status: Adopted
+- Lesson: Opening loader.php on shared hosting displays a page, but the drawing workspace also requires a running Python API, built frontend, private storage and supported hosting configuration.
+- Action: Provide a complete allowlisted hosting ZIP and visible installation steps. Check Python/Passenger support, keep data outside the public directory, disable demo access and verify the deployed service before using real drawings.
+- Evidence: `docs/CPANEL.md`; `passenger_wsgi.py`; `scripts/package_cpanel.py`; loader download and cPanel installation controls.

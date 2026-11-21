@@ -254,6 +254,22 @@
         width: 16px;
         height: 16px;
       }
+      .hosting-panel {
+        margin-top: 24px;
+        border-top: 1px solid #e5e6ed;
+        padding-top: 22px;
+      }
+      .hosting-panel h3 { display: flex; align-items: center; gap: 9px; }
+      .hosting-panel h3 svg { width: 20px; height: 20px; color: #af52de; }
+      .hosting-panel p, .install-guide { font-size: 13px; color: #656875; }
+      .hosting-actions { display: flex; flex-wrap: wrap; gap: 10px; margin: 16px 0; }
+      .button.secondary { background: #f4f4f8; color: #383b48; border-color: #dcdde5; box-shadow: none; }
+      .button.secondary:hover { background: #e8e8f0; color: #383b48; }
+      .install-guide { padding: 20px; border: 1px solid #e4def2; border-radius: 13px; background: #faf8ff; }
+      .install-guide li { margin: 12px 0; line-height: 1.7; }
+      .install-guide code { overflow-wrap: anywhere; color: #49406d; }
+      .install-guide pre { overflow-x: auto; padding: 14px; background: #efedf5; border-radius: 8px; }
+      .hosting-note { background: #fff6e8; border-radius: 9px; padding: 12px 14px; }
       .subtext {
         font-size: 11px;
         color: #8d8f99;
@@ -588,6 +604,9 @@
       <symbol id="arrow" viewBox="0 0 24 24">
         <path d="M5 12h14m-6-6 6 6-6 6" />
       </symbol>
+      <symbol id="download" viewBox="0 0 24 24">
+        <path d="M12 3v12m-5-5 5 5 5-5M4 16v5h16v-5" />
+      </symbol>
       <symbol id="external" viewBox="0 0 24 24">
         <path d="M8 5h11v11M19 5 5 19" />
       </symbol>
@@ -671,6 +690,35 @@
               <svg><use href="#shield" /></svg>Source PDFs stay intact.
               Engineering edits stay traceable.
             </p>
+            <div class="hosting-panel">
+              <h3><svg aria-hidden="true"><use href="#box" /></svg>Set up your own hosting</h3>
+              <p>Download the application with the website already built, then follow the cPanel setup steps.</p>
+              <div class="hosting-actions">
+                <a class="button" id="download-system" href="https://github.com/efrgdgr0024345/stress/raw/refs/heads/main/downloads/caesar-cpanel.zip">
+                  <svg aria-hidden="true"><use href="#download" /></svg>Download cPanel ZIP
+                </a>
+                <button class="button secondary" id="install-cpanel" aria-expanded="false" aria-controls="cpanel-guide">
+                  <svg aria-hidden="true"><use href="#code" /></svg>Install on cPanel
+                </button>
+              </div>
+              <p>Requires Python 3.12, Passenger Python support and dependency installation access. PHP-only hosting cannot run the complete system.</p>
+              <div class="install-guide" id="cpanel-guide" hidden>
+                <h3>cPanel installation guide</h3>
+                <p>These steps configure your hosting account. This page does not connect to cPanel or install files automatically.</p>
+                <ol>
+                  <li>Download the ZIP. In cPanel File Manager, upload and extract it in your home directory, outside <code>public_html</code>. It creates <code>caesar-system/</code>.</li>
+                  <li>Use a dedicated HTTPS subdomain. In <strong>Setup Python App</strong>, select Python 3.12, application root <code>caesar-system</code>, startup file <code>passenger_wsgi.py</code>, and entry point <code>application</code>. Serve the app at the subdomain root. The public document root must be the empty <code>caesar-system/public</code> directory, never the source directory. Ask your provider if these settings are unavailable.</li>
+                  <li>Activate the virtual environment using the command supplied by cPanel. In the application directory run:
+                    <pre><code>python -m pip install --upgrade pip
+python -m pip install -r requirements-cpanel.txt
+python scripts/check_host.py</code></pre>
+                    Or use cPanel's dependency installer with <code>requirements-cpanel.txt</code>. Node.js is not needed on your hosting.</li>
+                  <li>Add application environment variables in cPanel: <code>CAESAR_DATA_DIR</code> = an absolute private path such as <code>/home/YOUR_ACCOUNT/caesar-data</code>; <code>CAESAR_ADMIN_EMAIL</code> = your email; <code>CAESAR_ADMIN_PASSWORD</code> = a unique password of at least 12 characters; <code>CAESAR_LOCAL_DEMO=0</code>; <code>CAESAR_SECURE_COOKIE=1</code>. Replace the example account name. Do not put credentials in website files.</li>
+                  <li>Restart the Python application in cPanel. Visit <code>https://YOUR_SUBDOMAIN/api/v1/health</code> and confirm <code>mode: authenticated</code>. Open the subdomain, sign in, create a project, and test a non-sensitive PDF upload and export.</li>
+                </ol>
+                <p class="hosting-note"><strong>Private pilot:</strong> keep the entire subdomain behind your provider's access restriction or VPN. Upload isolation, rate limiting and other production security work remain. The ZIP includes <code>docs/CPANEL.md</code> with verification, backup and troubleshooting steps.</p>
+              </div>
+            </div>
           </div>
           <aside class="loader-info">
             <svg><use href="#branch" /></svg>
@@ -719,6 +767,19 @@
       (() => {
         "use strict";
         const byId = (id) => document.getElementById(id);
+        byId("install-cpanel").addEventListener("click", () => {
+          const guide = byId("cpanel-guide");
+          guide.hidden = !guide.hidden;
+          byId("install-cpanel").setAttribute("aria-expanded", String(!guide.hidden));
+        });
+        // The GitHub link also works when this loader is copied to a PHP host.
+        fetch("/downloads/caesar-cpanel.zip", { method: "HEAD" })
+          .then((response) => {
+            if (response.ok && response.headers.get("content-type")?.includes("application/zip")) {
+              byId("download-system").href = "/downloads/caesar-cpanel.zip";
+              byId("download-system").download = "caesar-cpanel.zip";
+            }
+          }).catch(() => {});
         const palettes = [
           ["#007aff", "#eaf3ff", "shield"],
           ["#af52de", "#f5edfb", "box"],

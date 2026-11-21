@@ -11,7 +11,19 @@ Setup performs a clean virtual-environment dependency install, locked npm instal
 
 ## Automated coverage
 
-The API/domain suite contains **34 tests** covering the original unit, upload, authorization, revision, numbering, native-PDF and coordinate regressions, plus catalog mapping, controlled approvals, units, unknown values, bolting scopes, ambiguity rejection, source integrity, independent project manufacturer confirmation, immutable source snapshots, free annotations and revision recovery.
+The API/domain/hosting suite contains **36 tests** covering the original unit, upload, authorization, revision, numbering, native-PDF and coordinate regressions, plus catalog mapping, controlled approvals, units, unknown values, bolting scopes, ambiguity rejection, source integrity, independent project manufacturer confirmation, immutable source snapshots, free annotations and revision recovery.
+
+The cPanel package test extracts the actual downloadable ZIP, verifies its file
+hashes and absence of private/runtime directories, and uses its Passenger WSGI
+entry point over simulated HTTPS to sign in, upload a synthetic PDF and export
+a native review bundle. It verifies refusal of unsafe hosted configuration and
+checks private paths. A separate regression rejects existing demo sessions
+after demo mode is disabled. Chromium also opens/closes the cPanel guide and
+downloads and inspects the ZIP using the visible loader button.
+
+These checks passed locally with the PyMuPDF 1.26.7 update. They do not verify a
+particular cPanel account, its Apache document roots, quotas or provider support;
+those still require the installation checks in `docs/CPANEL.md`.
 
 Browser coverage includes loader navigation, every lesson card/icon, direct project-to-canvas loading, original PDF rendering, native drawing-note creation/editing, graphic-only node edits, exact stations/support reasons, provisional points, route overlay, page/zoom controls, material review, workbook upload and source mapping, normalized record inspection, approval, exact match saving, exceptions, native bundle download, generated-PDF preview, rotated/nonzero-CropBox input, saved project reload and mobile navigation/layout.
 

@@ -90,6 +90,16 @@ class ApiTests(unittest.TestCase):
             422,
         )
 
+    def test_existing_demo_session_rejected_when_demo_mode_disabled(self):
+        previous = main.LOCAL_DEMO
+        try:
+            self.assertEqual(self.client.get("/api/v1/projects").status_code, 200)
+            main.LOCAL_DEMO = False
+            self.assertEqual(self.client.get("/api/v1/projects").status_code, 401)
+            self.assertEqual(self.client.post("/api/v1/auth/local").status_code, 403)
+        finally:
+            main.LOCAL_DEMO = previous
+
     def test_upload_pages_immutable_hash_and_duplicate_rejection(self):
         raw = self.pdf(90, True)
         p = self.upload(self.create(), raw)

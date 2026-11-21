@@ -339,7 +339,7 @@ def user(request: Request):
             "SELECT users.* FROM users JOIN sessions ON users.id=sessions.user_id WHERE sessions.token=? AND sessions.expires>?",
             (digest, int(time.time())),
         ).fetchone()
-    if not row:
+    if not row or (not LOCAL_DEMO and row["id"] == "local-engineer"):
         raise HTTPException(401, "Sign in to your workspace.")
     return dict(row)
 
@@ -1071,6 +1071,14 @@ def project_loader():
 @app.get("/LESSONS_LEARNED.md", include_in_schema=False)
 def public_lessons_register():
     return FileResponse(ROOT / "LESSONS_LEARNED.md", media_type="text/markdown")
+
+
+@app.api_route("/downloads/caesar-cpanel.zip", methods=["GET", "HEAD"], include_in_schema=False)
+def hosting_package():
+    path = ROOT / "downloads" / "caesar-cpanel.zip"
+    if not path.is_file():
+        raise HTTPException(404, "Build the hosting package with scripts/package_cpanel.py.")
+    return FileResponse(path, media_type="application/zip", filename="caesar-cpanel.zip")
 
 
 if (ROOT / "dist").exists():

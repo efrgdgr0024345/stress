@@ -86,6 +86,20 @@ def run():
                     assert len(lessons) >= 8
                     expect(page.locator(".lesson")).to_have_count(len(lessons))
                     expect(page.locator(".lesson-icon")).to_have_count(len(lessons))
+                    expect(page.get_by_role("link", name="Download cPanel ZIP")).to_be_visible()
+                    install = page.get_by_role("button", name="Install on cPanel")
+                    install.click()
+                    expect(page.get_by_role("heading", name="cPanel installation guide")).to_be_visible()
+                    expect(install).to_have_attribute("aria-expanded", "true")
+                    with page.expect_download() as download_info:
+                        page.get_by_role("link", name="Download cPanel ZIP").click()
+                    download = download_info.value
+                    assert download.suggested_filename == "caesar-cpanel.zip"
+                    with zipfile.ZipFile(download.path()) as package:
+                        assert "caesar-system/passenger_wsgi.py" in package.namelist()
+                        assert "caesar-system/scripts/check_host.py" in package.namelist()
+                    install.click()
+                    expect(page.locator("#cpanel-guide")).to_be_hidden()
                     expect(
                         page.get_by_role("button", name="Load project", exact=True)
                     ).to_be_enabled()

@@ -19,6 +19,14 @@ Setup creates an isolated `.venv`, installs pinned Python requirements and the n
 
 The loader is a portable HTML/PHP view: it can be served by this application without a PHP interpreter, or by a PHP-capable host that routes `/api/v1` to the running CAESAR API. GitHub stores source files; it does not execute the application. A standalone copy can display the adjacent Markdown lessons file, but needs the API to load private project drawings.
 
+The loader now includes **Download cPanel ZIP** and **Install on cPanel** controls.
+The [downloadable package](downloads/caesar-cpanel.zip) includes the built website
+and a Passenger WSGI entry point. Follow the [cPanel installation guide](docs/CPANEL.md).
+It requires Python 3.12 hosting, HTTPS and a private data directory; PHP-only
+hosting is insufficient. Keep the deployment restricted to a private pilot
+while the documented production security work remains. Rebuild the ZIP after
+source changes with `npm run build && python scripts/package_cpanel.py`.
+
 For frontend development, run `npm run api` (port 8010) and `npm run dev` (Vite on port 5173) in separate terminals. Vite proxies authenticated API requests. Workspace dates use Australia/Perth; override `VITE_WORKSPACE_TIMEZONE` at build time for another workspace timezone.
 
 Alternatively, `docker compose up --build` starts the application on **127.0.0.1:3000** with retained private data in a named volume. The Linux Compose configuration supplies the host CA bundle as a temporary build secret; set `CAESAR_CA_BUNDLE` if its location differs. TLS verification remains enabled and the bundle is not copied into image layers.
