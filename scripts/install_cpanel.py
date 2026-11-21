@@ -23,12 +23,18 @@ from urllib.error import HTTPError, URLError
 from urllib.request import build_opener, HTTPCookieProcessor, HTTPRedirectHandler, urlopen
 import zipfile
 
-BUNDLE_URL = "https://raw.githubusercontent.com/efrgdgr0024345/stress/c4580c92987349688a8b50cd3a9c73d13620648d/downloads/caesar-cpanel.zip"
-BUNDLE_SHA256 = "5632d129ffa72961aba813097adb76483adcba532c224c58adcaac7e52638bd2"
+BUNDLE_URL = "https://raw.githubusercontent.com/efrgdgr0024345/stress/a2306b42729e08b6bc9b5942e5e5ddc49a5dad32/downloads/caesar-cpanel.zip"
+BUNDLE_SHA256 = "b868d79f986fcf74192735a934b97c2fe21e8e35ab766aed3ab7facf9bea0b19"
 APP_NAME = "caesar-system"
+ROUTING_REPAIR_URL = "https://raw.githubusercontent.com/efrgdgr0024345/stress/839e449f62b3c84aeb81620c88d0be943d68c9ba/scripts/repair_cpanel_routing.py"
+ROUTING_REPAIR_SHA256 = "357b0dc99dbf053a44d7805466dd995dc25fd9fb279c42244a44157fbb79a0a9"
 
 
 class InstallError(Exception):
+    pass
+
+
+class HostingUnavailable(InstallError):
     pass
 
 
@@ -263,9 +269,27 @@ class Installer:
             (self.public / name).write_bytes(files[name])
             (self.public / name).chmod(0o644)
         self.selector.call("restart", "--domain", self.domain, "--app-root", APP_NAME)
-        self.verify(settings)
+        try:
+            self.verify(settings)
+        except HostingUnavailable:
+            print("Application updated; checking the existing subdirectory routing …", flush=True)
+            self.repair_routing()
+            self.verify(settings)
         print(f"\nREADY: {self.url}\nSign in with the administrator email and password you configured.")
         print("Keep this engineering-review pilot access-restricted as described in docs/CPANEL.md.")
+
+    def repair_routing(self):
+        if self.domain != "easyai.com.au" or self.uri != "stress":
+            raise InstallError("Automatic routing recovery is scoped to easyai.com.au/stress only.")
+        with urlopen(ROUTING_REPAIR_URL, timeout=30) as response:
+            content = response.read(1024 * 1024)
+        if hashlib.sha256(content).hexdigest() != ROUTING_REPAIR_SHA256:
+            raise InstallError("Routing recovery checksum mismatch; no recovery script executed.")
+        script = self.backup / "reviewed-routing-repair.py"
+        private_write(script, content.decode("utf-8"))
+        result = subprocess.run([sys.executable, str(script), "--public-dir", str(self.public)], timeout=360)
+        if result.returncode:
+            raise InstallError("Routing recovery did not complete. Its previous public files were restored; the worker update and private backups are retained.")
 
     def verify(self, settings):
         opener = build_opener(NoRedirect(), HTTPCookieProcessor(CookieJar()))
@@ -277,16 +301,18 @@ class Installer:
                     break
                 raise InstallError("Hosted API is not in authenticated mode; restrict the URL and check configuration.")
             except HTTPError as exc:
+                if exc.code in (401, 403):
+                    raise InstallError(f"The health URL is access-restricted (HTTP {exc.code}). Keep those restrictions and verify using your authorised access; no routing changes attempted.") from None
                 if exc.code == 404:
                     kind = "web-server HTML" if "text/html" in exc.headers.get("Content-Type", "") else "API"
-                    raise InstallError(f"Health URL returns a {kind} HTTP 404. Check the /{self.uri}/ Python URL mapping, its .htaccess and any existing PHP index; this does not establish a Python startup failure.") from None
+                    raise HostingUnavailable(f"Health URL returns a {kind} HTTP 404. Check the /{self.uri}/ Python URL mapping, its .htaccess and any existing PHP index; this does not establish a Python startup failure.") from None
                 if attempt == 14:
-                    raise InstallError(f"Health URL still returns HTTP {exc.code}. Check private Passenger logs and hosting configuration.") from None
+                    raise HostingUnavailable(f"Health URL still returns HTTP {exc.code}. Check private Passenger logs and hosting configuration.") from None
                 print(f"Waiting for Passenger startup (HTTP {exc.code}) …", flush=True)
                 time.sleep(2)
             except (OSError, URLError, ValueError):
                 if attempt == 14:
-                    raise InstallError("Python application did not become healthy. Check the private Passenger error log and hosting resource limits.") from None
+                    raise HostingUnavailable("Python application did not become healthy. Check the private Passenger error log and hosting resource limits.") from None
                 print("Waiting for Passenger startup …", flush=True)
                 time.sleep(2)
         from urllib.request import Request

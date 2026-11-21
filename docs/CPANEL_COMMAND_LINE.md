@@ -18,8 +18,8 @@ curl -fL --proto '=https' https://raw.githubusercontent.com/efrgdgr0024345/stres
 
 For an immutable installer, replace `main` in that download URL with its
 reviewed commit SHA. The application ZIP itself is pinned to commit
-`c4580c92987349688a8b50cd3a9c73d13620648d` and checked against SHA-256
-`5632d129ffa72961aba813097adb76483adcba532c224c58adcaac7e52638bd2`.
+`a2306b42729e08b6bc9b5942e5e5ddc49a5dad32` and checked against SHA-256
+`b868d79f986fcf74192735a934b97c2fe21e8e35ab766aed3ab7facf9bea0b19`.
 Updating the ZIP in main does not silently change this tested release.
 
 ## What happens
@@ -101,3 +101,14 @@ rewrite arguments are omitted; configured secrets are redacted from exception
 output. WSGI initialization uses a temporary private database and leaves real
 projects, credentials, routing and existing PHP files intact. Review output
 before sharing; do not share the private configuration or full server logs.
+
+## Updating the forked-worker startup adapter
+
+The currently pinned package initializes its ASGI adapter inside each serving
+worker, rather than creating a background event loop before fork. See
+[worker fix and reproduction](CPANEL_WORKER_FIX.md). Rerunning the latest
+installer preserves existing credentials and data and backs up replaced code.
+For unavailable hosting health, it invokes the checksum-pinned scoped routing
+repair, then verifies login again. Access restrictions and login failures do
+not trigger routing changes. Use the final setup status after all recovery
+steps finish; the actual host remains unverified until those checks succeed.

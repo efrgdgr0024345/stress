@@ -201,3 +201,33 @@ class InstallerTests(unittest.TestCase):
         text = 'failure: hidden-password, hidden-token, module not found'
         output = diagnostic.redact(text, {"CAESAR_ADMIN_PASSWORD": "hidden-password", "API_TOKEN": "hidden-token"})
         self.assertEqual(output, 'failure: [REDACTED], [REDACTED], module not found')
+
+    def test_hosting_failure_recovers_routing_then_verifies_login_again(self):
+        installer = self.installer()
+        with patch.object(installer, "verify", side_effect=[setup.HostingUnavailable("HTML 404"), None]) as verify, patch.object(installer, "repair_routing") as repair, redirect_stdout(io.StringIO()):
+            installer.run(self.files)
+        repair.assert_called_once_with()
+        self.assertEqual(verify.call_count, 2)
+
+    def test_login_failure_does_not_trigger_routing_repair(self):
+        installer = self.installer()
+        with patch.object(installer, "verify", side_effect=setup.InstallError("Existing password mismatch")), patch.object(installer, "repair_routing") as repair, redirect_stdout(io.StringIO()):
+            with self.assertRaisesRegex(setup.InstallError, "password mismatch"):
+                installer.run(self.files)
+        repair.assert_not_called()
+
+    def test_access_restrictions_are_not_classified_as_broken_routing(self):
+        for status in (401, 403):
+            failure = setup.HTTPError("https://easyai.com.au/stress/api/v1/health", status, "restricted", {}, io.BytesIO())
+            with patch.object(setup, "build_opener") as opener, patch.object(setup.time, "sleep") as sleep:
+                opener.return_value.open.side_effect = failure
+                with self.assertRaisesRegex(setup.InstallError, "access-restricted") as error:
+                    self.installer().verify(self.values)
+                self.assertNotIsInstance(error.exception, setup.HostingUnavailable)
+                sleep.assert_not_called()
+
+    def test_routing_recovery_checksum_failure_executes_nothing(self):
+        with patch.object(setup, "urlopen", return_value=io.BytesIO(b"unexpected script")), patch.object(setup.subprocess, "run") as execute:
+            with self.assertRaisesRegex(setup.InstallError, "checksum mismatch"):
+                self.installer().repair_routing()
+            execute.assert_not_called()
