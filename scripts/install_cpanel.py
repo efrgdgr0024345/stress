@@ -23,8 +23,8 @@ from urllib.error import HTTPError, URLError
 from urllib.request import build_opener, HTTPCookieProcessor, HTTPRedirectHandler, urlopen
 import zipfile
 
-BUNDLE_URL = "https://raw.githubusercontent.com/efrgdgr0024345/stress/a2306b42729e08b6bc9b5942e5e5ddc49a5dad32/downloads/caesar-cpanel.zip"
-BUNDLE_SHA256 = "b868d79f986fcf74192735a934b97c2fe21e8e35ab766aed3ab7facf9bea0b19"
+BUNDLE_URL = "https://raw.githubusercontent.com/efrgdgr0024345/stress/1b3d021a7a77f8df39db54f68fb890c5fa16519d/downloads/caesar-cpanel.zip"
+BUNDLE_SHA256 = "40951bd575b638dbb124a7fa053fd50023c3d7e70e512cb41fbb8adbebb3c4b6"
 APP_NAME = "caesar-system"
 ROUTING_REPAIR_URL = "https://raw.githubusercontent.com/efrgdgr0024345/stress/839e449f62b3c84aeb81620c88d0be943d68c9ba/scripts/repair_cpanel_routing.py"
 ROUTING_REPAIR_SHA256 = "357b0dc99dbf053a44d7805466dd995dc25fd9fb279c42244a44157fbb79a0a9"
@@ -275,8 +275,13 @@ class Installer:
             print("Application updated; checking the existing subdirectory routing …", flush=True)
             self.repair_routing()
             self.verify(settings)
+        if (self.app/"scripts/enable_updates.py").is_file():
+            self.setup_updates()
         print(f"\nREADY: {self.url}\nSign in with the administrator email and password you configured.")
         print("Keep this engineering-review pilot access-restricted as described in docs/CPANEL.md.")
+
+    def setup_updates(self):
+        subprocess.run([sys.executable,str(self.app/"scripts/enable_updates.py"),"--public-dir",str(self.public)],check=True)
 
     def repair_routing(self):
         if self.domain != "easyai.com.au" or self.uri != "stress":
