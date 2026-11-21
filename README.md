@@ -4,6 +4,8 @@ A working browser-based piping-isometric review system built from the attached e
 
 The interface uses a consistent macOS-inspired appearance. The root [loader.php](loader.php) opens projects directly in the drawing workspace and displays every entry in [LESSONS_LEARNED.md](LESSONS_LEARNED.md) immediately beneath its **Load project** section. Both files are maintained in GitHub. Editing the Markdown register updates the displayed lessons without rebuilding the frontend.
 
+Screenshots from the synthetic test project: [macOS-style loader and lessons](docs/screenshots/loader.png) · [in-site generated PDF preview](docs/screenshots/export-preview.png).
+
 ## Start the website
 
 Requires Node.js 24 and Python 3.12. Run these commands from the repository:
