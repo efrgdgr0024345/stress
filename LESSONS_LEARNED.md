@@ -83,3 +83,11 @@ Use the existing entry format: a unique `LESSON-###` heading, category, status, 
 - Lesson: Opening loader.php on shared hosting displays a page, but the drawing workspace also requires a running Python API, built frontend, private storage and supported hosting configuration.
 - Action: Provide a complete allowlisted hosting ZIP and visible installation steps. Check Python/Passenger support, keep data outside the public directory, disable demo access and verify the deployed service before using real drawings.
 - Evidence: `docs/CPANEL.md`; `passenger_wsgi.py`; `scripts/package_cpanel.py`; loader download and cPanel installation controls.
+
+## LESSON-011 — A public URL is different from a private application directory
+
+- Category: Hosting
+- Status: Adopted
+- Lesson: A working PHP loader at /stress/ does not make a root-only Python application work at that URL, and extracting the complete source into public_html would expose unnecessary private files.
+- Action: Keep browser links, API requests, PDF URLs and cookies within the selected application path. Let Passenger map /stress/ to an application outside public_html, with private credentials and drawing storage. Test both root and subdirectory deployments.
+- Evidence: Subdirectory browser workflow; Passenger SCRIPT_NAME package tests; docs/CPANEL.md.

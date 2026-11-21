@@ -642,14 +642,14 @@
       </symbol>
     </svg>
     <nav class="topbar" aria-label="Main navigation">
-      <a class="brand" href="/"
+      <a class="brand" href="./"
         ><span class="brand-mark"
           ><svg><use href="#layers" /></svg></span
         ><span>CAESAR<small>ISOMETRIC WORKSPACE</small></span></a
       >
       <div class="topbar-right">
         <span class="workspace-pill"><i></i>Engineering workspace</span
-        ><a class="back-link" href="/"
+        ><a class="back-link" href="./"
           >Open workspace <svg><use href="#external" /></svg
         ></a>
       </div>
@@ -661,7 +661,7 @@
           <h1>Pick up where you left off.</h1>
           <p>Your drawings, decisions, and lessons. All in one place.</p>
         </div>
-        <a class="back-link" href="/"
+        <a class="back-link" href="./"
           >All projects <svg><use href="#external" /></svg
         ></a>
       </header>
@@ -707,16 +707,16 @@
                 <p>These steps configure your hosting account. This page does not connect to cPanel or install files automatically.</p>
                 <ol>
                   <li>Download the ZIP. In cPanel File Manager, upload and extract it in your home directory, outside <code>public_html</code>. It creates <code>caesar-system/</code>.</li>
-                  <li>Use a dedicated HTTPS subdomain. In <strong>Setup Python App</strong>, select Python 3.12, application root <code>caesar-system</code>, startup file <code>passenger_wsgi.py</code>, and entry point <code>application</code>. Serve the app at the subdomain root. The public document root must be the empty <code>caesar-system/public</code> directory, never the source directory. Ask your provider if these settings are unavailable.</li>
+                  <li>In <strong>Setup Python App</strong>, select Python 3.12, application root <code>caesar-system</code>, startup file <code>passenger_wsgi.py</code>, and entry point <code>application</code>. You can use a domain root or a path such as <code>https://easyai.com.au/stress/</code>. Keep the application root outside <code>public_html</code>; the public URL is routed to Python by Passenger. Never expose the application source directory as a public document root.</li>
                   <li>Activate the virtual environment using the command supplied by cPanel. In the application directory run:
                     <pre><code>python -m pip install --upgrade pip
 python -m pip install -r requirements-cpanel.txt
 python scripts/check_host.py</code></pre>
                     Or use cPanel's dependency installer with <code>requirements-cpanel.txt</code>. Node.js is not needed on your hosting.</li>
-                  <li>Add application environment variables in cPanel: <code>CAESAR_DATA_DIR</code> = an absolute private path such as <code>/home/YOUR_ACCOUNT/caesar-data</code>; <code>CAESAR_ADMIN_EMAIL</code> = your email; <code>CAESAR_ADMIN_PASSWORD</code> = a unique password of at least 12 characters; <code>CAESAR_LOCAL_DEMO=0</code>; <code>CAESAR_SECURE_COOKIE=1</code>. Replace the example account name. Do not put credentials in website files.</li>
-                  <li>Restart the Python application in cPanel. Visit <code>https://YOUR_SUBDOMAIN/api/v1/health</code> and confirm <code>mode: authenticated</code>. Open the subdomain, sign in, create a project, and test a non-sensitive PDF upload and export.</li>
+                  <li>From the application directory, run <code>python scripts/configure_cpanel.py</code>. It prompts for your email and a hidden password, and saves configuration in an account-private file outside the website. Alternatively configure the <code>CAESAR_*</code> environment variables described in <code>docs/CPANEL.md</code>.</li>
+                  <li>Restart the Python application in cPanel. For a <code>/stress/</code> installation, visit <code>https://easyai.com.au/stress/api/v1/health</code> and confirm <code>mode: authenticated</code>. Open <code>/stress/</code>, sign in, create a project, and test a non-sensitive PDF upload and export.</li>
                 </ol>
-                <p class="hosting-note"><strong>Private pilot:</strong> keep the entire subdomain behind your provider's access restriction or VPN. Upload isolation, rate limiting and other production security work remain. The ZIP includes <code>docs/CPANEL.md</code> with verification, backup and troubleshooting steps.</p>
+                <p class="hosting-note"><strong>Private pilot:</strong> keep the complete application URL, including its API, behind your provider's access restriction or VPN. Upload isolation, rate limiting and other production security work remain. The ZIP includes <code>docs/CPANEL.md</code> with verification, backup and troubleshooting steps.</p>
               </div>
             </div>
           </div>
@@ -767,16 +767,17 @@ python scripts/check_host.py</code></pre>
       (() => {
         "use strict";
         const byId = (id) => document.getElementById(id);
+        const base = new URL(".", window.location.href).pathname;
         byId("install-cpanel").addEventListener("click", () => {
           const guide = byId("cpanel-guide");
           guide.hidden = !guide.hidden;
           byId("install-cpanel").setAttribute("aria-expanded", String(!guide.hidden));
         });
         // The GitHub link also works when this loader is copied to a PHP host.
-        fetch("/downloads/caesar-cpanel.zip", { method: "HEAD" })
+        fetch(base + "downloads/caesar-cpanel.zip", { method: "HEAD" })
           .then((response) => {
             if (response.ok && response.headers.get("content-type")?.includes("application/zip")) {
-              byId("download-system").href = "/downloads/caesar-cpanel.zip";
+              byId("download-system").href = base + "downloads/caesar-cpanel.zip";
               byId("download-system").download = "caesar-cpanel.zip";
             }
           }).catch(() => {});
@@ -884,7 +885,7 @@ python scripts/check_host.py</code></pre>
           });
         }
         async function request(path, options) {
-          const response = await fetch("/api/v1" + path, {
+          const response = await fetch(base + "api/v1" + path, {
             credentials: "same-origin",
             ...options,
           });
@@ -956,7 +957,7 @@ python scripts/check_host.py</code></pre>
                   byId("status").append(
                     document.createTextNode(" "),
                     Object.assign(el("a", "", "Open sign-in"), {
-                      href: "/?returnTo=loader",
+                      href: base + "?returnTo=loader",
                     }),
                   );
               } catch {}
@@ -970,7 +971,7 @@ python scripts/check_host.py</code></pre>
           const id = byId("project").value;
           if (id)
             window.location.assign(
-              "/?project=" + encodeURIComponent(id) + "&view=workspace",
+              base + "?project=" + encodeURIComponent(id) + "&view=workspace",
             );
         });
         byId("sign-in").addEventListener("click", async () => {

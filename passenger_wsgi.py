@@ -1,11 +1,23 @@
 """cPanel Passenger entry point for a private HTTPS pilot (not PHP execution)."""
 
 import os
+import json
 from pathlib import Path
 import sys
 
 ROOT = Path(__file__).resolve().parent
 sys.path.insert(0, str(ROOT))
+
+# Optional account-private CLI configuration. Environment variables take
+# precedence. Secrets never belong in the public loader or process arguments.
+settings = ROOT.parent / ".config" / "caesar" / f"{ROOT.name}.json"
+if settings.is_file():
+    if settings.stat().st_mode & 0o077:
+        raise RuntimeError("Private CAESAR configuration must have mode 600.")
+    values = json.loads(settings.read_text())
+    for key in ("CAESAR_DATA_DIR", "CAESAR_ADMIN_EMAIL", "CAESAR_ADMIN_PASSWORD", "CAESAR_LOCAL_DEMO", "CAESAR_SECURE_COOKIE"):
+        if key in values:
+            os.environ.setdefault(key, str(values[key]))
 
 if os.environ.get("CAESAR_LOCAL_DEMO", "0") != "0":
     raise RuntimeError("Hosted installations require CAESAR_LOCAL_DEMO=0.")

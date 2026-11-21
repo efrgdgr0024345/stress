@@ -13,7 +13,7 @@ def build():
         raise SystemExit("Build the website first: npm ci && npm run build")
     paths = [ROOT / name for name in (
         "loader.php", "LESSONS_LEARNED.md", "README.md", "requirements.txt",
-        "requirements-cpanel.txt", "passenger_wsgi.py", "docs/CPANEL.md", "scripts/check_host.py",
+        "requirements-cpanel.txt", "passenger_wsgi.py", "docs/CPANEL.md", "scripts/check_host.py", "scripts/configure_cpanel.py",
     )]
     for directory in ("services", "packages"):
         paths.extend((ROOT / directory).rglob("*.py"))

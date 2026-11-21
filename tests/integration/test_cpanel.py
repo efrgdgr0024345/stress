@@ -32,10 +32,16 @@ class CpanelPackageTests(unittest.TestCase):
                    "CAESAR_ADMIN_EMAIL": "test@example.invalid", "CAESAR_ADMIN_PASSWORD": "isolated-test-password-987",
                    "CAESAR_LOCAL_DEMO": "0", "CAESAR_SECURE_COOKIE": "1", "PYTHONPATH": ""}
             code = '''
-import io, zipfile
+import io, os, zipfile
 import httpx, fitz
 from passenger_wsgi import application
-with httpx.Client(transport=httpx.WSGITransport(app=application), base_url="https://test.invalid") as client:
+mount = os.environ.get("CAESAR_TEST_MOUNT", "")
+def mounted(environ, start_response):
+    assert environ["PATH_INFO"].startswith(mount + "/")
+    environ["SCRIPT_NAME"] = mount
+    environ["PATH_INFO"] = environ["PATH_INFO"][len(mount):]
+    return application(environ, start_response)
+with httpx.Client(transport=httpx.WSGITransport(app=mounted), base_url="https://test.invalid" + mount + "/") as client:
     assert client.get("/api/v1/health").json()["mode"] == "authenticated"
     assert client.get("/").status_code == 200
     assert "Install on cPanel" in client.get("/loader.php").text
@@ -44,6 +50,7 @@ with httpx.Client(transport=httpx.WSGITransport(app=application), base_url="http
     result = client.post("/api/v1/auth/login", json={"email":"test@example.invalid", "password":"isolated-test-password-987"})
     assert result.status_code == 200, result.text
     assert "Secure" in result.headers["set-cookie"] and "HttpOnly" in result.headers["set-cookie"]
+    assert "Path=" + mount + "/;" in result.headers["set-cookie"]
     assert client.get("/api/v1/projects").json() == []
     project = client.post("/api/v1/projects", json={"title":"WSGI deployment test", "line_id":"TEST-01"}).json()
     doc = fitz.open()
@@ -64,10 +71,36 @@ with httpx.Client(transport=httpx.WSGITransport(app=application), base_url="http
         assert any(name.endswith(".pdf") for name in archive.namelist())
     for path in ("/.env", "/.git/config", "/passenger_wsgi.py", "/requirements.txt", "/.local/workspace.sqlite3"):
         assert client.get(path).status_code == 404, path
+    result = client.post("/api/v1/auth/logout")
+    assert "Path=" + mount + "/;" in result.headers["set-cookie"]
+    assert client.get("/api/v1/projects").status_code == 401
 print("WSGI package: HTTPS login, upload, export and private paths verified")
 '''
-            result = subprocess.run([sys.executable, "-c", code], cwd=application, env=env, capture_output=True, text=True, timeout=60)
+            for mount in ("", "/stress"):
+                result = subprocess.run([sys.executable, "-c", code], cwd=application, env={**env, "CAESAR_TEST_MOUNT": mount, "CAESAR_DATA_DIR": str(temp / ("root-data" if not mount else "mount-data"))}, capture_output=True, text=True, timeout=60)
+                self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+            configure = '''
+from unittest.mock import patch
+import runpy
+with patch("builtins.input", return_value="test@example.invalid"), patch("getpass.getpass", return_value="isolated-test-password-987"):
+    runpy.run_path("scripts/configure_cpanel.py", run_name="__main__")
+'''
+            result = subprocess.run([sys.executable, "-c", configure], cwd=application, env=env, capture_output=True, text=True, timeout=15)
             self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+            self.assertNotIn("isolated-test-password-987", result.stdout + result.stderr)
+            settings = temp / ".config/caesar/caesar-system.json"
+            self.assertEqual(settings.stat().st_mode & 0o777, 0o600)
+            private_env = {key: value for key, value in env.items() if not key.startswith("CAESAR_")}
+            result = subprocess.run([sys.executable, "-c", code], cwd=application, env={**private_env, "CAESAR_TEST_MOUNT": "/stress"}, capture_output=True, text=True, timeout=60)
+            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+            settings.chmod(0o644)
+            result = subprocess.run([sys.executable, "-c", "import passenger_wsgi"], cwd=application, env=private_env, capture_output=True, text=True, timeout=15)
+            self.assertNotEqual(result.returncode, 0)
+            settings.chmod(0o600)
+            previous = settings.read_bytes()
+            result = subprocess.run([sys.executable, "-c", configure], cwd=application, env=env, capture_output=True, text=True, timeout=15)
+            self.assertNotEqual(result.returncode, 0)
+            self.assertEqual(settings.read_bytes(), previous)
             for changed in ({"CAESAR_LOCAL_DEMO": "1"}, {"CAESAR_ADMIN_PASSWORD": ""}, {"CAESAR_SECURE_COOKIE": "0"}, {"CAESAR_DATA_DIR": str(application / "public/data")}):
                 result = subprocess.run([sys.executable, "-c", "import passenger_wsgi"], cwd=application, env={**env, **changed}, capture_output=True, text=True, timeout=15)
                 self.assertNotEqual(result.returncode, 0, changed.keys())

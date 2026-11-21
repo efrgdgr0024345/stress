@@ -1,3 +1,4 @@
+import { appPath } from "./paths";
 export type Point = [number, number];
 export interface Sheet {
   id: string;
@@ -132,7 +133,7 @@ export async function api<T>(
   path: string,
   options: RequestInit = {},
 ): Promise<T> {
-  const response = await fetch(`/api/v1${path}`, {
+  const response = await fetch(appPath(`api/v1${path}`), {
     ...options,
     headers: {
       ...(options.body instanceof FormData

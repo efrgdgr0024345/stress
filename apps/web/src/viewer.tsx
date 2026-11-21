@@ -1,3 +1,4 @@
+import { appPath } from "./paths";
 import { useEffect, useRef, useState } from "react";
 import * as pdfjs from "pdfjs-dist";
 import workerUrl from "pdfjs-dist/build/pdf.worker.min.mjs?url";
@@ -109,7 +110,7 @@ export function DrawingEditor({
     setError("");
     setPdfPage(null);
     const task = pdfjs.getDocument({
-      url: `/api/v1/projects/${project.id}/sources/${sheet.source_id}`,
+      url: appPath(`api/v1/projects/${project.id}/sources/${sheet.source_id}`),
       withCredentials: true,
       isEvalSupported: false,
     });
@@ -928,7 +929,7 @@ export function DrawingEditor({
             </pre>
             <a
               className="button secondary full compact"
-              href={`/api/v1/projects/${project.id}/sources/${sheet.source_id}`}
+              href={appPath(`api/v1/projects/${project.id}/sources/${sheet.source_id}`)}
             >
               <ArrowDownToLine size={14} />
               Download original

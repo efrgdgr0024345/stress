@@ -19,14 +19,13 @@ not a claim that every cPanel plan supports it.
    directory, outside public_html**. It creates `caesar-system/`. Never place
    source files, SQLite, workbooks, passwords or original drawings in a public
    document root. Do not use an existing local-demo database for this install.
-3. Create a dedicated subdomain with a valid HTTPS certificate. In **Setup
-   Python App** select Python 3.12, production mode, application root
-   `caesar-system`, URL at the **root of that subdomain**, startup file
-   `passenger_wsgi.py`, and entry point `application`. Subdirectory mounting is
-   not supported by this package. The public document root must be the empty
-   `caesar-system/public` folder, with requests handled by Passenger. If your
-   provider's cPanel interface cannot configure this separation, ask its support
-   team to do so before proceeding. Do not point Apache at the source root.
+3. In **Setup Python App** select Python 3.12, production mode, private
+   application root `caesar-system`, startup file `passenger_wsgi.py`, and entry
+   point `application`. A domain root or a subdirectory works. For the EasyAI
+   installation use domain **easyai.com.au** and application URI **stress**,
+   giving `https://easyai.com.au/stress/`. Passenger maps that public URL to the
+   private Python app; it must not expose the source directory as a document
+   root. Keep the rest of the EasyAI website in its existing location.
 4. Activate the virtual environment using the command shown by cPanel. From
    your application's directory, run:
 
@@ -59,22 +58,85 @@ not a claim that every cPanel plan supports it.
    missing built assets and data inside common public/source directories.
    The administrator is created on first startup; changing these variables
    later does **not** reset an existing user's password.
-6. Restrict the **entire subdomain**, including `/api/v1`, using your provider's
+6. Restrict the **entire application URL**, including its API, using your provider's
    private access controls or a VPN. Restart the Python application in cPanel.
    The Install button explains these steps; it does not contact your hosting
    account or execute an unattended remote installer.
 
+## Command-line setup with CloudLinux Python Selector
+
+For an account with Python Selector enabled, configure credentials privately:
+
+```bash
+cd "$HOME/caesar-system"
+/opt/alt/python312/bin/python3 scripts/configure_cpanel.py
+```
+
+The prompt saves settings in `$HOME/.config/caesar/caesar-system.json` with mode
+600, and selects `$HOME/caesar-data/caesar-system` as private data storage. Keep
+this file and backups private. The configuration contains the bootstrap password
+in plaintext protected by account filesystem permissions, as do many hosting
+configuration systems. Never copy it to public_html or commit it. Explicit
+application environment variables take precedence over this file.
+
+Then register the app using CloudLinux's documented CLI (no password arguments):
+
+```bash
+cloudlinux-selector create --json --interpreter python \
+  --domain easyai.com.au --app-root caesar-system --app-uri stress \
+  --version 3.12 --startup-file passenger_wsgi.py --entry-point application
+```
+
+Before registration, back up the current public `stress` folder, particularly
+its `.htaccess` and loader. Registration changes routing for `/stress/`; it does
+not authorize replacing unrelated site files. If the application already exists,
+do not register it twice; use its existing environment and configuration.
+CloudLinux may generate a startup template; verify `passenger_wsgi.py` still
+matches the packaged version before starting the app.
+
+Python Selector can install into the application's environment directly:
+
+```bash
+cloudlinux-selector install-modules --json --interpreter python \
+  --domain easyai.com.au --app-root caesar-system --requirements-file requirements-cpanel.txt
+cloudlinux-selector restart --json --interpreter python --app-root caesar-system --domain easyai.com.au
+```
+
+Alternatively use the **activation command supplied by Python Selector**, not
+the system Python. A common environment location is
+`$HOME/virtualenv/caesar-system/3.12/bin/activate`, but confirm the actual path
+on your account. After activation:
+
+```bash
+cd "$HOME/caesar-system"
+python -m pip install --upgrade pip
+python -m pip install -r requirements-cpanel.txt
+python scripts/check_host.py
+cloudlinux-selector restart --json --interpreter python --app-root caesar-system --domain easyai.com.au
+```
+
+If an older physical `loader.php` remains in the public stress folder, back it
+up and replace just that file with the new loader. Keep `LESSONS_LEARNED.md`
+beside it for the PHP-only fallback. Do **not** extract the Python application
+or data into that public folder. The Python app itself serves its loader,
+built assets and API through the Passenger URL mapping.
+
+Reference: [CloudLinux Python Selector CLI](https://docs.cloudlinux.com/cloudlinuxos/command-line_tools/).
+These commands require the hosting account's existing Selector support, not
+root access. The provider's actual URL mapping, quotas and overrides still
+need the verification steps below.
+
 ## Verify before using real drawings
 
-- `https://YOUR_SUBDOMAIN/api/v1/health` must respond with `mode: authenticated`.
-- Open `https://YOUR_SUBDOMAIN/`, sign in with the configured credentials, then
-  visit `/loader.php`. Create a project, upload a non-sensitive PDF, add a note,
+- `https://easyai.com.au/stress/api/v1/health` must respond with `mode: authenticated`.
+- Open `https://easyai.com.au/stress/`, sign in with the configured credentials, then
+  visit `/stress/loader.php`. Create a project, upload a non-sensitive PDF, add a note,
   export and preview it inside the website. Restart the app and check that the
   project remains. A fresh install intentionally has no demonstration project.
-- Requests for `/.env`, `/.git/config`, `/passenger_wsgi.py`,
-  `/requirements.txt` and `/.local/workspace.sqlite3` must not expose files.
+- Requests for `/stress/.env`, `/stress/.git/config`, `/stress/passenger_wsgi.py`,
+  `/stress/requirements.txt` and `/stress/.local/workspace.sqlite3` must not expose files.
   Check this at the actual hosting URL, since Apache configuration matters.
-- The password-free `/api/v1/auth/local` login must return 403. Do not expose
+- The password-free `/stress/api/v1/auth/local` login must return 403. Do not expose
   the service if it accepts a login. Previously issued demo sessions are also
   rejected when demo mode is disabled.
 

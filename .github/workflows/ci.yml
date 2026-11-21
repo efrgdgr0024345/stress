@@ -20,3 +20,5 @@ jobs:
       - run: python -m playwright install --with-deps chromium
       - name: Browser workflow
         run: CHROMIUM_PATH="$(python -c 'from playwright.sync_api import sync_playwright; p=sync_playwright().start(); print(p.chromium.executable_path); p.stop()')" python tests/e2e/smoke.py
+      - name: Browser workflow under /stress
+        run: CAESAR_TEST_MOUNT=/stress CHROMIUM_PATH="$(python -c 'from playwright.sync_api import sync_playwright; p=sync_playwright().start(); print(p.chromium.executable_path); p.stop()')" python tests/e2e/smoke.py

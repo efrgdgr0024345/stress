@@ -387,7 +387,7 @@ def change(project_id, version, actor, action, update):
     return project
 
 
-def session(response, actor):
+def session(response, actor, request):
     import time
 
     token = secrets.token_urlsafe(32)
@@ -407,6 +407,7 @@ def session(response, actor):
         samesite="strict",
         secure=os.environ.get("CAESAR_SECURE_COOKIE", "0") == "1",
         max_age=43200,
+        path=request.scope.get("root_path", "").rstrip("/") + "/",
     )
     return {k: actor[k] for k in ("id", "name", "email", "role")}
 
@@ -431,7 +432,7 @@ class Login(BaseModel):
 
 
 @app.post("/api/v1/auth/local")
-def local_login(response: Response):
+def local_login(response: Response, request: Request):
     if not LOCAL_DEMO:
         raise HTTPException(403, "Local demo access is disabled.")
     with db() as conn:
@@ -440,11 +441,11 @@ def local_login(response: Response):
                 "SELECT * FROM users WHERE id=?", ("local-engineer",)
             ).fetchone()
         )
-    return session(response, actor)
+    return session(response, actor, request)
 
 
 @app.post("/api/v1/auth/login")
-def login(body: Login, response: Response):
+def login(body: Login, response: Response, request: Request):
     with db() as conn:
         row = conn.execute(
             "SELECT * FROM users WHERE email=?", (body.email,)
@@ -457,7 +458,7 @@ def login(body: Login, response: Response):
         )
     ):
         raise HTTPException(401, "Email or password is incorrect.")
-    return session(response, dict(row))
+    return session(response, dict(row), request)
 
 
 @app.post("/api/v1/auth/logout")
@@ -471,7 +472,7 @@ def logout(request: Request, response: Response):
                 ).hexdigest(),
             ),
         )
-    response.delete_cookie("caesar_session")
+    response.delete_cookie("caesar_session", path=request.scope.get("root_path", "").rstrip("/") + "/")
     return {"ok": True}
 
 

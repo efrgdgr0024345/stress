@@ -25,6 +25,16 @@ These checks passed locally with the PyMuPDF 1.26.7 update. They do not verify a
 particular cPanel account, its Apache document roots, quotas or provider support;
 those still require the installation checks in `docs/CPANEL.md`.
 
+The Passenger package regression exercises both a domain root and `/stress/`
+using WSGI `SCRIPT_NAME`, including mount-scoped login/logout cookies. It also
+tests private CLI configuration, file mode 600, refusal of readable credentials,
+refusal to overwrite an existing configuration and no password in command
+output. Browser tests can run the complete workflow under the same prefix:
+
+```bash
+CAESAR_TEST_MOUNT=/stress .venv/bin/python tests/e2e/smoke.py
+```
+
 Browser coverage includes loader navigation, every lesson card/icon, direct project-to-canvas loading, original PDF rendering, native drawing-note creation/editing, graphic-only node edits, exact stations/support reasons, provisional points, route overlay, page/zoom controls, material review, workbook upload and source mapping, normalized record inspection, approval, exact match saving, exceptions, native bundle download, generated-PDF preview, rotated/nonzero-CropBox input, saved project reload and mobile navigation/layout.
 
 The native PDF checks enumerate stable object names, edit/save/reopen representative types, retain original content streams, and inspect actual source-derived schedule text and provenance. The generated PDF is also opened by the browser's independent PDF renderer. No test result is a claim of universal editing support in every external PDF application.

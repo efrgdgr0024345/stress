@@ -25,14 +25,16 @@ def run():
         with socket.socket() as s:
             s.bind(("127.0.0.1", 0))
             port = s.getsockname()[1]
-        base = f"http://127.0.0.1:{port}"
+        prefix = os.environ.get("CAESAR_TEST_MOUNT", "")
+        origin = f"http://127.0.0.1:{port}"
+        base = origin + prefix
         with open(Path(tmp) / "server.log", "w") as log:
             process = subprocess.Popen(
                 [
                     sys.executable,
                     "-m",
                     "uvicorn",
-                    "services.api.main:app",
+                    "tests.e2e.hosted_app:app",
                     "--host",
                     "127.0.0.1",
                     "--port",
@@ -69,7 +71,7 @@ def run():
                     page = context.new_page()
                     errors = []
                     page.on("pageerror", lambda e: errors.append(str(e)))
-                    page.goto(base)
+                    page.goto(base + "/")
                     page.get_by_role("button", name="Enter local workspace").click()
                     expect(
                         page.get_by_role("heading", name="Projects.")
@@ -86,6 +88,7 @@ def run():
                     assert len(lessons) >= 8
                     expect(page.locator(".lesson")).to_have_count(len(lessons))
                     expect(page.locator(".lesson-icon")).to_have_count(len(lessons))
+                    assert page.url.startswith(base + "/loader.php")
                     expect(page.get_by_role("link", name="Download cPanel ZIP")).to_be_visible()
                     install = page.get_by_role("button", name="Install on cPanel")
                     install.click()
@@ -107,6 +110,7 @@ def run():
                         path="/tmp/caesar-screens/loader.png", full_page=True
                     )
                     page.get_by_role("button", name="Load project", exact=True).click()
+                    assert page.url.startswith(base + "/?project=")
                     expect(page.locator(".node-glyph").first).to_be_visible()
                     page.wait_for_function(
                         "document.querySelector('canvas')?.width > 100"

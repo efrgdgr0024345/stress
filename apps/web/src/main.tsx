@@ -1,3 +1,4 @@
+import { APP_BASE, appPath } from "./paths";
 import React, { useState, useEffect, useRef } from "react";
 import { createRoot } from "react-dom/client";
 import {
@@ -163,7 +164,7 @@ function App() {
     if (user) {
       const params = new URLSearchParams(window.location.search);
       if (params.get("returnTo") === "loader") {
-        window.location.replace("/loader.php");
+        window.location.replace(appPath("loader.php"));
         return;
       }
       loadProjects()
@@ -199,7 +200,7 @@ function App() {
       window.history.replaceState(
         null,
         "",
-        `/?project=${encodeURIComponent(id)}&view=${target}`,
+        `${APP_BASE}?project=${encodeURIComponent(id)}&view=${target}`,
       );
     } catch (e) {
       notify((e as Error).message, true);
@@ -224,12 +225,12 @@ function App() {
       null,
       "",
       next === "projects"
-        ? "/"
+        ? APP_BASE
         : next === "catalogs"
-          ? "/?view=catalogs"
+          ? `${APP_BASE}?view=catalogs`
           : project
-            ? `/?project=${encodeURIComponent(project.id)}&view=${next}`
-            : "/",
+            ? `${APP_BASE}?project=${encodeURIComponent(project.id)}&view=${next}`
+            : APP_BASE,
     );
   };
   const upload = async (file: File, p = project) => {
@@ -274,7 +275,7 @@ function App() {
   };
   const download = (artifact: Artifact) => {
     if (project)
-      window.location.href = `/api/v1/projects/${project.id}/artifacts/${artifact.id}/download`;
+      window.location.href = appPath(`api/v1/projects/${project.id}/artifacts/${artifact.id}/download`);
   };
   const mutation = async (path: string, body: unknown, method = "POST") => {
     if (!project) return;
@@ -470,7 +471,7 @@ function App() {
                 <p>From isometric drawings to engineering-ready decisions.</p>
               </div>
               <div className="heading-actions">
-                <a className="button secondary" href="/loader.php">
+                <a className="button secondary" href={appPath("loader.php")}>
                   <Folder size={16} />
                   Load project
                 </a>
@@ -1146,7 +1147,7 @@ function App() {
                 window.history.replaceState(
                   null,
                   "",
-                  `/?project=${encodeURIComponent(p.id)}&view=workspace`,
+                  `${APP_BASE}?project=${encodeURIComponent(p.id)}&view=workspace`,
                 );
                 if (file) await upload(file, p);
                 else {
@@ -1706,7 +1707,7 @@ function SheetCard({
       </div>
       <a
         className="source-link"
-        href={`/api/v1/projects/${project.id}/sources/${sheet.source_id}`}
+        href={appPath(`api/v1/projects/${project.id}/sources/${sheet.source_id}`)}
       >
         Download original PDF <ArrowDownToLine size={13} />
       </a>

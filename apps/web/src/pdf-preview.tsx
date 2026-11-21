@@ -1,3 +1,4 @@
+import { appPath } from "./paths";
 import { useEffect, useRef, useState } from "react";
 import * as pdfjs from "pdfjs-dist";
 import workerUrl from "pdfjs-dist/build/pdf.worker.min.mjs?url";
@@ -25,7 +26,7 @@ export function PDFPreview({
   useEffect(() => {
     let alive = true;
     const task = pdfjs.getDocument({
-      url: `/api/v1/projects/${project.id}/artifacts/${artifact.id}/pdf`,
+      url: appPath(`api/v1/projects/${project.id}/artifacts/${artifact.id}/pdf`),
       withCredentials: true,
       isEvalSupported: false,
     });

@@ -27,6 +27,13 @@ hosting is insufficient. Keep the deployment restricted to a private pilot
 while the documented production security work remains. Rebuild the ZIP after
 source changes with `npm run build && python scripts/package_cpanel.py`.
 
+Both a domain root and a subdirectory such as `https://easyai.com.au/stress/`
+are supported. Assets, navigation, API calls, PDF URLs and session cookies stay
+inside the application mount. Passenger's public URL mapping points to private
+application code outside `public_html`; drawings and credentials also stay
+outside the public directory. The CLI configuration helper prompts for
+credentials and saves an account-private file with mode 600.
+
 For frontend development, run `npm run api` (port 8010) and `npm run dev` (Vite on port 5173) in separate terminals. Vite proxies authenticated API requests. Workspace dates use Australia/Perth; override `VITE_WORKSPACE_TIMEZONE` at build time for another workspace timezone.
 
 Alternatively, `docker compose up --build` starts the application on **127.0.0.1:3000** with retained private data in a named volume. The Linux Compose configuration supplies the host CA bundle as a temporary build secret; set `CAESAR_CA_BUNDLE` if its location differs. TLS verification remains enabled and the bundle is not copied into image layers.
