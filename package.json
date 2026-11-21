@@ -1,0 +1,33 @@
+{
+  "name": "caesar-iso-workspace",
+  "private": true,
+  "version": "0.2.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 0.0.0.0",
+    "build": "tsc -b && vite build",
+    "preview": "vite preview --host 0.0.0.0",
+    "api": "python -m uvicorn services.api.main:app --host 127.0.0.1 --port 8010",
+    "test": "python -m unittest discover -s tests -v",
+    "test:e2e": "python tests/e2e/smoke.py",
+    "format": "prettier --write apps/web/src vite.config.ts tsconfig.json package.json",
+    "start": "bash scripts/start.sh",
+    "setup": "bash scripts/setup.sh"
+  },
+  "dependencies": {
+    "@fontsource-variable/dm-sans": "5.3.0",
+    "@fontsource-variable/manrope": "5.3.0",
+    "lucide-react": "^0.468.0",
+    "pdfjs-dist": "^4.10.38",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.18",
+    "@types/react-dom": "^18.3.5",
+    "@vitejs/plugin-react": "^4.3.4",
+    "prettier": "3.10.1",
+    "typescript": "~5.7.3",
+    "vite": "^6.1.0"
+  }
+}

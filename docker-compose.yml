@@ -1,0 +1,24 @@
+services:
+  caesar:
+    build:
+      context: .
+      secrets:
+        - proxy_ca
+    ports:
+      - "127.0.0.1:3000:8000"
+    environment:
+      CAESAR_LOCAL_DEMO: "1"
+      CAESAR_DATA_DIR: /app/data
+    volumes:
+      - caesar-data:/app/data
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    mem_limit: 1g
+volumes:
+  caesar-data:
+secrets:
+  proxy_ca:
+    file: ${CAESAR_CA_BUNDLE:-/etc/ssl/certs/ca-certificates.crt}

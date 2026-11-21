@@ -67,3 +67,11 @@ Use the existing entry format: a unique `LESSON-###` heading, category, status, 
 - Lesson: Synthetic PDFs are useful for testing software behavior but cannot prove the missing legacy 1010 counts, canonical workbook values or engineering correctness.
 - Action: Label training data clearly. Keep missing source assets and unrun acceptance gates explicit, and add source-hash-pinned regressions when the real files are supplied.
 - Evidence: `docs/IMPLEMENTATION_STATUS.md`; synthetic fixtures are separate from the unavailable 1010 source package.
+
+## LESSON-009 — A catalog manufacturer is not the project manufacturer
+
+- Category: Engineering integrity
+- Status: Adopted
+- Lesson: A catalog row can document a manufacturer's verified values without proving that the actual drawing uses that manufacturer or model.
+- Action: Keep catalog source quality separate from project match status. Require explicit manufacturer and model constraints plus drawing/vendor evidence before marking the project match manufacturer-confirmed.
+- Evidence: `test_catalog_manufacturer_does_not_confirm_the_drawing_manufacturer` verifies that an approved manufacturer row stays reference-only until the project identity is explicitly confirmed.

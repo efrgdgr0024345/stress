@@ -1,0 +1,1077 @@
+"""Local-first engineering review API. Production infrastructure is documented separately."""
+
+from contextlib import asynccontextmanager
+from datetime import datetime, timezone
+from decimal import Decimal
+import hashlib
+import json
+import os
+from pathlib import Path
+import secrets
+import sqlite3
+import subprocess
+import sys
+import threading
+from uuid import uuid4
+
+from fastapi import Depends, FastAPI, File, HTTPException, Request, Response, UploadFile
+from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
+from pydantic import BaseModel, ConfigDict, Field
+
+from packages.engineering import compute_reasons, dimension_mm, renumber, validate
+from packages.pdf import create_sample, export_bundle
+
+ROOT = Path(__file__).resolve().parents[2]
+DATA = Path(os.environ.get("CAESAR_DATA_DIR", ROOT / ".local"))
+LOCAL_DEMO = os.environ.get("CAESAR_LOCAL_DEMO", "1") == "1"
+LOCK = threading.RLock()
+
+
+def now():
+    return datetime.now(timezone.utc).isoformat()
+
+
+def uid():
+    return str(uuid4())
+
+
+def db():
+    conn = sqlite3.connect(DATA / "workspace.sqlite3", timeout=20)
+    conn.row_factory = sqlite3.Row
+    conn.execute("PRAGMA foreign_keys=ON")
+    return conn
+
+
+def audit(conn, project, actor, action, detail=""):
+    conn.execute(
+        "INSERT INTO audit VALUES (?,?,?,?,?,?)",
+        (uid(), project, actor, action, detail, now()),
+    )
+
+
+def initialize():
+    DATA.mkdir(parents=True, exist_ok=True, mode=0o700)
+    for name in ("sources", "exports", "catalogs"):
+        (DATA / name).mkdir(exist_ok=True, mode=0o700)
+    with db() as conn:
+        conn.executescript("""
+        CREATE TABLE IF NOT EXISTS users (id TEXT PRIMARY KEY, name TEXT, email TEXT UNIQUE, password TEXT, role TEXT, tenant TEXT);
+        CREATE TABLE IF NOT EXISTS sessions (token TEXT PRIMARY KEY, user_id TEXT REFERENCES users(id), expires INTEGER);
+        CREATE TABLE IF NOT EXISTS projects (id TEXT PRIMARY KEY, tenant TEXT NOT NULL, version INTEGER, data TEXT NOT NULL);
+        CREATE TABLE IF NOT EXISTS revisions (id TEXT, version INTEGER, data TEXT, PRIMARY KEY(id,version));
+        CREATE TABLE IF NOT EXISTS audit (id TEXT PRIMARY KEY, project_id TEXT, actor TEXT, action TEXT, detail TEXT, created TEXT);
+        CREATE TABLE IF NOT EXISTS sources (id TEXT PRIMARY KEY, project_id TEXT, filename TEXT, sha256 TEXT);
+        CREATE TABLE IF NOT EXISTS artifacts (id TEXT PRIMARY KEY, project_id TEXT, revision INTEGER, filename TEXT, created TEXT, count INTEGER);
+        CREATE TABLE IF NOT EXISTS catalogs (id TEXT PRIMARY KEY, tenant TEXT, filename TEXT, sha256 TEXT, created TEXT, data TEXT);
+        CREATE TABLE IF NOT EXISTS catalog_versions (id TEXT PRIMARY KEY, tenant TEXT, catalog_id TEXT, seq INTEGER, created TEXT, data TEXT, UNIQUE(catalog_id,seq));
+        PRAGMA user_version=2;
+        """)
+        if LOCAL_DEMO:
+            conn.execute(
+                "INSERT OR IGNORE INTO users VALUES (?,?,?,?,?,?)",
+                (
+                    "local-engineer",
+                    "Alex Morgan",
+                    "engineer@local",
+                    "",
+                    "admin",
+                    "local",
+                ),
+            )
+            if not conn.execute(
+                "SELECT 1 FROM projects WHERE tenant=?", ("local",)
+            ).fetchone():
+                seed(conn)
+        elif os.environ.get("CAESAR_ADMIN_PASSWORD"):
+            password = os.environ["CAESAR_ADMIN_PASSWORD"]
+            if len(password) < 12:
+                raise RuntimeError(
+                    "CAESAR_ADMIN_PASSWORD must be at least 12 characters."
+                )
+            conn.execute(
+                "INSERT OR IGNORE INTO users VALUES (?,?,?,?,?,?)",
+                (
+                    "admin",
+                    "Administrator",
+                    os.environ.get("CAESAR_ADMIN_EMAIL", "admin@local"),
+                    password_hash(password),
+                    "admin",
+                    "default",
+                ),
+            )
+
+
+def password_hash(password, salt=None):
+    salt = salt or secrets.token_hex(16)
+    digest = hashlib.scrypt(
+        password.encode(), salt=salt.encode(), n=16384, r=8, p=1
+    ).hex()
+    return f"{salt}:{digest}"
+
+
+def empty_project(title, line, description=""):
+    return {
+        "id": uid(),
+        "title": title,
+        "line_id": line,
+        "description": description,
+        "version": 1,
+        "status": "DRAFT",
+        "created": now(),
+        "updated": now(),
+        "sample": False,
+        "sheets": [],
+        "nodes": [],
+        "materials": [],
+        "materials_reviewed": False,
+        "layout_reviewed": False,
+        "numbering_map": [],
+    }
+
+
+def seed(conn):
+    project = empty_project(
+        "North utility corridor",
+        "DEMO-8-CS-001",
+        "A two-sheet, synthetic isometric for exploring the review workflow.",
+    )
+    project["sample"] = True
+    project["status"] = "ENGINEERING_REVIEW"
+    source_id = uid()
+    path = DATA / "sources" / f"{source_id}.pdf"
+    create_sample(path)
+    sha = hashlib.sha256(path.read_bytes()).hexdigest()
+    conn.execute(
+        "INSERT INTO sources VALUES (?,?,?,?)",
+        (source_id, project["id"], "training-isometric.pdf", sha),
+    )
+    for index in range(2):
+        project["sheets"].append(
+            {
+                "id": uid(),
+                "source_id": source_id,
+                "filename": "training-isometric.pdf",
+                "sha256": sha,
+                "page_index": index,
+                "width": 1100,
+                "height": 760,
+                "rotation": 0,
+                "printed_id": f"ISO-TRAINING-001 / {index + 1}",
+                "line_id": project["line_id"],
+                "format": "Vector / text",
+                "text": "Synthetic training fixture. Not the original 1010.",
+                "axis": [110, 130],
+                "table": [710, 370] if index == 0 else [55, 210],
+            }
+        )
+    positions = [
+        [
+            (160, 485),
+            (255, 430),
+            (340, 381),
+            (425, 430),
+            (500, 473),
+            (500, 370),
+            (500, 282),
+            (600, 224),
+            (710, 161),
+            (800, 213),
+            (885, 262),
+        ],
+        [
+            (170, 485),
+            (260, 433),
+            (350, 381),
+            (445, 435),
+            (540, 490),
+            (635, 435),
+            (730, 380),
+            (730, 295),
+            (730, 210),
+            (825, 155),
+            (920, 100),
+        ],
+    ]
+    for sheet_index, coords in enumerate(positions):
+        for index, (x, y) in enumerate(coords):
+            if sheet_index == 1 and index == 0:
+                project["nodes"][-1]["instances"].append(
+                    {
+                        "sheet_id": project["sheets"][1]["id"],
+                        "anchor": [x, y],
+                        "bubble": [x - 30, y - 30],
+                    }
+                )
+                continue
+            order = sheet_index * 10 + index
+            kind = (
+                "continuation"
+                if sheet_index == 0 and index == 10
+                else (
+                    "support"
+                    if index in (2, 3)
+                    else (
+                        "tee"
+                        if index == 4
+                        else (
+                            "elbow"
+                            if index == 6
+                            else "endpoint" if index in (0, 10) else "flange"
+                        )
+                    )
+                )
+            )
+            known = index not in (4, 7)
+            station = order * 600 if index != 3 else (sheet_index * 10 + 2) * 600 + 50.8
+            project["nodes"].append(
+                {
+                    "id": uid(),
+                    "line_id": project["line_id"],
+                    "route": "main",
+                    "order": order,
+                    "kind": kind,
+                    "station_mm": str(station) if known else None,
+                    "evidence": (
+                        "Synthetic training dimension; not real engineering evidence."
+                        if known
+                        else ""
+                    ),
+                    "number": None,
+                    "instances": [
+                        {
+                            "sheet_id": project["sheets"][sheet_index]["id"],
+                            "anchor": [x, y],
+                            "bubble": [x - 28, y - 32],
+                        }
+                    ],
+                }
+            )
+    sheet = project["sheets"][0]
+    for index, (x, y) in enumerate([(570, 513), (646, 557), (646, 588)]):
+        project["nodes"].append(
+            {
+                "id": uid(),
+                "line_id": project["line_id"],
+                "route": "branch-01",
+                "takeoff_id": project["nodes"][4]["id"],
+                "order": index,
+                "kind": "endpoint" if index == 2 else "support",
+                "station_mm": None,
+                "evidence": "",
+                "number": None,
+                "instances": [
+                    {
+                        "sheet_id": sheet["id"],
+                        "anchor": [x, y],
+                        "bubble": [x + 30, y - 30],
+                    }
+                ],
+            }
+        )
+    for sheet in project["sheets"]:
+        for i, family in enumerate(["pipe", "elbow", "flange", "valve"]):
+            project["materials"].append(
+                {
+                    "id": uid(),
+                    "sheet_id": sheet["id"],
+                    "item_no": str(i + 1),
+                    "family": family,
+                    "description": [
+                        "Pipe, seamless, ASTM A106 Gr B",
+                        "Elbow, 90°, ASTM A234 WPB",
+                        "Weld neck flange, ASME B16.5",
+                        "Ball valve, vendor unconfirmed",
+                    ][i],
+                    "size": "8 in",
+                    "quantity": [1, 2, 2, 1][i],
+                    "observed": [1, 2, 2, 0][i],
+                    "evidence": "Synthetic source materials list; needs engineer review.",
+                }
+            )
+    project["numbering_map"] = renumber(project["nodes"])
+    compute_reasons(project["nodes"])
+    conn.execute(
+        "INSERT INTO projects VALUES (?,?,?,?)",
+        (project["id"], "local", 1, json.dumps(project)),
+    )
+    conn.execute(
+        "INSERT INTO revisions VALUES (?,?,?)", (project["id"], 1, json.dumps(project))
+    )
+    audit(conn, project["id"], "System", "Created synthetic training project")
+
+
+@asynccontextmanager
+async def lifespan(app):
+    initialize()
+    yield
+
+
+app = FastAPI(title="CAESAR ISO Engineering API", version="0.2.0", lifespan=lifespan)
+
+
+@app.middleware("http")
+async def security_headers(request: Request, call_next):
+    if request.method not in ("GET", "HEAD", "OPTIONS"):
+        origin = request.headers.get("origin")
+        if origin:
+            from urllib.parse import urlsplit
+
+            if urlsplit(origin).netloc != request.headers.get("host"):
+                return Response(
+                    "Cross-origin writes are not permitted.", status_code=403
+                )
+    response = await call_next(request)
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["Referrer-Policy"] = "same-origin"
+    response.headers["X-Frame-Options"] = "DENY"
+    response.headers["Cache-Control"] = "no-store"
+    return response
+
+
+def user(request: Request):
+    import time
+
+    token = request.cookies.get("caesar_session", "")
+    digest = hashlib.sha256(token.encode()).hexdigest()
+    with db() as conn:
+        row = conn.execute(
+            "SELECT users.* FROM users JOIN sessions ON users.id=sessions.user_id WHERE sessions.token=? AND sessions.expires>?",
+            (digest, int(time.time())),
+        ).fetchone()
+    if not row:
+        raise HTTPException(401, "Sign in to your workspace.")
+    return dict(row)
+
+
+def editor(actor=Depends(user)):
+    if actor["role"] == "viewer":
+        raise HTTPException(403, "Engineering editor permission required.")
+    return actor
+
+
+def project_read(project_id, actor, conn):
+    row = conn.execute(
+        "SELECT * FROM projects WHERE id=? AND tenant=?", (project_id, actor["tenant"])
+    ).fetchone()
+    if not row:
+        raise HTTPException(404, "Project not found.")
+    return json.loads(row["data"])
+
+
+def change(project_id, version, actor, action, update):
+    with LOCK, db() as conn:
+        conn.execute("BEGIN IMMEDIATE")
+        project = project_read(project_id, actor, conn)
+        if project["version"] != version:
+            raise HTTPException(
+                409, "This project changed in another session. Reload before saving."
+            )
+        update(project)
+        compute_reasons(project["nodes"])
+        project["version"] += 1
+        project["updated"] = now()
+        if action != "Submitted for engineering review":
+            project["status"] = "DRAFT"
+            project.pop("review_approval", None)
+        conn.execute(
+            "UPDATE projects SET version=?,data=? WHERE id=?",
+            (project["version"], json.dumps(project), project_id),
+        )
+        conn.execute(
+            "INSERT INTO revisions VALUES (?,?,?)",
+            (project_id, project["version"], json.dumps(project)),
+        )
+        audit(conn, project_id, actor["name"], action)
+    project["issues"] = validate(project)
+    return project
+
+
+def session(response, actor):
+    import time
+
+    token = secrets.token_urlsafe(32)
+    with db() as conn:
+        conn.execute(
+            "INSERT INTO sessions VALUES (?,?,?)",
+            (
+                hashlib.sha256(token.encode()).hexdigest(),
+                actor["id"],
+                int(time.time()) + 43200,
+            ),
+        )
+    response.set_cookie(
+        "caesar_session",
+        token,
+        httponly=True,
+        samesite="strict",
+        secure=os.environ.get("CAESAR_SECURE_COOKIE", "0") == "1",
+        max_age=43200,
+    )
+    return {k: actor[k] for k in ("id", "name", "email", "role")}
+
+
+@app.get("/api/v1/health")
+def health():
+    return {
+        "status": "ok",
+        "mode": "local-development" if LOCAL_DEMO else "authenticated",
+        "version": "0.2.0",
+    }
+
+
+@app.get("/api/v1/auth/me")
+def me(actor=Depends(user)):
+    return {k: actor[k] for k in ("id", "name", "email", "role")}
+
+
+class Login(BaseModel):
+    email: str = Field(max_length=254)
+    password: str = Field(max_length=1024)
+
+
+@app.post("/api/v1/auth/local")
+def local_login(response: Response):
+    if not LOCAL_DEMO:
+        raise HTTPException(403, "Local demo access is disabled.")
+    with db() as conn:
+        actor = dict(
+            conn.execute(
+                "SELECT * FROM users WHERE id=?", ("local-engineer",)
+            ).fetchone()
+        )
+    return session(response, actor)
+
+
+@app.post("/api/v1/auth/login")
+def login(body: Login, response: Response):
+    with db() as conn:
+        row = conn.execute(
+            "SELECT * FROM users WHERE email=?", (body.email,)
+        ).fetchone()
+    if (
+        not row
+        or not row["password"]
+        or not secrets.compare_digest(
+            password_hash(body.password, row["password"].split(":")[0]), row["password"]
+        )
+    ):
+        raise HTTPException(401, "Email or password is incorrect.")
+    return session(response, dict(row))
+
+
+@app.post("/api/v1/auth/logout")
+def logout(request: Request, response: Response):
+    with db() as conn:
+        conn.execute(
+            "DELETE FROM sessions WHERE token=?",
+            (
+                hashlib.sha256(
+                    request.cookies.get("caesar_session", "").encode()
+                ).hexdigest(),
+            ),
+        )
+    response.delete_cookie("caesar_session")
+    return {"ok": True}
+
+
+@app.get("/api/v1/projects")
+def projects(actor=Depends(user)):
+    with db() as conn:
+        values = [
+            json.loads(r["data"])
+            for r in conn.execute(
+                "SELECT data FROM projects WHERE tenant=? ORDER BY rowid DESC",
+                (actor["tenant"],),
+            )
+        ]
+    return [{**p, "issues": validate(p)} for p in values]
+
+
+class ProjectCreate(BaseModel):
+    title: str = Field(min_length=1, max_length=150)
+    line_id: str = Field(min_length=1, max_length=150)
+    description: str = Field(default="", max_length=2000)
+
+
+@app.post("/api/v1/projects", status_code=201)
+def create_project(body: ProjectCreate, actor=Depends(editor)):
+    if not body.title.strip() or not body.line_id.strip():
+        raise HTTPException(422, "Project name and full line ID are required.")
+    project = empty_project(body.title.strip(), body.line_id.strip(), body.description)
+    with db() as conn:
+        conn.execute(
+            "INSERT INTO projects VALUES (?,?,?,?)",
+            (project["id"], actor["tenant"], 1, json.dumps(project)),
+        )
+        conn.execute(
+            "INSERT INTO revisions VALUES (?,?,?)",
+            (project["id"], 1, json.dumps(project)),
+        )
+        audit(conn, project["id"], actor["name"], "Created project")
+    project["issues"] = validate(project)
+    return project
+
+
+@app.get("/api/v1/projects/{project_id}")
+def get_project(project_id: str, actor=Depends(user)):
+    with db() as conn:
+        project = project_read(project_id, actor, conn)
+    project["issues"] = validate(project)
+    return project
+
+
+@app.get("/api/v1/projects/{project_id}/graph")
+def graph(project_id: str, actor=Depends(user)):
+    return get_project(project_id, actor)["graph"]
+
+
+@app.get("/api/v1/projects/{project_id}/validation")
+def validation(project_id: str, actor=Depends(user)):
+    return get_project(project_id, actor)["issues"]
+
+
+@app.post("/api/v1/projects/{project_id}/sources")
+async def upload(
+    project_id: str, version: int, file: UploadFile = File(...), actor=Depends(editor)
+):
+    with db() as conn:
+        project_read(project_id, actor, conn)
+    if Path(file.filename or "").suffix.lower() != ".pdf":
+        raise HTTPException(
+            415, "Upload a PDF file. ZIP import is not supported in this MVP."
+        )
+    source_id = uid()
+    path = DATA / "sources" / f"{source_id}.pdf"
+    size = 0
+    digest = hashlib.sha256()
+    try:
+        with path.open("wb") as out:
+            while chunk := await file.read(1024 * 1024):
+                size += len(chunk)
+                if size > 30 * 1024 * 1024:
+                    raise HTTPException(413, "PDF exceeds the 30 MB limit.")
+                digest.update(chunk)
+                out.write(chunk)
+        with path.open("rb") as inp:
+            if inp.read(5) != b"%PDF-":
+                raise HTTPException(415, "The file signature is not a PDF.")
+        result = subprocess.run(
+            [sys.executable, "-m", "services.api.pdf_worker", str(path)],
+            cwd=ROOT,
+            capture_output=True,
+            text=True,
+            timeout=25,
+        )
+        if result.returncode:
+            raise HTTPException(
+                422,
+                "PDF rejected: invalid, encrypted, active content, or parser resource limit. Use a plain PDF.",
+            )
+        pages = json.loads(result.stdout)
+        sha = digest.hexdigest()
+        filename = Path(file.filename or "source.pdf").name[:200]
+
+        def update(p):
+            if sha in {s["sha256"] for s in p["sheets"]}:
+                raise HTTPException(409, "This exact source PDF is already registered.")
+            if len(p["sheets"]) + len(pages) > 200:
+                raise HTTPException(422, "A project supports up to 200 pages.")
+            for page in pages:
+                p["sheets"].append(
+                    {
+                        **page,
+                        "id": uid(),
+                        "source_id": source_id,
+                        "filename": filename,
+                        "sha256": sha,
+                        "printed_id": "",
+                        "line_id": p["line_id"],
+                        "axis": None,
+                        "table": None,
+                    }
+                )
+            p["layout_reviewed"] = False
+            p["materials_reviewed"] = False
+
+        with LOCK:
+            # Source metadata is scoped by project before it can be downloaded.
+            with db() as conn:
+                conn.execute(
+                    "INSERT INTO sources VALUES (?,?,?,?)",
+                    (source_id, project_id, filename, sha),
+                )
+            try:
+                return change(
+                    project_id,
+                    version,
+                    actor,
+                    f"Registered {len(pages)} PDF pages",
+                    update,
+                )
+            except Exception:
+                with db() as conn:
+                    conn.execute("DELETE FROM sources WHERE id=?", (source_id,))
+                raise
+    except subprocess.TimeoutExpired:
+        path.unlink(missing_ok=True)
+        raise HTTPException(
+            422, "PDF parser timed out. Split the drawing into smaller sources."
+        )
+    except Exception:
+        path.unlink(missing_ok=True)
+        raise
+
+
+@app.get("/api/v1/projects/{project_id}/sources/{source_id}")
+def source_file(project_id: str, source_id: str, actor=Depends(user)):
+    with db() as conn:
+        project = project_read(project_id, actor, conn)
+        row = conn.execute(
+            "SELECT * FROM sources WHERE id=? AND project_id=?", (source_id, project_id)
+        ).fetchone()
+    if not row or source_id not in {s["source_id"] for s in project["sheets"]}:
+        raise HTTPException(404, "Source not found.")
+    return FileResponse(
+        DATA / "sources" / f"{source_id}.pdf",
+        media_type="application/pdf",
+        filename=row["filename"],
+    )
+
+
+class Version(BaseModel):
+    version: int = Field(ge=1)
+
+
+class SheetPatch(Version):
+    printed_id: str = Field(max_length=150)
+    line_id: str = Field(min_length=1, max_length=150)
+    axis: tuple[float, float] | None = None
+    table: tuple[float, float] | None = None
+
+
+def sheet_for(project, sheet_id):
+    sheet = next((s for s in project["sheets"] if s["id"] == sheet_id), None)
+    if not sheet:
+        raise HTTPException(404, "Sheet not found.")
+    return sheet
+
+
+@app.patch("/api/v1/projects/{project_id}/sheets/{sheet_id}")
+def patch_sheet(
+    project_id: str, sheet_id: str, body: SheetPatch, actor=Depends(editor)
+):
+    def update(p):
+        sheet = sheet_for(p, sheet_id)
+        for key in ("axis", "table"):
+            point = getattr(body, key)
+            if point and not (
+                50 <= point[0] <= sheet["width"] - 60
+                and 50 <= point[1] <= sheet["height"] - 110
+            ):
+                raise HTTPException(
+                    422,
+                    "Place the annotation inside the page with at least 50 pt clearance.",
+                )
+        sheet.update(body.model_dump(exclude={"version"}))
+        p["layout_reviewed"] = False
+
+    return change(
+        project_id, body.version, actor, "Updated sheet register / layout", update
+    )
+
+
+class Instance(BaseModel):
+    sheet_id: str
+    anchor: tuple[float, float]
+    bubble: tuple[float, float]
+
+
+class NodeInput(Version):
+    model_config = ConfigDict(extra="forbid")
+    line_id: str = Field(min_length=1, max_length=150)
+    route: str = Field(pattern=r"^(main|branch-\d{2})$")
+    takeoff_id: str | None = None
+    order: int = Field(ge=0, le=100000)
+    kind: str = Field(
+        pattern=r"^(endpoint|flange|tee|elbow|support|valve|instrument|continuation)$"
+    )
+    dimension: str = Field(default="", max_length=100)
+    evidence: str = Field(default="", max_length=3000)
+    instances: list[Instance] = Field(min_length=1, max_length=200)
+
+
+def apply_node(project, body, node_id=None):
+    node = (
+        next((n for n in project["nodes"] if n["id"] == node_id), None)
+        if node_id
+        else None
+    )
+    if node_id and not node:
+        raise HTTPException(404, "Physical point not found.")
+    if body.takeoff_id:
+        tee = next((n for n in project["nodes"] if n["id"] == body.takeoff_id), None)
+        if (
+            body.route == "main"
+            or not tee
+            or tee["kind"] != "tee"
+            or tee["route"] != "main"
+            or tee["line_id"] != body.line_id
+        ):
+            raise HTTPException(
+                422, "Branch takeoff must be an existing main-run tee on the same line."
+            )
+    if (
+        node
+        and node["kind"] == "tee"
+        and any(n.get("takeoff_id") == node_id for n in project["nodes"])
+    ):
+        if (
+            body.kind != "tee"
+            or body.route != "main"
+            or body.line_id != node["line_id"]
+        ):
+            raise HTTPException(
+                422, "Reassign dependent branches before changing this tee identity."
+            )
+    seen = set()
+    for inst in body.instances:
+        sheet = sheet_for(project, inst.sheet_id)
+        if inst.sheet_id in seen:
+            raise HTTPException(422, "A point can appear only once on each sheet.")
+        seen.add(inst.sheet_id)
+        for x, y in (inst.anchor, inst.bubble):
+            if not (12 <= x <= sheet["width"] - 12 and 12 <= y <= sheet["height"] - 12):
+                raise HTTPException(
+                    422, "Keep anchors and bubbles inside the PDF page."
+                )
+    try:
+        station = str(dimension_mm(body.dimension)) if body.dimension.strip() else None
+    except ValueError as exc:
+        raise HTTPException(422, str(exc))
+    if station is not None and not body.evidence.strip():
+        raise HTTPException(
+            422, "Physical stations require a dimension source / engineering evidence."
+        )
+    data = {
+        **body.model_dump(exclude={"version", "dimension"}),
+        "station_mm": station,
+        "dimension_input": body.dimension,
+    }
+    if node:
+        node.update(data)
+    else:
+        project["nodes"].append({**data, "id": uid(), "number": None})
+    if body.route != "main":
+        for member in project["nodes"]:
+            if member["line_id"] == body.line_id and member["route"] == body.route:
+                member["takeoff_id"] = body.takeoff_id
+    try:
+        project["numbering_map"] = renumber(project["nodes"])
+    except ValueError as exc:
+        raise HTTPException(422, str(exc))
+    project["layout_reviewed"] = False
+
+
+@app.post("/api/v1/projects/{project_id}/nodes")
+def add_node(project_id: str, body: NodeInput, actor=Depends(editor)):
+    return change(
+        project_id,
+        body.version,
+        actor,
+        "Added physical point",
+        lambda p: apply_node(p, body),
+    )
+
+
+@app.patch("/api/v1/projects/{project_id}/nodes/{node_id}")
+def patch_node(project_id: str, node_id: str, body: NodeInput, actor=Depends(editor)):
+    return change(
+        project_id,
+        body.version,
+        actor,
+        "Updated physical point / presentation",
+        lambda p: apply_node(p, body, node_id),
+    )
+
+
+@app.delete("/api/v1/projects/{project_id}/nodes/{node_id}")
+def delete_node(project_id: str, node_id: str, version: int, actor=Depends(editor)):
+    def update(p):
+        if not any(n["id"] == node_id for n in p["nodes"]):
+            raise HTTPException(404, "Point not found.")
+        if any(n.get("takeoff_id") == node_id for n in p["nodes"]):
+            raise HTTPException(
+                422, "Reassign dependent branches before deleting their shared tee."
+            )
+        p["nodes"] = [n for n in p["nodes"] if n["id"] != node_id]
+        try:
+            p["numbering_map"] = renumber(p["nodes"])
+        except ValueError as exc:
+            raise HTTPException(422, str(exc))
+        p["layout_reviewed"] = False
+
+    return change(project_id, version, actor, "Deleted physical point", update)
+
+
+@app.post("/api/v1/projects/{project_id}/nodes/renumber")
+def renumber_nodes(project_id: str, body: Version, actor=Depends(editor)):
+    def update(p):
+        try:
+            p["numbering_map"] = renumber(p["nodes"])
+        except ValueError as exc:
+            raise HTTPException(422, str(exc))
+
+    return change(
+        project_id, body.version, actor, "Renumbered routes deterministically", update
+    )
+
+
+class MaterialInput(Version):
+    sheet_id: str
+    item_no: str = Field(min_length=1, max_length=50)
+    family: str = Field(
+        pattern=r"^(pipe|elbow|tee|support|flange|valve|instrument|other)$"
+    )
+    description: str = Field(min_length=1, max_length=1000)
+    size: str = Field(max_length=100)
+    quantity: int = Field(ge=0, le=100000)
+    observed: int = Field(ge=0, le=100000)
+    evidence: str = Field(default="", max_length=3000)
+
+
+@app.post("/api/v1/projects/{project_id}/materials")
+def add_material(project_id: str, body: MaterialInput, actor=Depends(editor)):
+    def update(p):
+        sheet_for(p, body.sheet_id)
+        p["materials"].append({**body.model_dump(exclude={"version"}), "id": uid()})
+        p["materials_reviewed"] = False
+
+    return change(
+        project_id, body.version, actor, "Added materials inventory row", update
+    )
+
+
+@app.patch("/api/v1/projects/{project_id}/materials/{item_id}")
+def patch_material(
+    project_id: str, item_id: str, body: MaterialInput, actor=Depends(editor)
+):
+    def update(p):
+        sheet_for(p, body.sheet_id)
+        item = next((m for m in p["materials"] if m["id"] == item_id), None)
+        if not item:
+            raise HTTPException(404, "Material not found.")
+        if any(
+            item.get(key) != getattr(body, key)
+            for key in ("family", "size", "description")
+        ):
+            item.pop("catalog_match", None)
+        item.update(body.model_dump(exclude={"version"}))
+        p["materials_reviewed"] = False
+
+    return change(
+        project_id, body.version, actor, "Corrected material inventory", update
+    )
+
+
+class ReviewInput(Version):
+    materials_reviewed: bool
+    layout_reviewed: bool
+
+
+@app.post("/api/v1/projects/{project_id}/review")
+def review(project_id: str, body: ReviewInput, actor=Depends(editor)):
+    def update(p):
+        p.update(body.model_dump(exclude={"version"}))
+        p["status"] = "ENGINEERING_REVIEW"
+
+    return change(
+        project_id, body.version, actor, "Submitted for engineering review", update
+    )
+
+
+@app.get("/api/v1/projects/{project_id}/audit")
+def history(project_id: str, actor=Depends(user)):
+    with db() as conn:
+        project_read(project_id, actor, conn)
+        events = [
+            dict(r)
+            for r in conn.execute(
+                "SELECT * FROM audit WHERE project_id=? ORDER BY rowid DESC LIMIT 200",
+                (project_id,),
+            )
+        ]
+        artifacts = [
+            dict(r)
+            for r in conn.execute(
+                "SELECT * FROM artifacts WHERE project_id=? ORDER BY rowid DESC",
+                (project_id,),
+            )
+        ]
+        revisions = [
+            {"version": r["version"], "updated": json.loads(r["data"])["updated"]}
+            for r in conn.execute(
+                "SELECT version,data FROM revisions WHERE id=? ORDER BY version DESC",
+                (project_id,),
+            )
+        ]
+    return {"events": events, "artifacts": artifacts, "revisions": revisions}
+
+
+@app.post("/api/v1/projects/{project_id}/exports")
+def export(project_id: str, body: Version, actor=Depends(editor)):
+    with LOCK, db() as conn:
+        project = project_read(project_id, actor, conn)
+        if project["version"] != body.version:
+            raise HTTPException(409, "Project has changed. Reload before exporting.")
+        if not project["nodes"] or not project["sheets"]:
+            raise HTTPException(
+                422, "Add a source PDF and at least one reviewed node before exporting."
+            )
+        existing = conn.execute(
+            "SELECT * FROM artifacts WHERE project_id=? AND revision=?",
+            (project_id, body.version),
+        ).fetchone()
+        if existing:
+            return dict(existing)
+        project["issues"] = validate(project)
+        artifact_id = uid()
+        path = DATA / "exports" / f"{artifact_id}.zip"
+        try:
+            count = export_bundle(
+                project, lambda sid: DATA / "sources" / f"{sid}.pdf", path
+            )
+        except ValueError as exc:
+            path.unlink(missing_ok=True)
+            raise HTTPException(422, str(exc))
+        except Exception:
+            path.unlink(missing_ok=True)
+            raise HTTPException(
+                422,
+                "PDF export integrity check failed; source preserved. Review annotation positions.",
+            )
+        record = {
+            "id": artifact_id,
+            "project_id": project_id,
+            "revision": body.version,
+            "filename": f"caesar-review-r{body.version}.zip",
+            "created": now(),
+            "count": count,
+        }
+        conn.execute(
+            "INSERT INTO artifacts VALUES (?,?,?,?,?,?)", tuple(record.values())
+        )
+        audit(
+            conn,
+            project_id,
+            actor["name"],
+            "Exported engineering review draft",
+            f"{count} native annotations; source streams unchanged",
+        )
+    return record
+
+
+@app.get("/api/v1/projects/{project_id}/artifacts/{artifact_id}/download")
+def download(project_id: str, artifact_id: str, actor=Depends(user)):
+    with db() as conn:
+        project_read(project_id, actor, conn)
+        row = conn.execute(
+            "SELECT * FROM artifacts WHERE id=? AND project_id=?",
+            (artifact_id, project_id),
+        ).fetchone()
+    if not row:
+        raise HTTPException(404, "Artifact not found.")
+    return FileResponse(
+        DATA / "exports" / f"{artifact_id}.zip",
+        media_type="application/zip",
+        filename=row["filename"],
+    )
+
+
+@app.get("/api/v1/catalogs")
+def catalogs(actor=Depends(user)):
+    with db() as conn:
+        return [
+            {**dict(r), "data": json.loads(r["data"])}
+            for r in conn.execute(
+                "SELECT * FROM catalogs WHERE tenant=? ORDER BY rowid DESC",
+                (actor["tenant"],),
+            )
+        ]
+
+
+@app.post("/api/v1/catalogs/import")
+async def import_catalog(file: UploadFile = File(...), actor=Depends(editor)):
+    if actor["role"] != "admin":
+        raise HTTPException(403, "Administrator permission required.")
+    if not (file.filename or "").lower().endswith(".xlsx"):
+        raise HTTPException(415, "Upload a non-macro XLSX workbook.")
+    content = await file.read(15 * 1024 * 1024 + 1)
+    if len(content) > 15 * 1024 * 1024:
+        raise HTTPException(413, "Workbook exceeds 15 MB.")
+    import io, zipfile
+
+    try:
+        with zipfile.ZipFile(io.BytesIO(content)) as archive:
+            if sum(i.file_size for i in archive.infolist()) > 80 * 1024 * 1024 or any(
+                "vbaProject" in i.filename for i in archive.infolist()
+            ):
+                raise ValueError("Unsafe workbook.")
+        from openpyxl import load_workbook
+
+        workbook = load_workbook(
+            io.BytesIO(content), read_only=True, data_only=True, keep_links=False
+        )
+        sheets = [
+            {"name": s.title, "rows": s.max_row, "columns": s.max_column}
+            for s in workbook.worksheets
+        ]
+        workbook.close()
+    except Exception:
+        raise HTTPException(
+            422, "Invalid, oversized, encrypted or macro-enabled workbook."
+        )
+    record = {
+        "id": uid(),
+        "filename": Path(file.filename).name,
+        "sha256": hashlib.sha256(content).hexdigest(),
+        "created": now(),
+        "data": {
+            "sheets": sheets,
+            "status": "PENDING_SCHEMA_REVIEW",
+            "note": "Immutable source registered. Engineering mapping and dataset approval are required before numeric use.",
+        },
+    }
+    with db() as conn:
+        (DATA / "catalogs" / f"{record['id']}.xlsx").write_bytes(content)
+        conn.execute(
+            "INSERT INTO catalogs VALUES (?,?,?,?,?,?)",
+            (
+                record["id"],
+                actor["tenant"],
+                record["filename"],
+                record["sha256"],
+                record["created"],
+                json.dumps(record["data"]),
+            ),
+        )
+    return record
+
+
+from services.api.workflows import install
+
+install(sys.modules[__name__])
+
+
+@app.get("/loader.php", include_in_schema=False)
+def project_loader():
+    return FileResponse(ROOT / "loader.php", media_type="text/html")
+
+
+@app.get("/LESSONS_LEARNED.md", include_in_schema=False)
+def public_lessons_register():
+    return FileResponse(ROOT / "LESSONS_LEARNED.md", media_type="text/markdown")
+
+
+if (ROOT / "dist").exists():
+    app.mount("/", StaticFiles(directory=ROOT / "dist", html=True), name="web")

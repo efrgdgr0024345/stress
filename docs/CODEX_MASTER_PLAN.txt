@@ -1,0 +1,757 @@
+                                                                            CAESAR II ISO AUTOMATION | CODEX MIGRATION | 10 NOV 2026
+
+
+
+
+CAESAR II Piping Isometric Automation — Production Website Engineering
+Plan
+Migration baseline: 10 November 2026
+Status: Design and implementation specification; not a claim that the website already exists.
+Source: Entire 1010 isometric-development conversation, user-provided Coding Plan v1.1 and Integrated Plan v2.2, inspected
+Integrated Generator v1.2 source/test package, original 2-page 1010 PDF, revised flange workbook, latest valve workbook.
+Audience: Codex, software engineers, piping stress engineers, QA and deployment administrators.
+         Primary product objective: A secure browser-based engineering application that accepts arbitrary multipage piping
+         isometric PDFs, inventories materials, identifies/constructs pipe connectivity, proposes CAESAR II nodes, allows an
+         engineer to verify and correct positions, numbers all lines and branches deterministically, applies flange/valve database
+         data, and exports the original isometric with every added element individually editable within the PDF, plus fully
+         traceable schedules and outstanding engineering exceptions.
+         Never claim any drawing-derived node station is physically exact unless supported by explicit dimensions,
+         coordinates, verified CAD source or signed-off engineering evidence. Never scale NOT-TO-SCALE isometrics to
+         obtain physical lengths.
+
+0. Scope and limits
+In scope
+   1.       Upload one or more PDFs (including multiple isometric sheets/lines), preview every page and preserve source revisions.
+   2.       Detect drawing line IDs, sheet numbers, continuation references, equipment tags, materials-list entries and component
+            callouts; expose confidence and evidence.
+   3.       Reconstruct a connected piping graph across all sheets; main run, branches, fittings, valves, supports, instruments,
+            endpoints and continuations.
+   4.       Engineer-led review for ambiguity, undimensioned data, rotated/cropped sheets, raster documents, conflicting titles,
+            conflicting material quantities.
+   5.       Node rules, CAESAR node numbering, red/blue exception flags, shared continuation IDs and persistent engineer changes.
+   6.       Versioned B16.5 / B16.47 A+B / API 6A flange weight database and ASME B16.10 / API 6A valve database, with
+            provenance, correct units and nonmatch exceptions.
+   7.       Per-sheet editable annotation overlays: node number, bubble, leader, axis triad, flange/valve data boxes, warnings and
+            continuation notes.
+   8.       Editable annotated PDF, node CSV/JSON, valve/flange schedules, material reconciliation, source provenance, exception
+            report, annotation manifest and revision diff.
+   9.       Web user accounts, role-based approvals, export jobs, job progress, revision history, backups and audit logs.
+   10.      Reproduce the approved 1010 regression fixture and generalise to new drawing packs through an engineering-review
+            workflow.
+
+Explicitly not in initial website MVP
+   •        A full pipe stress solver or proprietary CAESAR II model file exporter unless separately specified and validated.
+   •        Automatic guaranteed exact geometry from scanned or NOT-TO-SCALE PDFs.
+   •        Interpreting manufacturer weight tables as certified final weights without a manufacturer-specific match and approved
+            datasheet.
+   •        Generating API 6A flange/valve geometry from unsuitable B16.5/B16.47/B16.10 rows.
+   •        Inferring missing dimensions, elbow locations, face-to-face lengths or centre of gravity from drawing appearance.
+   •        Guaranteeing editable annotation behaviour in every third-party PDF viewer. A designated compatible editing application
+            must be tested.
+
+1. Baseline assessment: existing source that must be migrated
+The delivered CAESAR_II_Integrated_Generator_v1_2_Valve_Database.zip contains a deterministic Python
+1010 reproducer. The source is not a general-purpose arbitrary-isometric recogniser. It is source-SHA-256 pinned and uses
+reviewed 1010_review_project.json, 1010_annotation_blueprint.json and 1010_flange_specs.json.
+These protections must be retained for the fixture but replaced for new PDFs by a per-project reviewed model/blueprint creation
+workflow; do not bypass source validation or stretch 1010 anchors to another PDF.
+
+Verified locally during planning: python -m unittest discover -s tests -v returned 13 passed. Current regression
+artefacts report 48 unique nodes, 49 displayed node labels (because Node 170 appears twice), and 297 native PDF additions
+after including valve tables. Current code uses PyMuPDF, an XLSX reader, hardcoded 1010 layout fixtures, CSV/JSON manifest
+output and an offline basic review utility.
+
+
+                                                                                              Production website development plan | Page 1
+                                                                              CAESAR II ISO AUTOMATION | CODEX MIGRATION | 10 NOV 2026
+
+
+
+Which legacy pieces to retain / refactor
+ Legacy file                                           Migration treatment
+ src/integrated_iso.py                                 Extract PDF annotation primitives, weight-field resolution
+                                                       and export verification into reusable services; remove global
+                                                       1010 assumptions from general processing.
+ src/caesar_iso_review.py                              Reuse concept of point_id, verification, blueprint editing and
+                                                       numbering; rewrite as tested domain services + interactive
+                                                       browser editor.
+ data/1010_original.pdf                                Immutable private regression input. Do not alter source
+                                                       page contents.
+ data/1010_review_project.json                         Seed reviewed 1010 project fixture with stable physical-
+                                                       point IDs.
+ data/1010_annotation_blueprint.json                   Exact visual anchor reference for 1010 only, not a template
+                                                       for other drawings.
+ data/1010_flange_specs.json                           Seed mapping of item codes to database rows; turn into
+                                                       per-project mapping + admin-reviewed lookup rules.
+ data/                                                 Canonical revised flange database for import/versioning
+ PIPE100_Flange_Weights_B16_5_B16_47_API6A_Number      (ignore previous superseded workbook).
+ s.xlsx
+ data/Valve_Database_Latest.xlsx                       Canonical valve database for import/versioning.
+ tests/test_integrated.py                              Preserve all existing 13 tests as regression fixtures; add
+                                                       generalised graph/unit/API/browser tests.
+ output/*, examples/*                                  Golden results; use PDF structural assertions, numeric
+                                                       assertions and visually approved snapshots.
+
+Do not deploy the legacy demo as a public production web service. It has no production authentication, tenancy, upload
+sandbox, job queue, engineer approval workflow or automatic generic geometry extraction.
+
+2. Proposed application architecture
+Recommended pragmatic stack
+   •       Web UI: Next.js or React + TypeScript, PDF.js for PDF render, a separate SVG overlay for nodes/leaders/annotations and
+           editable handles. Use robust coordinate conversion based on actual PDF page CropBox, MediaBox, rotation, zoom and
+           CSS transform; independent engineering coordinates MUST NOT be derived from pixel positions.
+   •       Backend API: Python FastAPI, typed Pydantic contracts and an OpenAPI specification. Keep domain/engineering
+           modules independent of FastAPI.
+   •       Work queue: Redis-backed RQ/Celery (or managed equivalent) for PDF rendering, extraction, catalog imports and
+           exports; statuses queued/running/review-needed/failed/done.
+   •       Database: PostgreSQL + migrations (Alembic), transactional approval/revision records and unique constraints.
+   •       Binary storage: private S3-compatible object storage with versioned immutable inputs and outputs; signed short-lived
+           URLs, not public disk paths.
+   •       PDF export: an annotation-capable PDF library, initially the proven PyMuPDF routines, subject to AGPL vs commercial
+           licensing decision before a hosted proprietary launch. All additions stored as true native PDF annotations, not
+           screenshots or page-content paint operations.
+   •       Infrastructure: Docker Compose for local development; production containers on a VPS or managed container platform,
+           with HTTPS proxy, backups, observability and isolated worker processes.
+   •       Authentication: tested OIDC provider or secure application authentication with MFA for approvers; granular role-based
+           project permissions.
+Browser (PDF.js + TypeScript SVG editing overlay)
+           |   HTTPS, auth, request IDs
+           v
+API (FastAPI) ---- PostgreSQL (projects, graphs, nodes, approvals, catalogs)
+       |                    |
+       |              audit/event history
+       +--> private object store (source PDFs, datasets, exports, manifests)
+       |
+       +--> queue -> sandboxed worker
+                      |-- PDF/text/vector extraction
+                      |-- sheet/material/continuation parsing
+                      |-- dimension-chain + pipe graph engine
+                      |-- node rules + numbering + validations
+                      |-- editable annotation exporter
+                      +-- checks, images, schedules, reports
+
+Architecture principle: three separate coordinate/identity layers
+   1.      Physical engineering model: XYZ/station in exact engineering units (canonical decimal millimetres or rational inches;
+           preserve input precision), line and branch topology, evidence and reviewer approval. This governs node identity and six-
+           inch checks.
+   2.      Drawing presentation model: PDF page ID, visual_anchor_pdf_xy, bubble XY, line/arrow vertices, bounding
+           rectangles, page transform and original-content collision zones. It governs appearance only.
+                                                                                                     Production website development plan | Page 2
+                                                                          CAESAR II ISO AUTOMATION | CODEX MIGRATION | 10 NOV 2026
+
+
+
+   3.    PDF output object model: native Circle/FreeText/Line/Polyline/Ink/etc objects; stable /NM name; logical group and
+         corresponding physical-point ID; editable without flattening. It governs export round-trip integrity.
+
+Never use screen pixels, rendered-image distances or shape geometry as a proxy for engineering distances. A good-looking leader
+pointer is not evidence of physical accuracy.
+
+3. Required engineer journey / website screens
+   1.    Home/projects: Create project, select company/line-system, see upload/review/export status, search prior projects and
+         revision history.
+   2.    Upload/import: Drop PDF files or ZIP of PDF sheets; check file type, size, malware, page count, signatures and revisions;
+         never treat filenames as line IDs. Attach current vetted flange/valve database versions.
+   3.    Drawing register: Every PDF page shown with source file, sheet index, printed drawing/sheet ID, revision, line ID,
+         scanned/vector status, extracted material items, discrepancy count; can fix title data manually.
+   4.    Materials review: View the original materials-list image alongside structured rows and located drawing callouts; confirm
+         size/class, item number, qty, component family and matching instances.
+   5.    Pipe route editor: Full-screen PDF with original north arrow, linked page navigation, zoom/pan, the evolving
+         centreline/topology overlay, main/branch selection and branch ordering. Add/change/delete physical points and assign
+         source dimensions or explicit verified coordinates.
+   6.    Continuation review: Paired views for both referenced sheets; compare full line identity, Easting, Northing/Southing,
+         Elevation, size and topology, and approve a shared point or reject with reasons.
+   7.    Node editor: Auto-propose locations and classification; allow moving graphic bubble and leader independently of
+         changing engineering station; show item provenance, station verification, colour reason and previous/next model node.
+         Manual overrides persist across regenerations.
+   8.    Flange and valve data review: See workbook matches, flange type and class, weights in newtons, stud/nut allowances,
+         valve spec/code, length mm, reference source and manufacturer quality. Permit documented engineer overrides; never fill
+         unknowns with zero.
+   9.    Export preview: On every sheet, editable red/blue nodes, red axis triad top-left clear of north, non-overlapping boxed
+         flange/valve schedules and warning notes. Show table collision warnings.
+   10.   Validation and release: Red/blue exception queue, unresolved station proofs, source/database version hashes, approval
+         signatures and editable-PDF checks; export review draft or approved issue with appropriate labelling.
+   11.   Download/revision history: Original immutable PDFs, approved generated PDFs, CSV/JSON reports, annotation
+         manifest, old→new numbering map, diff and full issue log.
+
+User roles
+   •     Viewer: read and download permitted versions.
+   •     Engineering editor: mark features, enter physical dimensions, revise node positions, add database matches and propose
+         overrides.
+   •     Lead engineer/approver: approve station evidence, resolve blue issues, approve exports for verified modelling use, lock a
+         version without destroying archived draft edits.
+   •     Administrator: manage team roles, tenant policy, dataset version publication and system maintenance. Separate dataset
+         approval from drawing approval.
+
+4. Multi-sheet document parsing and materials inventory
+Stage 1: Register all pages to the end; preserve page rotation, bounds, source SHA-256, original bytes, printed sheet number and
+title block. Handle mixed drawing line IDs in one uploaded PDF and repeated line IDs across files. Detect and distinguish SHT 2
+OF 2 from physical page 2.
+Stage 2: Extract CAD vector/text where available; some drawing lettering consists of paths and may have little searchable text.
+Raster/scanned drawings may yield proposals via OCR/vision but never exact physical stations merely from image recognition.
+Retain source bbox/page/recognition confidence for every extracted statement. Template-specific extraction adapters are allowed
+but must degrade safely to manual verification.
+
+Stage 3: Parse the materials list with per-sheet inventory {sheet_id, item_no, description_raw, quantity, size,
+class, rating, standard, component_type, source_evidence}. Distinguish fabrication vs erection lists and don't
+assume item numbers are globally unique. Source quantity is authoritative for audit, not proof that an exact physical location exists.
+
+Stage 4: Match each list item to drawing callouts and observed component instances. Flag MISSING_INSTANCE,
+EXCESS_INSTANCE, DUPLICATE_INSTANCE, AMBIGUOUS_MATCH, UNREADABLE_LABEL,
+SIZE_MISMATCH or ITEM_NOT_LOCATED; never silently skip an inventory item.
+
+
+                                                                                            Production website development plan | Page 3
+                                                                                CAESAR II ISO AUTOMATION | CODEX MIGRATION | 10 NOV 2026
+
+
+Stage 5: Build the evidence-backed connectivity graph using centrelines, tee/branch topology, known endpoint
+coordinates/dimensions, fittings, supports and intersheet continuations. Determine a main route using engineer-approved tie-in/flow
+or topology; sheet number and left-to-right reading order alone are never decisive.
+
+5. Mandatory node-placement business rules (history reconciled)
+                                                                               What went wrong before / acceptance
+ Component                           Create/reuse nodes                        criterion
+ Flange                              At flange face AND at opposite end        Early PDFs placed both nodes at the
+                                     at the black dot on pipe centreline.      same flange face; this is forbidden.
+                                     Reuse physical interfaces already         Proof of black-dot association is
+                                     occupied by valve/instrument.             required.
+ Tee/reducing tee                    One node at precise common main           Don't make a second branch ID at the
+                                     centreline × branch centreline            same tee. Counts must reconcile to
+                                     intersection; tee point belongs to main   materials-list tees.
+                                     node series.
+ Elbow                               One node at theoretical change of         Not at tangent ends by default for this
+                                     direction of elbow, determined from       ISO rule; don't use diagram bends or
+                                     stated engineering dimensional chain,     scaled proportions as dimensional
+                                     coordinate model and correct bend         evidence.
+                                     convention.
+ Support                             One node at each distinct actual          Do not merge merely nearby supports;
+                                     support station. Merge genuinely          if second support is at a distinct station
+                                     coincident supports onto one physical     it may need a distinct node even if
+                                     point with multiple support               close.
+                                     associations.
+ Valve                               Node at each physical process end;        No duplicate shared interfaces; if exact
+                                     adjacent flange interface uses the        end station isn't proved, blue
+                                     existing flange-face node.                provisional with reason.
+ Inline instrument                   Node at each process connection end;      Do not double-count flowmeter or
+                                     share interface node with adjacent        inline PV flange faces.
+                                     flange.
+ Single-ended instrument/PIT         Process connection node; no               Earlier PIT exact station lacked
+                                     unsupported second process end;           dimension evidence; keep blue until
+                                     DBB valve connections may have their      verified.
+                                     own documented distinct stations.
+ Continuation                        Same unique point ID and node             Node 170 must appear on both 1010
+                                     number shown on every available           sheets, counting as ONE unique
+                                     sheet depicting the same confirmed        model node.
+                                     connection.
+ Unlocated required feature          Do not guess an exact physical            Blue is a reasoned review status, not a
+                                     station. Add a blue numbered              substitute for proof.
+                                     provisional marker only if its visual
+                                     anchor is plausible; otherwise create
+                                     unresolved inventory exception without
+                                     fabricated position.
+
+Six-inch support rule (critical correction)
+Where two adjacent supports along the same physical pipe route are 6 inches (152.4 mm) apart or less, make the
+second/downstream support node BLUE and record the exact measured separation, the two node identities, the dimension
+evidence and reason SUPPORT_WITHIN_6_IN. First remains red unless another blue reason applies. If more than 6 inches,
+no proximity-based blue flag. Only use engineering dimension chains or verified coordinates; visual sheet distance is not acceptable.
+Compare physical support stations, not unrelated branch devices or nearby node bubbles. Persist this status by physical_point_id,
+not integer node number.
+
+Historic correction examples: support nodes 30 and 40 at 2 inches must flag second (40) blue; a different close support pair was 0.5
+inch, and another was 2 1/8 inches; the previous Node 190 should not be blue solely on six-inch proximity where its support
+separation exceeds six inches. During future renumbering, the flag follows the point, not historical labels (such as 40→some new
+integer).
+
+Red/blue reasons — typed and auditable
+   •       UNVERIFIED_DIMENSION, UNKNOWN_FLANGE_END, UNCONFIRMED_ELBOW_COD,
+           UNMATCHED_COMPONENT, PROVISIONAL_CONTINUATION, COORDINATE_MISMATCH,
+           UNKNOWN_VALVE_END, UNKNOWN_INSTRUMENT_STATION → BLUE until resolved.
+   •       SUPPORT_WITHIN_6_IN → BLUE downstream/second node even if station is fully verified; do not confuse this
+           engineering flag with an uncertain location.
+   •       No active blue reason, engineering evidence sufficient, no overrides pending → RED (or a separate draft status if project
+           rules require).
+   •       Store reasons as structured lists, not a single painted RGB value. Any user colour change has to be a reviewed exception
+           to the computed rules.
+
+
+                                                                                                       Production website development plan | Page 4
+                                                                          CAESAR II ISO AUTOMATION | CODEX MIGRATION | 10 NOV 2026
+
+
+
+Continuation matching and discrepancies
+Search every sheet and drawing for CONT. ON, CONT. FROM, matchline, drawing/sheet references and equipment tie-ins.
+Compare complete line ID, size, component identity, topology, E/N/S/EL independent physical coordinates and claimed station. For
+two proved depictions of the same point, unify physical ID and repeat its node number (and flag colour) on both PDFs; don't add a
+second point. Keep neighbouring flange-face nodes distinct. For coordinate mismatch ≥1 inch on any one axis and otherwise
+plausible connection, show provisional continuation on both sheets with blue MATCH TO BE CONFIRMED BY
+ENGINEER, preserve original coordinates and record the delta for each axis; do not silently mark as exact. For an impossible
+match or absent matching sheet, record unresolved endpoint instead of inventing the connection. Also flag smaller mismatches
+according to configured engineering tolerance.
+
+6. Deterministic CAESAR node numbering
+Precedence: establish physical point identity → group by full line ID → pick engineer-approved main run → number complete main
+across all same-line sheets → number each branch away from tee → reproduce identical number on confirmed continuation sheets.
+Do not number simply in PDF reading order.
+   •      First piping line starts at 10 unless authorised project configuration overrides it. Increment by 10 on main.
+   •      Tee intersection belongs to the main pipe and retains its ID when numbering its branch.
+   •      After finishing the entire main pipe, start branch 1 at the next higher unallocated multiple of 100 above the main's last
+          node, e.g. main ends 330 → first branch 400; branch 2 500, branch 3 600, etc. Reserve non-overlapping ranges; if a
+          branch exceeds ten positions, allocate more space rather than collide with another branch.
+   •      On the same line across sheet breaks, keep the sequence and repeated continuation ID; sheet break is not line change.
+   •      On a new line number, the first new distinct node starts at the next higher 1,000 boundary after the maximum allocated
+          ID on the previous line, including its branches, e.g. 1350 → 2000 (not 1360). Returning to a previously registered line
+          reuses its established numbering namespace.
+   •      A physical shared interface across different lines must not be duplicated: a proved shared point can show its existing node
+          ID; subsequent newly distinct nodes on the new line begin at its new thousand.
+   •     Save old_node_id → new_node_id, stable physical_point_id, route ordering and all repeated sheet
+         instances in an atomic transaction; renumbering must not change any physical station, bubble/leader geometry, red/blue
+         reason, or approvals.
+def next_higher_multiple(n: int, multiple: int) -> int:
+    return ((n // multiple) + 1) * multiple
+
+# Group node candidates by a verified physical_point_id.
+# For each first-seen new line in a deterministic processing order:
+start = 10 if first_line else next_higher_multiple(previous_line_max_id, 1000)
+for physical_point in main_route_traversal_all_sheets(line):
+    allocate_id(physical_point, start)
+    start += 10
+next_branch_base = next_higher_multiple(last_main_id, 100)
+for branch in branches_sorted_by_verified_takeoff_station(line):
+    block = reserve_nonoverlapping_hundred_range(next_branch_base, branch.length)
+    for p in branch_unique_points_excluding_shared_tee(branch):
+        allocate_id(p, block.next_id_by_10())
+previous_line_max_id = max(all_new_line_ids)
+repeat_confirmed_id_on_all_continuation_instances()
+
+Required tests include mixed page order, reversed flow, branches longer than 100, multiple new lines, a line returning later,
+continuation labels on multiple sheets and intentional node insertion/renumbering.
+
+7. Exact dimension engine and physical evidence
+   •     Canonical internal numeric model: either millimetres stored as Decimal or exact rational inches, with source unit,
+         tolerance and original fraction retained. 6 inches = 152.4 mm; mass kg and weight newtons must never be confused.
+   •     Parse mixed feet/inches/fractions, positive/negative Easting and Northing/Southing, elevation, offsets, angular/elbow spec,
+         nominal bore and code/rating.
+   •     Distinguish source engineering coordinate from PDF view XY and from physical along-centreline station. All are
+         explicitly typed (different data models).
+   •     Create constraint graph and dimension equations; solve only when sufficiently constrained. Retain exact source text,
+         source page and confidence/approval provenance.
+   •     For bend COD, infer model intersection from correct engineering dimension convention only; otherwise flag unverified and
+         require entered dimensions/CAD/engineer confirmation. Do not extrapolate paper angle or page scale.
+   •     For supports, compute along-route distance, not page XY Euclidean distance. Handle branches, elbows and backtracking
+         segments correctly.
+   •     When constraints disagree, fail validation or request engineer decision; do not silently move the original design data.
+   •     Do not infer valve length from symbol width, a default catalogue valve, or another operator style.
+
+
+                                                                                            Production website development plan | Page 5
+                                                                          CAESAR II ISO AUTOMATION | CODEX MIGRATION | 10 NOV 2026
+
+
+
+8. Flange database module — revised workbook is canonical
+Use only PIPE100_Flange_Weights_B16_5_B16_47_API6A_Numbers.xlsx (supersedes the earlier filtered
+workbook), imported with a version, hash, rows, units, source URLs, validity status and optional engineering override. Existing tabs:
+B16.5, B16.47 Series A, B16.47 Series B, API 6A, Read Me, Constants.
+Input key: standard + class/psi rating + true API bore (e.g. pipe NPS 8 is not the API 6A bore 7 1/16) + facing/flange type + any
+required end/size constraints. NPS, API bore, class and rating psi are separate columns. Fail on zero or multiple plausible
+exact records; do not silently substitute B16.5 for API 6A.
+
+Per flange type on each sheet, print a separate, editable boxed table in unused area, with flange size, class/rating, type, code,
+material, stud and nut materials, count and data quality, and at least:
+   •     W_flange (N) = flange assembly's reference bare flange weight.
+   •     W_half (N) = W_flange + 0.5 × W_all_studs + W_one_nut_per_stud.
+   •     W_full (N) = W_flange + W_all_studs + W_two_nuts_per_stud.
+Use workbook's published/derived value as the source; don't double-add bolting already included in a manufacturer's assembly
+mass. Keep explicit stud_count, length and diameter, nut size, vendor material, source references, calculation/assumption. The
+half studs + one nut convention is a project modelling allowance; document its purpose and distinguish from actual installed
+assembly deadweight.
+
+1010 regression examples (preliminary, not certified): API 6A 8-inch pipe / 7 1/16-inch bore / 10,000 psi: flange approximately
+1,232.5 N, W_half = 1,459.7 N, W_full = 1,686.8 N. API 6A 2-inch pipe / 2 1/16-inch bore / 10,000 psi: flange
+approximately 99.1 N, W_half = 117.2 N, W_full = 135.3 N. Sheet 1: 4 × 8-inch flanges; Sheet 2: 6 × 8-inch and 3 × 2-
+inch. The workbook uses approximate/estimated geometry in some rows, not supplier-certified hub and full assembly mass. Flag ¼-
+inch stud-length discrepancy between ISO and workbook; never silently override.
+
+Catalog changes must version rather than mutate approved historical outputs. Hash the XLSX, validate schema/unit conventions,
+derive and snapshot resolved row IDs; display a revision diff. New published database versions do not silently overwrite previous
+project PDFs.
+
+9. Valve database module — latest workbook is canonical
+Use Valve_Database_Latest.xlsx, not ad hoc values in code. Sheets include ASME B16.10 VALVE DATA BASE,
+API 6A Valve Database, audits/sources/coverage/guidance. Explicit fields: valve type, NPS/API bore, code, API WP or class,
+end connection, vendor, model, length in mm, weight in N, source and published/estimate status, operator/actuator inclusion, CG if
+known and reviewed.
+
+Sheet-specific editable boxed valve tables shall show:
+
+VALVE TYPE | SPECIFICATION | CODE | LENGTH (mm) | WEIGHT (N) plus manufacturer/model,
+quantity, source/quality, relevant operator or CG warning. Every sheet with valve data shall display the editable warning:
+       VALVE DATA SUPPLIED ON THIS ISO IS AS PER A PARTICULAR MANUFACTURER OR ESTIMATED. OBTAIN
+       ACTUAL MANUFACTURER WEIGHTS AND LENGTHS FOR FINAL STRESS ANALYSIS.
+
+1010 sample facts: Material item 6 on Sheet 1 and item 10 on Sheet 2 are 8-inch 10,000 psi ball valves, drawing code
+BA9901X:8. Database has a Bonney Forge reference with 889 mm and 13,729.31 N; this is not confirmed as the exact
+manufacturer/model on the drawing. Sheet 2 item 9 comprises three 2 × ¾-inch 10,000 psi DBB valves, drawing code
+E:DB3902:2x.75: no exact match; length/weight must be N/A, not 0 and not a guessed replacement. Preserve status
+REFERENCE_ONLY, NO_EXACT_MATCH, MANUFACTURER_CONFIRMED and manager/engineer sign-off
+separately.
+
+Record whether body/standard gear/actuator/handwheel is included in reported mass. Additional actuator allowance shall not be
+assumed zero if unknown; CG remains unknown until explicitly proven. Store actual manufacturer GA drawing and weight evidence
+for final analysis.
+
+10. Editable PDF annotations — absolute acceptance requirement
+Every added object remains individually selectable, editable, movable/recolourable/deletable in the actual exported PDF in
+the designated PDF editor. A PDF with editable metadata but flattened drawn numbers is a failed deliverable.
+   •     Node ID: native FreeText text annotation, correctly centred in independently editable Circle annotation.
+
+                                                                                            Production website development plan | Page 6
+                                                                               CAESAR II ISO AUTOMATION | CODEX MIGRATION | 10 NOV 2026
+
+
+   •      Leader: native Line/Polyline, editable endpoints targeted at identified drawing feature, not the bubble centre.
+   •      X/Y/Z + +Mx/+My/+Mz local axis: editable lines/curve segments and separate editable text labels in red on every
+          sheet, top-left close to the NORTH arrow but not covering it.
+   •      Flange/valve tables: native separate editable text rows and rectangle borders, each row/reference represented as trackable
+          object; source drawing untouched.
+   •      Continuation label or repeated node: separate PDF annotation objects on both sheets, but one logical physical ID.
+   •      Blue-node engineering comments/exception flags: editable visible text; optionally separate tooltip/details with full
+          verification cause.
+   •      Persist /NM or equivalent unique annotation name, subtype, position, appearance properties, subject, sheet ID, point ID,
+          logical group ID and source/project revision in an annotation manifest.
+   •      Original PDF content streams must not change; do not overwrite initial dimensions, material tables, NORTH symbol or
+          title blocks.
+   •      Graphic bubble/leader relocation to avoid collision is NOT a physical station change. Physical station changes require
+          engineer evidence and approval.
+   •      On regeneration, reconcile existing native annotations by stable IDs. Do not duplicate annotations or silently discard
+          engineer edits; record conflicts.
+   •      Test save → close → reopen → edit → save → reopen on representatives of every annotation type on
+          every page. Include target-editor manual testing (e.g., Acrobat desktop), browser display comparison, metadata checks
+          and original-content SHA comparison.
+   •      If requested exact axis symbol is not faithfully representable via editable primitives in target editor, stop and require
+          approval for an editable alternative; never flatten it into a PNG.
+
+11. Website data model (relational + JSON graph)
+Core tables/entities (each project scoped to tenant; use UUID keys, unique constraints and migration scripts):
+ Entity                                                Essential fields
+ Organization/User/Membership                          org_id, user ID, role, status, MFA, access policy
+ Project/Revision                                      project ID, title, drawing set, unit system, stage, parent
+                                                       revision, approval status, created/updated
+ SourceFile/Sheet                                      file ID, original bytes key, SHA256, page index, printed
+                                                       sheet no., full line ID, rotation, dimensions, material bbox,
+                                                       status
+ MaterialItem/ComponentInstance                        sheet, item no., family, raw description, code, standard,
+                                                       bore/class/rating, qty, observed callout, source bbox, match
+                                                       status
+ PipeLine/Route/GraphEdge                              full line ID, main or branch ID, parent takeoff, ordered
+                                                       endpoints, signed XYZ constraint, dimension source,
+                                                       verified flag
+ PhysicalPoint                                         stable point UUID, line/route, engineering XYZ/station
+                                                       nullable, evidence, verification status, topo role
+ Node                                                  point UUID foreign key, current number, colour reason
+                                                       codes, version, approval
+ NodeSheetInstance                                     sheet, physical point ID, visual anchor, bubble, leader
+                                                       vertices, text annotation ID, unique per sheet/point
+ ContinuationMatch                                     endpoint A/B, coordinate delta axes, size/topology,
+                                                       matching status, reviewer decision
+ Support/SupportPairCheck                              station, listed item, paired next support, along-route
+                                                       distance, cause/evidence, flag
+ DimensionEvidence                                     raw text, parsed unit value, drawing source, CAD source,
+                                                       author, approval, confidence
+ CatalogVersion/CatalogRecord                          workbook filename/hash, sheet/row, data type, matching
+                                                       key, number/unit, source, validity, provenance
+ ComponentCatalogMatch                                 component ID, exact/reference/no match, dataset version,
+                                                       selected row, engineer override, reason
+ AnnotationObject                                      PDF object stable name, subtype, role, target, geometry,
+                                                       logical grouping, edit state
+ Exception/Approval/AuditEvent                         severity, code, evidence, action, actor, timestamp, revision,
+                                                       status and resolver
+ ExportJob/ExportArtifact                              job ID, input revision hash, catalog snapshot, result
+                                                       paths/hashes, QA report, state
+
+
+Invariants: one node_number per physical_point_id within project revision; one unique physical point per same actual
+connection; same logical node may appear on multiple sheets; PDF object IDs are unique per sheet representation. Catalog source
+and revision are mandatory for any printed numeric weight or length. Engineering null is not zero.
+
+
+
+
+                                                                                                      Production website development plan | Page 7
+                                                                           CAESAR II ISO AUTOMATION | CODEX MIGRATION | 10 NOV 2026
+
+
+
+12. Web APIs and boundary contracts
+Version APIs (/api/v1) and keep a typed OpenAPI spec. Suggested endpoints:
+POST     /api/v1/projects
+POST     /api/v1/projects/{id}/sources           # multipart upload and validation
+GET      /api/v1/projects/{id}/sheets            # all physical + printed sheets
+POST     /api/v1/projects/{id}/extraction-jobs # queued + status
+GET      /api/v1/jobs/{id}
+GET      /api/v1/projects/{id}/materials
+PATCH    /api/v1/projects/{id}/materials/{item_id}
+GET      /api/v1/projects/{id}/graph
+PATCH    /api/v1/projects/{id}/graph             # optimistic version token
+POST     /api/v1/projects/{id}/nodes/propose
+POST     /api/v1/projects/{id}/nodes/renumber
+PATCH    /api/v1/projects/{id}/nodes/{point_id}
+POST     /api/v1/projects/{id}/continuations/{match_id}/review
+POST     /api/v1/catalogs/import                # admin only, creates version
+GET      /api/v1/projects/{id}/component-matches
+PATCH    /api/v1/projects/{id}/component-matches/{id}
+GET      /api/v1/projects/{id}/validation
+POST     /api/v1/projects/{id}/revisions/{rev}/approve
+POST     /api/v1/projects/{id}/exports
+GET      /api/v1/projects/{id}/artifacts/{artifact_id}/download
+GET      /api/v1/projects/{id}/audit
+
+Always validate ownership/permissions server-side. API commands work against immutable revision or optimistic concurrency
+version; return 409 on conflicting edits. Provide idempotency keys for export requests. Record unit, evidence and reason on every
+engineering-critical change.
+
+Example node DTO (illustrative, not a substitute for typed schema and migrations):
+{
+    "physical_point_id": "pt-uuid-2026-001",
+    "project_revision_id": "rev-uuid",
+    "line_id": "8-PG-JE3LN2-1010-FUTURE",
+    "route": "main",
+    "node_number": 170,
+    "engineering_station_mm": null,
+    "engineering_station_status": "UNVERIFIED_DIMENSION",
+    "evidence_ids": ["ev-photo-13"],
+    "colour": "blue",
+    "colour_reason_codes": ["PROVISIONAL_CONTINUATION"],
+    "sheet_instances": [
+      {"sheet_id":"1010-s1","pdf_anchor_xy":[510.1,415.3],"bubble_xy":[550.1,440.3]},
+      {"sheet_id":"1010-s2","pdf_anchor_xy":[1225.1,314.3],"bubble_xy":[1250.1,340.3]}
+    ]
+}
+
+The positions in this DTO are illustrative software-shape values, not real project coordinates; live data must come from the
+reviewed drawing fixture.
+
+13. Security, privacy, tenant isolation and operations
+    •     Uploaded PDFs/XLSX/ZIP are untrusted: allowlist type, validate signature, size/pages/zip expansion, virus scan, content
+          sandbox/limits; do not execute PDF embedded scripts, macros or arbitrary workbooks; store outside public webroot.
+    •     Run PDF parsers in least-privilege isolated workers with CPU/memory/time/size limits, read-only containers where possible
+          and no arbitrary network access.
+    •     Mandatory authentication, role-based access on every object ID, per-tenant DB row-level enforcement or careful query
+          scoping, file encryption at rest, TLS, expiring signed download URLs, admin audit trail, rate limiting and quotas.
+    •     Privately store original client drawings; no default public catalogue indexing of project PDFs or telemetry with raw drawings.
+          Log identifiers and checksums, not confidential document content.
+    •     Maintain backup of PostgreSQL and object storage, periodically perform restoration drills, snapshot every approved
+          revision and dataset; retention and deletion policies.
+    •     Monitor upload errors, worker crash rates, invalid physical station attempts, missing matches, PDF editability-test failures
+          and queue health.
+    •     Deploy via Docker to VPS/managed app service with independent queue worker. cPanel may run Python/Node
+          applications but basic shared hosting often cannot reliably provide Docker/worker/Redis/storage setup; if cPanel is
+          mandatory, first confirm host's permitted services and suitable deployment architecture.
+
+PyMuPDF licensing action: Before proprietary SaaS/commercial hosting, obtain counsel/license confirmation: PyMuPDF offers
+AGPL and commercial licensing. Preserve an alternative PDF-engine interface to make backend licensing changes possible.
+
+
+
+
+                                                                                             Production website development plan | Page 8
+                                                                        CAESAR II ISO AUTOMATION | CODEX MIGRATION | 10 NOV 2026
+
+
+
+14. QA: specific regressions and release gates
+1010 golden fixture (must stay green)
+   •     Exactly 2 source sheets with same 8-PG-JE3LN2-1010-FUTURE line → no 1,000-series restart between sheets.
+   •     48 unique nodes, 49 displayed node labels, because one logical Node 170 is present on both sheets.
+   •     Main node sequence 10–370; three branches 400–430, 500–530, 600–620.
+   •     Materials: flange counts 4 on Sheet 1; 6 8-inch + 3 2-inch on Sheet 2. Three reducing tees on Sheet 2. Five elbows
+         across both sheets. Preserve component audits rather than hardcode counts for all projects.
+   •     Red/blue node assignment follows reviewed physical-point identities and original engineering reasons, including support
+         proximity tests. No renumber changes colour or source station.
+   •     API 6A 8-inch and 2-inch flange tables contain correct revised-workbook values and material/spec details. Quarter-inch
+         stud-length discrepancy remains reported.
+   •     Valves: two 8-inch ball-valve reference rows 889 mm / 13,729.31 N with unconfirmed-manufacturer notice; three DBB
+         valves remain N/A for unknown length/weight.
+   •     Valve warning appears on both sheets. Red X/Y/Z +Mx/My/Mz symbol appears beside NORTH on both without touching it.
+   •     Every native object can be enumerated, selected, edited in a test copy and saved/reopened. Baseline 297 annotations in
+         v1.2; count may legitimately change if the design evolves, but no silently missing types/elements.
+   •     Original PDF content streams unchanged; no annotation obscures existing engineering dimensions, title information or
+         materials.
+   •     Automated 13 legacy tests remain passing; add structural/visual/site-level tests.
+
+Additional artificial fixture tests
+   1.    1-sheet simplest pipe; 10-sheet line with continuations; multiple line IDs in one PDF; pages intentionally out of physical
+         sequence.
+   2.    Same physical continuation on three sheets; missing mate; size mismatch; coordinate disagreement 1/2 inch vs ≥1 inch.
+   3.    Main last 330 → branch 400; second 500; branch longer than 10 nodes; branch takeoff in reversed drawing orientation.
+   4.    Previous line max 1350 → new line start 2000 (including last branch); new drawing sheet but same line must not restart.
+   5.    2 distinct adjacent supports 2 inches apart → second blue; distance exactly 6 inches → second blue; distance >6 inches →
+         red unless other flag; two support tags at a truly identical station share node.
+   6.    Flange face vs opposite dot; flange not located; valve adjacent flange shares node; inline instrument shared flange; single-
+         ended PIT only one process end.
+   7.    Elbow COD fully dimensioned vs undimensioned; scanned-only input rejected as 'physically verified' but allowed review
+         proposal.
+   8.    Unknown 10k DBB weight remains null, no substitution. Force mismatch cases for flange bore, standards, rating, stud
+         length and operator inclusion.
+   9.    Each native PDF object type edited, moved and deleted in temporary editor copy; original streams unchanged; target editor
+         round trip.
+   10.   Upsert same source+review twice -> zero duplicate nodes/annotations and identical engineering output. Concurrency and
+         version conflicts don't overwrite approved edits.
+   11.   Attempt malicious PDF, macro-like XLSX, ZIP bomb, cross-tenant source fetch; ensure denial and audit.
+   12.   PDF rotated 90/180, nonzero CropBox origin and different DPI/zoom; correct on-screen and exported annotation
+         placement.
+
+Release levels
+   •     DRAFT: automatic discovery/proposals, many blue issues allowed.
+   •     ENGINEERING_REVIEW: all proposed components accounted for, blue issues explicitly listed and assigned;
+         editable PDF export allowed with watermark/status.
+   •     VERIFIED_FOR_MODELLING: physical stations, continuations, vendor details used by modelling and dataset
+         provenance accepted and lead-approved; no critical unresolved exception.
+   •     EXPORT_FAILED: required editable PDF structural/editor tests fail; never call such a PDF a completed approved
+         issue.
+
+15. Development milestones and strict acceptance criteria
+Phase 0 — Freeze legacy and create repo foundation. Import v1.2 as legacy/, pin dependencies, run 13 existing tests, preserve
+source SHA fixtures, establish Git CI, Docker local DB/worker and code owners. Deliverable: reproducible baseline; no behavior
+changes.
+
+
+
+                                                                                          Production website development plan | Page 9
+                                                                                    CAESAR II ISO AUTOMATION | CODEX MIGRATION | 10 NOV 2026
+
+
+Phase 1 — Extract domain engine. Implement typed models, exact units, separate physical vs graphic coordinates, node
+identity/unification, deterministic numbering and reason codes; migrate regression tests. Deliverable: pure Python unit-testable rules
+independent of PDF.
+
+Phase 2 — Database import and matching. Version XLSX catalogs, parse source/quality, add admin preview/approval and exact
+match rules; build per-project immutable catalog snapshot and schedule outputs. Deliverable: numeric 1010 rows and N/A cases
+reproducible by APIs.
+
+Phase 3 — Secure upload, project and sheet registry. Auth, project revision, file validation, immutable storage and processing
+jobs; show each page. Deliverable: uploaded 1010 pages and new arbitrary PDFs as project records without any accidental
+geometry reuse.
+
+Phase 4 — PDF viewer and editable visual overlay. PDF.js + SVG native editing/drag/select; stable page transform; annotation
+object handles; save per-sheet graphics to server. Deliverable: manually place/edit/reopen native node bubbles, leader and axis on
+any new PDF, with no physical station guesses.
+
+Phase 5 — Extraction + materials review. Process CAD text/vector where possible, manual correction interface, per-item
+quantities and positions, evidence and audit. Deliverable: 1010 inventory reconciled, unknown-format PDFs safely flagged.
+
+Phase 6 — Connectivity/dimensional engine. Pipe graph, main route, branches, signed XYZ, real dimensional chains, elbow COD
+and supports; handle underdetermination explicitly. Deliverable: engineer-approved graph and independent validated station checks;
+no scaling.
+
+Phase 7 — Node proposals and complete numbering. Component rule engine, numbering, continuation matching, blue/red
+reasons, review controls and insertion/renumbering with identity preservation. Deliverable: 1010 48/49 test and challenging synthetic
+fixtures green.
+
+Phase 8 — Full editable PDF generator. All native edits, boxed flange/valve tables, valve notices, collision solver, red local triad,
+downloadable manifests, edit/reopen tests. Deliverable: 1010 reference output and new PDF with engineer review both pass
+structural QA.
+
+Phase 9 — Engineer approvals, reports and revision history. Exception queues, two-level approvals, database provenance,
+old/new maps, revision diff, exports and audit. Deliverable: draft/review/approved gates enforced server-side.
+
+Phase 10 — Deployment/pilot. CI/CD, container deployment, private storage, backups, operational dashboards, rate limits, tenant
+isolation, vendor/manual editor tests, user docs and pilot on several unrelated consultant isometrics. Deliverable: production-ready
+engineering pilot; findings and open limitations recorded.
+
+Definition of done for the first usable website
+An authorised engineer can upload a new two-sheet PDF, review its materials, manually confirm a main
+route/branch/support/endpoints, insert or approve nodes, produce collision-free red/blue and continuation labels, resolve/flag missing
+weights, then download an individually editable PDF and complete schedules without modifying legacy 1010-specific source
+code. The website must never silently claim underdimensioned points or manufacturer-unverified valve properties as final validated
+engineering data.
+
+16. Known engineering/software risks and mitigations
+ Risk                                                       Mitigation
+ 1010 blueprints accidentally reused on other drawings      Source-hash check per project; new reviewed blueprint
+                                                            generated for each source; design-time typed validation.
+ Raster/scanned or vector-stroke text cannot be parsed      Hybrid extraction, confidence/evidence UI, human approval
+                                                            and explicit unlocated items.
+ Scale misunderstanding causes wrong stress node stations   Separate physical dimension engine from PDF XY, prohibit
+                                                            distance-from-pixels, unit tests for fractions.
+ Branch numbering overlaps line/next branch                 Pre-allocate number blocks transactionally; enforce
+                                                            uniqueness and collision checks.
+ Duplicate nodes on continuation                            Stable physical point UUID, many sheet instances, atomic
+                                                            renumber fanout.
+ Editable objects get flattened in export                   Enforce /Annots, structural tests, target editor round-trip and
+                                                            abort export.
+ Wrong valve/flange weights due to near match               Exact-key matching, catalog status/provenance, null rather
+                                                            than zero, approval and discrepancy warnings.
+ Operator weight or flanges/bolts counted twice             Separate included/excluded scope fields, component-level
+                                                            assembly mass accounting.
+ Original engineering data obscured                         Visible collision solver on PDF graphic layer; snapshot
+                                                            visual QA and manual review.
+ Wrong data after workbook update                           Versioned catalog snapshots, source checksums and
+                                                            reviewable dataset diffs.
+ Proprietary commercial deployment license conflict         Review PyMuPDF AGPL/commercial terms and make PDF
+                                                            adapter swappable.
+ Inadequate shared-host resources                           Use isolated web+worker containers/VPS or verified hosting
+                                                            service; don't rely on cPanel without checking constraints.
+
+                                                                                                        Production website development plan | Page 10
+                                                                               CAESAR II ISO AUTOMATION | CODEX MIGRATION | 10 NOV 2026
+
+
+ Risk                                                   Mitigation
+ Other users access confidential drawings               Tenant isolation, authz, private object store, signed URLs,
+                                                        logging/sandboxing.
+
+
+17. Initial repository structure
+caesar-iso-web/
+├── AGENTS.md
+├── README.md
+├── docs/
+│   ├── CODEX_MASTER_PLAN.md
+│   ├── IMPLEMENTATION_BACKLOG.md
+│   ├── DATA_CONTRACTS_AND_TESTS.md
+│   └── SOURCE_AND_DECISIONS.md
+├── legacy/v1_2/                # unmodified package as baseline
+├── apps/web/                   # React/Next TS + PDF.js + SVG overlays
+├── services/api/               # FastAPI routes/auth/migrations
+├── packages/engineering/       # pure Python graph/node/dimension engine
+├── packages/catalogs/          # flange/valve workbook adapters and match policy
+├── packages/pdf/               # extract/render/native editable annot adapters
+├── workers/                    # imports, extraction, exports, QA
+├── fixtures/1010/              # source PDF + reviewed blueprint + golden output
+├── fixtures/synthetic/         # edge cases (safe test PDFs)
+├── tests/unit/
+├── tests/integration/
+├── tests/e2e/
+├── docker-compose.yml
+├── infra/                      # deployment, backup, monitoring
+└── .github/workflows/          # lint/tests/security/build
+
+No large-scale rewrite of the tested 1010 generator in the first commit. Use ports/adapters so pure engineering routines and legacy
+fixture coexist with new website modules until acceptance tests prove replacement.
+
+18. References and verification status
+Source-derived/inspected: legacy v1.2 code, local 13/13 automated suite, 1010 original drawing and golden PDF, v1.1/v2.2 coding
+plans, attached authoritative workbook schemas, user corrections throughout this conversation.
+
+External technical references (checked 10 November 2026):
+   •     PyMuPDF license choice: https://pymupdf.io/licensing (AGPL/commercial deployment consideration).
+   •     Mozilla PDF.js integration: https://mozilla.github.io/pdf.js/getting_started/ and https://mozilla.github.io/pdf.js/examples/
+         (render and viewport transform; not a guarantee that PDF objects are editable in browser).
+   •     OWASP safe uploads: https://cheatsheetseries.owasp.org/cheatsheets/File_Upload_Cheat_Sheet.html.
+   •     cPanel framework capability (but host-specific restrictions still apply):
+         https://support.cpanel.net/hc/en-us/articles/4408475507479-Does-cPanel-support-Python-Java-or-other-frameworks.
+
+Unresolved decisions requiring engineering/business approval: approved physical station evidence for historic 1010 nodes
+(many imported graphical anchors only); precise vendor valve values/CG/actuator scope; whether the customer wants external
+CAESAR II input files; target PDF editor and licence; hosting provider, user roles and geographic data retention rules. These
+decisions must not block the manual engineering review MVP, but must block any misleading claims of final validated stress input.
+
+
+
+
+                                                                                                   Production website development plan | Page 11
+
