@@ -4,6 +4,7 @@ import os
 import json
 from pathlib import Path
 import sys
+import threading
 
 ROOT = Path(__file__).resolve().parent
 sys.path.insert(0, str(ROOT))
@@ -38,7 +39,33 @@ if not (ROOT / "dist" / "index.html").is_file():
 from a2wsgi import ASGIMiddleware
 from services.api.main import app, initialize
 
-# Passenger runs WSGI and does not send ASGI lifespan events. Initialize once
-# per worker before serving traffic; SQLite initialization is idempotent.
-initialize()
-application = ASGIMiddleware(app)
+# Hosting servers may fork workers after importing the startup file. An ASGI
+# adapter created here would start a thread that disappears in forked children.
+# Build it lazily in the process actually serving the request instead.
+_adapter = None
+_adapter_pid = None
+_adapter_lock = threading.Lock()
+
+
+def _after_fork():
+    global _adapter, _adapter_pid, _adapter_lock
+    _adapter = None
+    _adapter_pid = None
+    _adapter_lock = threading.Lock()
+
+
+os.register_at_fork(after_in_child=_after_fork)
+
+
+def application(environ, start_response):
+    global _adapter, _adapter_pid
+    process = os.getpid()
+    if _adapter_pid != process:
+        with _adapter_lock:
+            if _adapter_pid != process:
+                # WSGI does not send ASGI lifespan events. SQLite setup is
+                # idempotent; use a new adapter/event loop for each worker.
+                initialize()
+                _adapter = ASGIMiddleware(app)
+                _adapter_pid = process
+    return _adapter(environ, start_response)

@@ -6,6 +6,8 @@ The package includes the built React website; Node.js is not needed on the host.
 Root or sudo access is not required: dependencies install in the account's
 Python application virtual environment. Enabling Passenger itself is the
 hosting provider's responsibility.
+The WSGI entry point creates its ASGI event loop lazily in each serving worker;
+it does not start adapter threads before the hosting server forks workers.
 PHP-only hosting cannot run the FastAPI API. Ask your provider about Python
 support before purchasing or changing hosting. This is a tested WSGI adapter,
 not a claim that every cPanel plan supports it.

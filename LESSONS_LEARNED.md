@@ -91,3 +91,11 @@ Use the existing entry format: a unique `LESSON-###` heading, category, status, 
 - Lesson: A working PHP loader at /stress/ does not make a root-only Python application work at that URL, and extracting the complete source into public_html would expose unnecessary private files.
 - Action: Keep browser links, API requests, PDF URLs and cookies within the selected application path. Let Passenger map /stress/ to an application outside public_html, with private credentials and drawing storage. Test both root and subdirectory deployments.
 - Evidence: Subdirectory browser workflow; Passenger SCRIPT_NAME package tests; docs/CPANEL.md.
+
+## LESSON-012 — WSGI adapters must start their threads in the serving worker
+
+- Category: Hosting
+- Status: Adopted
+- Lesson: An ASGI-to-WSGI adapter created during module import starts a background event loop. After a web server forks workers, that inherited loop can have no running thread, so HTTP requests hang despite a successful standalone startup test.
+- Action: Create the adapter lazily for each serving process, reset inherited state and locks after fork, and test requests after both cold and warmed parent processes fork workers. Keep live hosting verification separate from isolated interpreter checks.
+- Evidence: The previous adapter hung in a real fork reproduction. The cold/warm worker regression exercises the corrected Passenger entry point with an alarm that detects a hung request.

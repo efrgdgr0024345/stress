@@ -11,7 +11,7 @@ Setup performs a clean virtual-environment dependency install, locked npm instal
 
 ## Automated coverage
 
-The API/domain/hosting suite contains **51 tests** covering the original unit, upload, authorization, revision, numbering, native-PDF and coordinate regressions, plus catalog mapping, controlled approvals, units, unknown values, bolting scopes, ambiguity rejection, source integrity, independent project manufacturer confirmation, immutable source snapshots, free annotations and revision recovery.
+The API/domain/hosting suite contains **56 tests** covering the original unit, upload, authorization, revision, numbering, native-PDF and coordinate regressions, plus catalog mapping, controlled approvals, units, unknown values, bolting scopes, ambiguity rejection, source integrity, independent project manufacturer confirmation, immutable source snapshots, free annotations and revision recovery.
 
 The cPanel package test extracts the actual downloadable ZIP, verifies its file
 hashes and absence of private/runtime directories, and uses its Passenger WSGI
@@ -62,6 +62,15 @@ explicit WSGI fallback, reruns and rollback. These are filesystem/control-flow
 checks, not an emulation of Apache/LiteSpeed. See
 [routing repair](CPANEL_ROUTING_REPAIR.md). Actual-host health/frontend checks
 remain necessary.
+
+A real fork regression checks cold and warmed WSGI parent processes: forked
+workers must complete an authenticated health request before an alarm expires.
+The old import-time adapter hung in the reproduction; lazy per-process adapter
+initialization passes. Four installer checks exercise automatic routing recovery
+for unavailable hosting, refusal to recover routing for login/access failures,
+and refusal to execute a recovery script with an unexpected checksum.
+See [worker startup fix](CPANEL_WORKER_FIX.md). The real provider's startup
+error remains necessary if the corrected app still fails there.
 
 ## Container trust and execution
 

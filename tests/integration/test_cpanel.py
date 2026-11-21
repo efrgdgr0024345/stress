@@ -15,6 +15,35 @@ ROOT = Path(__file__).resolve().parents[2]
 
 
 class CpanelPackageTests(unittest.TestCase):
+    def test_worker_requests_complete_after_cold_and_warm_parent_forks(self):
+        with tempfile.TemporaryDirectory() as temp:
+            env = {**os.environ, "CAESAR_DATA_DIR": str(Path(temp) / "data"),
+                   "CAESAR_ADMIN_EMAIL": "fork@example.invalid", "CAESAR_ADMIN_PASSWORD": "isolated-fork-test-password-987",
+                   "CAESAR_LOCAL_DEMO": "0", "CAESAR_SECURE_COOKIE": "1"}
+            code = '''
+import os, signal
+import httpx
+from passenger_wsgi import application
+def health():
+    with httpx.Client(transport=httpx.WSGITransport(app=application), base_url="https://fork.invalid") as client:
+        response = client.get("/api/v1/health")
+        assert response.status_code == 200 and response.json()["mode"] == "authenticated"
+for warmed in (False, True):
+    if warmed:
+        health()
+    child = os.fork()
+    if child == 0:
+        signal.signal(signal.SIGALRM, lambda *_: os._exit(20))
+        signal.alarm(5)
+        health()
+        os._exit(0)
+    _, status = os.waitpid(child, 0)
+    assert os.waitstatus_to_exitcode(status) == 0, ("forked worker did not serve health", warmed, status)
+print("Cold and warm forked workers served authenticated health")
+'''
+            result = subprocess.run([sys.executable, "-c", code], cwd=ROOT, env=env, capture_output=True, text=True, timeout=20)
+            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+
     def test_extracted_package_https_auth_upload_export_and_fail_closed(self):
         with tempfile.TemporaryDirectory() as temp:
             temp = Path(temp)
