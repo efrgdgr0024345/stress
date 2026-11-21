@@ -11,7 +11,7 @@ Setup performs a clean virtual-environment dependency install, locked npm instal
 
 ## Automated coverage
 
-The API/domain/hosting suite contains **56 tests** covering the original unit, upload, authorization, revision, numbering, native-PDF and coordinate regressions, plus catalog mapping, controlled approvals, units, unknown values, bolting scopes, ambiguity rejection, source integrity, independent project manufacturer confirmation, immutable source snapshots, free annotations and revision recovery.
+The API/domain/hosting suite contains **62 tests** covering the original unit, upload, authorization, revision, numbering, native-PDF and coordinate regressions, plus catalog mapping, controlled approvals, units, unknown values, bolting scopes, ambiguity rejection, source integrity, independent project manufacturer confirmation, immutable source snapshots, free annotations and revision recovery.
 
 The cPanel package test extracts the actual downloadable ZIP, verifies its file
 hashes and absence of private/runtime directories, and uses its Passenger WSGI
@@ -71,6 +71,13 @@ for unavailable hosting, refusal to recover routing for login/access failures,
 and refusal to execute a recovery script with an unexpected checksum.
 See [worker startup fix](CPANEL_WORKER_FIX.md). The real provider's startup
 error remains necessary if the corrected app still fails there.
+
+Six administrator-recovery tests exercise the real API password/session
+implementation with disposable data: updated login, session revocation,
+unchanged projects, configuration synchronization and private backups,
+duplicate-email rejection, readable-config/short-password refusal, rollback
+on file-write failure and no password in prompt output. See
+[administrator recovery](ADMIN_RECOVERY.md).
 
 ## Container trust and execution
 
