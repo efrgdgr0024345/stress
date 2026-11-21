@@ -1,6 +1,12 @@
 # Implementation status — 0.2
 
-## Working local system
+## Implemented review application
+
+The Python/cPanel pilot is installed at `https://easyai.com.au/stress/`.
+Operator checks verified authenticated API, administrator login and projects;
+public checks verified the CAESAR frontend and unauthenticated project denial.
+This is not completion of the automatic drawing-recognition pipeline or
+production security hardening. See [the revised automation plan](AUTOMATED_PROJECT_PIPELINE.md).
 
 - macOS-inspired React interface and root `loader.php`, with each lesson displayed in a distinct coloured icon card beneath Load project. The Markdown register is version controlled and read dynamically.
 - Same-origin, authenticated project loading directly into the in-browser drawing workspace, with project URLs retained across reloads.
@@ -25,7 +31,7 @@
 - Release remains engineering-review draft. Final engineering approval, verified-for-modelling gates, separate lead/dataset workflows, MFA and external editor qualification are not claimed.
 - Standard PDF annotations support broad compatibility. The browser editor is the primary working environment; individual third-party readers may differ in their annotation editing features.
 - SQLite/local files and synchronous exports are local adapters. Enterprise PostgreSQL/S3/queue infrastructure, isolated workers, malware scanning, rate limits, retention/restore drills and operational monitoring remain production work.
-- ZIP drawing upload, proprietary CAESAR model-file export and public deployment are not implemented.
+- ZIP drawing upload, proprietary CAESAR model-file export and the end-to-end automated extraction/job pipeline are not implemented.
 
 ## Required missing reference assets
 
@@ -37,4 +43,6 @@ The plan names files that were not attached or present:
 
 Import these immutably when available. Pin hashes, retain their original tests, map the actual source schemas and add the documented numeric, 48-unique/49-display and native-object regressions. Synthetic fixtures must never be presented as real 1010 evidence.
 
-No public deployment or cloud-environment publication is part of this implementation.
+The cPanel pilot was installed through operator-run terminal commands; the cloud
+environment was not published by these changes. Keep the pilot access-restricted
+while the documented security and operational work remains unfinished.
