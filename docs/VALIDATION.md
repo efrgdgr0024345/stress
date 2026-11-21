@@ -11,7 +11,7 @@ Setup performs a clean virtual-environment dependency install, locked npm instal
 
 ## Automated coverage
 
-The API/domain/hosting suite contains **62 tests** covering the original unit, upload, authorization, revision, numbering, native-PDF and coordinate regressions, plus catalog mapping, controlled approvals, units, unknown values, bolting scopes, ambiguity rejection, source integrity, independent project manufacturer confirmation, immutable source snapshots, free annotations and revision recovery.
+The API/domain/hosting suite contains **69 tests** covering the original unit, upload, authorization, revision, numbering, native-PDF and coordinate regressions, plus catalog mapping, controlled approvals, units, unknown values, bolting scopes, ambiguity rejection, source integrity, independent project manufacturer confirmation, immutable source snapshots, free annotations and revision recovery.
 
 The cPanel package test extracts the actual downloadable ZIP, verifies its file
 hashes and absence of private/runtime directories, and uses its Passenger WSGI
@@ -90,3 +90,5 @@ The container runs as a non-root user. CI and documented commands validate build
 The original 13 legacy tests, original 1010 48/49-node fixture, authoritative workbook numeric regressions, universal third-party editor coverage, actual engineer/lead sign-off, production OIDC/MFA and queue/storage/DB infrastructure, disaster-restoration drills and hosted deployment have not been established. Their required assets, credentials or operational decisions were not supplied.
 
 Publication and deployment are distinct from a source commit or a local test. No public deployment or environment publication is performed automatically.
+
+Updater tests cover admin access, queued command serialization, archive/hash rejection, failed-health restoration, interrupted-swap recovery and data-preserving manual rollback. Browser coverage opens the System updates panel and checks disabled installation before runner setup. These use simulated deployment health; actual cPanel cron/restart/update still requires operator verification.

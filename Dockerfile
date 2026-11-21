@@ -17,7 +17,7 @@ RUN --mount=type=secret,id=proxy_ca \
     pip install --no-cache-dir -r requirements.txt
 COPY --chown=10001:10001 packages ./packages
 COPY --chown=10001:10001 services ./services
-COPY --chown=10001:10001 loader.php LESSONS_LEARNED.md ./
+COPY --chown=10001:10001 loader.php LESSONS_LEARNED.md RELEASE.json ./
 COPY --chown=10001:10001 downloads ./downloads
 COPY --from=web --chown=10001:10001 /app/dist ./dist
 RUN useradd --uid 10001 --create-home caesar && mkdir /app/data && chown caesar:caesar /app/data

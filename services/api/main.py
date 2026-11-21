@@ -23,6 +23,7 @@ from packages.engineering import compute_reasons, dimension_mm, renumber, valida
 from packages.pdf import create_sample, export_bundle
 
 ROOT = Path(__file__).resolve().parents[2]
+BUILD_ID = json.loads((ROOT / "RELEASE.json").read_text())["version"] if (ROOT / "RELEASE.json").exists() else "0.2.0"
 DATA = Path(os.environ.get("CAESAR_DATA_DIR", ROOT / ".local"))
 LOCAL_DEMO = os.environ.get("CAESAR_LOCAL_DEMO", "1") == "1"
 LOCK = threading.RLock()
@@ -312,6 +313,8 @@ app = FastAPI(title="CAESAR ISO Engineering API", version="0.2.0", lifespan=life
 
 @app.middleware("http")
 async def security_headers(request: Request, call_next):
+    if (DATA / "updates/maintenance.json").exists() and request.url.path.endswith("/api/v1/health") is False and "/api/v1/system/updates" not in request.url.path:
+        return Response("System update in progress. Please retry shortly.", status_code=503, headers={"Retry-After":"30"})
     if request.method not in ("GET", "HEAD", "OPTIONS"):
         origin = request.headers.get("origin")
         if origin:
@@ -418,6 +421,7 @@ def health():
         "status": "ok",
         "mode": "local-development" if LOCAL_DEMO else "authenticated",
         "version": "0.2.0",
+        "release": BUILD_ID,
     }
 
 
@@ -1062,6 +1066,9 @@ async def import_catalog(file: UploadFile = File(...), actor=Depends(editor)):
 from services.api.workflows import install
 
 install(sys.modules[__name__])
+
+from services.api.updates import install as install_updates
+install_updates(sys.modules[__name__])
 
 
 @app.get("/loader.php", include_in_schema=False)

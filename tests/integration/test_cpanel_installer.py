@@ -101,6 +101,7 @@ class InstallerTests(unittest.TestCase):
 
     def installer(self):
         installer = setup.Installer(self.home, "easyai.com.au", "stress", selector=self.selector)
+        installer.setup_updates = lambda: None  # Never modify the test host's crontab.
         installer.url = f"http://127.0.0.1:{self.server.server_port}/stress/"
         return installer
 

@@ -1,4 +1,5 @@
 import { APP_BASE, appPath } from "./paths";
+import { Updates } from "./updates";
 import React, { useState, useEffect, useRef } from "react";
 import { createRoot } from "react-dom/client";
 import {
@@ -118,6 +119,7 @@ function Empty({
 }
 
 function App() {
+  const [updatesOpen,setUpdatesOpen]=useState(false);
   const [user, setUser] = useState<User | null>(null),
     [starting, setStarting] = useState(true),
     [local, setLocal] = useState(false);
@@ -382,6 +384,7 @@ function App() {
           </>
         )}
         <div className="sidebar-bottom">
+          {user.role==="admin"&&(local||user.id==="admin")&&<button className="help-link" onClick={()=>setUpdatesOpen(true)}><Settings2 size={17}/>System updates</button>}
           <div className="review-card">
             <div>
               <ShieldCheck size={17} />
@@ -1252,6 +1255,7 @@ function App() {
           onClose={() => setPreviewArtifact(null)}
         />
       )}
+      {updatesOpen&&<Updates onClose={()=>setUpdatesOpen(false)}/>}
       {help && (
         <Modal
           title="A clear route to review"

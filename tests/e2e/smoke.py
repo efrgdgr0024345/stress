@@ -81,6 +81,11 @@ def run():
                         page.get_by_role("heading", name="No matching projects")
                     ).to_be_visible()
                     page.get_by_label("Search projects").fill("")
+                    page.get_by_role("button",name="System updates",exact=True).click()
+                    expect(page.get_by_role("dialog",name="System updates",exact=True)).to_be_visible()
+                    expect(page.get_by_role("button",name="Check GitHub",exact=True)).to_be_visible()
+                    expect(page.get_by_role("button",name="Install update",exact=True)).to_be_disabled()
+                    page.get_by_role("button",name="Close dialog",exact=True).click()
                     page.get_by_role("link", name="Load project", exact=True).click()
                     lessons = context.request.get(base + "/api/v1/lessons").json()[
                         "lessons"
