@@ -47,6 +47,12 @@ the local profile only; `digitalocean_live_tested` stays false.
 
 ## Secure account connection and deployment
 
+For the website demonstration, open **Admin connections**, save the token there,
+and select a small PDF project to deploy/test. This route uses the existing
+cPanel runner and provider REST APIs; it needs no GitHub secret, doctl, root
+access or always-on server. See [website connection and diagnostics](../../docs/GITHUB_AND_SERVERLESS.md#connect-from-the-website-045).
+The GitHub/CLI deployment below is an alternative route.
+
 Create a short-lived DigitalOcean API token with the required Functions
 read/create/admin scopes and account-read access for doctl. Store it in this
 repository's GitHub Actions secret named **DIGITALOCEAN_ACCESS_TOKEN**. Never put
@@ -75,6 +81,24 @@ The token is read from the environment. The GitHub integration may not have
 permission to create/read repository secrets; that account connection must be
 supplied by the owner. Owning an account alone does not give this chat API access.
 Only a successful provider smoke test sets `digitalocean_live_tested: true`.
+
+## Live website qualification — 22 November 2026
+
+Release 0.4.6 completed the real two-page 1010 drawing through cPanel → private
+Sydney Functions → website results → editable XLSX/CSV downloads. Page one
+returned 506 words / 13 material proposals in 4.307 seconds; page two returned
+691 words / 19 proposals in 4.928 seconds. These are handler durations, not the
+whole cron-driven workflow duration or an invoice.
+
+The live browser displayed all 32 proposals and downloaded both formats. The
+Excel reader reopened the workbook with 32 component rows, filters and frozen
+headings. The original source hash and project snapshot were unchanged, and the
+diagnostic export contained no provider token. See the metadata-only
+[provider qualification record](evidence/provider-qualification.json).
+
+This qualifies the small-file demonstration and its exports. Material proposals
+remain unreviewed; physical geometry and a CAESAR model are not engineering
+verified. Normal uploads still use the existing worker as explained below.
 
 ## What remains before normal website uploads use it
 

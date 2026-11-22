@@ -1,0 +1,43 @@
+{
+  "format": "caesar-functions-live-website-qualification-1",
+  "tested_date_australia_sydney": "2026-11-22",
+  "website_release": "0.4.6",
+  "source_fixture": "fixtures/1010/1010 Reviewed.pdf",
+  "digitalocean_live_tested": true,
+  "engineering_verified": false,
+  "region": "syd1",
+  "source_sha256": "7b97d44bef3d544c4c98ed0667c29607ce58fa4a401dd2463f66010a9615bb59",
+  "pages": [
+    {
+      "page": 1,
+      "words": 506,
+      "ocr_used": true,
+      "material_proposals": 13,
+      "elapsed_ms": 4307,
+      "parser_peak_rss_kib": 295444
+    },
+    {
+      "page": 2,
+      "words": 691,
+      "ocr_used": true,
+      "material_proposals": 19,
+      "elapsed_ms": 4928,
+      "parser_peak_rss_kib": 260420
+    }
+  ],
+  "material_proposals": 32,
+  "project_modified": false,
+  "limits": {
+    "memory_mb": 1024,
+    "timeout_seconds": 240
+  },
+  "website_material_table_rows": 32,
+  "downloaded_excel_material_rows": 32,
+  "browser_excel_and_csv_downloads_verified": true,
+  "source_integrity_verified": true,
+  "project_snapshot_unchanged_verified": true,
+  "credential_absent_from_diagnostic_export_verified": true,
+  "raw_credentials_included": false,
+  "passed": true,
+  "scope": "One small, two-page real drawing; proposal extraction and editable review exports. General production upload transport and engineering approval are not qualified by this demonstration."
+}
