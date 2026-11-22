@@ -11,6 +11,8 @@ Screenshots from the tested local application:
 
 ![Generated PDF second page previewed inside the website](screenshots/1010-real-export.png)
 
+![Actual 1010 material proposals in the website spreadsheet](screenshots/1010-real-results.png)
+
 ## Workflow checked
 
 - Create a project and upload the original two-page PDF through the website.
