@@ -118,9 +118,16 @@ export function CatalogManager({
         body: form,
       });
       await load();
-      setEditing(value);
+      if (
+        (value.data as Catalog["data"] & { status?: string }).status !==
+        "PREPARED_FOR_REVIEW"
+      )
+        setEditing(value);
       notify(
-        "Workbook registered. Map its source columns, then review the normalized dataset.",
+        (value.data as Catalog["data"] & { status?: string }).status ===
+          "PREPARED_FOR_REVIEW"
+          ? "All four flange sheets prepared. Review source limitations and approve each dataset when satisfied."
+          : "Workbook registered. Map its source columns, then review the normalized dataset.",
       );
     } catch (e) {
       notify((e as Error).message, true);
@@ -198,6 +205,32 @@ export function CatalogManager({
                 <GitBranch size={14} />
                 Map a new dataset version
               </button>
+              {c.data.sheets.some((s) => s.name === "API 6A") &&
+                c.data.sheets.some((s) => s.name === "B16.5") && (
+                  <button
+                    className="button secondary compact full"
+                    disabled={busy}
+                    onClick={async () => {
+                      setBusy(true);
+                      try {
+                        await api(`/catalogs/${c.id}/prepare`, {
+                          method: "POST",
+                        });
+                        await load();
+                        notify(
+                          "All flange sheets prepared for review. No engineering approval was applied.",
+                        );
+                      } catch (e) {
+                        notify((e as Error).message, true);
+                      } finally {
+                        setBusy(false);
+                      }
+                    }}
+                  >
+                    <Database size={14} />
+                    Prepare all flange sheets
+                  </button>
+                )}
               {versions[c.id]?.map((v) => (
                 <DatasetCard
                   key={v.id}
@@ -236,7 +269,20 @@ function DatasetCard({
 }) {
   const [reason, setReason] = useState(""),
     [busy, setBusy] = useState(false),
-    [show, setShow] = useState(false);
+    [show, setShow] = useState(false),
+    [recordQuery, setRecordQuery] = useState(""),
+    [recordOffset, setRecordOffset] = useState(0);
+  const visibleRecords = v.data.records.filter(
+    (r) =>
+      !recordQuery ||
+      Object.entries(r).some(
+        ([key, value]) =>
+          !["source_fields"].includes(key) &&
+          String(value ?? "")
+            .toLowerCase()
+            .includes(recordQuery.toLowerCase()),
+      ),
+  );
   const approve = async () => {
     setBusy(true);
     try {
@@ -276,6 +322,37 @@ function DatasetCard({
       </button>
       {show && (
         <div className="catalog-preview">
+          <label className="form-field">
+            Search dataset records
+            <input
+              value={recordQuery}
+              onChange={(e) => {
+                setRecordQuery(e.target.value);
+                setRecordOffset(0);
+              }}
+              placeholder="Bore, rating, size, source row…"
+            />
+          </label>
+          <div className="inline-actions">
+            <span>
+              {visibleRecords.length} matching records · {recordOffset + 1}–
+              {Math.min(recordOffset + 50, visibleRecords.length)}
+            </span>
+            <button
+              className="text-button"
+              disabled={!recordOffset}
+              onClick={() => setRecordOffset(Math.max(0, recordOffset - 50))}
+            >
+              Previous
+            </button>
+            <button
+              className="text-button"
+              disabled={recordOffset + 50 >= visibleRecords.length}
+              onClick={() => setRecordOffset(recordOffset + 50)}
+            >
+              Next
+            </button>
+          </div>
           <table>
             <thead>
               <tr>
@@ -285,6 +362,8 @@ function DatasetCard({
                   "Standard",
                   "Rating",
                   "NPS",
+                  "API bore",
+                  "Facing",
                   "Type",
                   "Weight N",
                   "Length mm",
@@ -295,23 +374,27 @@ function DatasetCard({
               </tr>
             </thead>
             <tbody>
-              {v.data.records.slice(0, 100).map((r, i) => (
-                <tr key={i}>
-                  {[
-                    "source_row",
-                    "family",
-                    "standard",
-                    "rating",
-                    "nps",
-                    "component_type",
-                    "weight_n",
-                    "length_mm",
-                    "quality",
-                  ].map((k) => (
-                    <td key={k}>{String(r[k] ?? "N/A")}</td>
-                  ))}
-                </tr>
-              ))}
+              {visibleRecords
+                .slice(recordOffset, recordOffset + 50)
+                .map((r, i) => (
+                  <tr key={i}>
+                    {[
+                      "source_row",
+                      "family",
+                      "standard",
+                      "rating",
+                      "nps",
+                      "api_bore",
+                      "facing",
+                      "component_type",
+                      "weight_n",
+                      "length_mm",
+                      "quality",
+                    ].map((k) => (
+                      <td key={k}>{String(r[k] ?? "N/A")}</td>
+                    ))}
+                  </tr>
+                ))}
             </tbody>
           </table>
         </div>

@@ -152,10 +152,13 @@ def install(api):
                 page.iter_rows(
                     min_row=header_row,
                     max_row=header_row + 12,
-                    max_col=min(page.max_column or 1, 200),
+                    max_col=min(page.max_column or 200, 200),
                     values_only=True,
                 )
             )
+            if rows and page.max_column is None:
+                width = max((i + 1 for row in rows for i, value in enumerate(row) if value is not None), default=1)
+                rows = [row[:width] for row in rows]
             return {
                 "sheet": name,
                 "header_row": header_row,
@@ -184,6 +187,11 @@ def install(api):
                 )
             ]
 
+    @api.app.post('/api/v1/catalogs/{catalog_id}/prepare')
+    def prepare_canonical(catalog_id: str, actor=Depends(admin)):
+        from services.api.canonical_catalog import prepare_source
+        return prepare_source(api, catalog_id, actor)
+
     @api.app.post("/api/v1/catalogs/{catalog_id}/versions")
     def map_version(catalog_id: str, body: MappingInput, actor=Depends(admin)):
         source, path = catalog(catalog_id, actor)
@@ -195,7 +203,7 @@ def install(api):
             if body.sheet not in workbook.sheetnames:
                 raise HTTPException(422, "Worksheet not found.")
             page = workbook[body.sheet]
-            end = body.last_data_row or page.max_row or start
+            end = body.last_data_row or page.max_row or start + 4999
             if end < start or end - start >= 5000:
                 raise HTTPException(
                     422,
@@ -205,7 +213,7 @@ def install(api):
                 page.iter_rows(
                     min_row=start,
                     max_row=end,
-                    max_col=min(page.max_column or 1, 200),
+                    max_col=min(page.max_column or 200, 200),
                     values_only=True,
                 ),
                 start,

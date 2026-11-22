@@ -1087,6 +1087,11 @@ async def import_catalog(file: UploadFile = File(...), actor=Depends(editor)):
             ),
         )
     diag.emit(DATA,"catalog.import.completed",catalog_id=record["id"],worksheets=len(sheets),input_bytes=len(content))
+    from packages.catalogs.canonical import SOURCE_SHA256
+    if record['sha256'] == SOURCE_SHA256:
+        from services.api.canonical_catalog import prepare_source
+        prepare_source(sys.modules[__name__], record['id'], actor)
+        record['data']['status'] = 'PREPARED_FOR_REVIEW'
     return record
 
 

@@ -219,3 +219,11 @@ Use the existing entry format: a unique `LESSON-###` heading, category, status, 
 - Lesson: DigitalOcean returns a null namespace list for an empty account and blank deployment credentials in list summaries. A successful action upload also echoes its full binary code. Simplified API fixtures missed all three behaviours.
 - Action: Accept a present null list as empty, fetch full namespace details before deployment, and acknowledge a successful action upload without buffering its large echo. Record HTTP status, safe response types, duration and provider request IDs; never record credentials or document contents.
 - Evidence: Release 0.4.6 adds these live-observed contracts and regression coverage. The private Sydney function successfully processed the actual 1010 drawing's first page during provider qualification.
+
+## LESSON-028 — Published workbook dimensions and bore fields need explicit handling
+
+- Category: Catalog ingestion
+- Status: Adopted
+- Lesson: The supplied Numbers-compatible flange workbook omits worksheet dimension tags. Treating unknown dimensions as one column or one row silently loses valid data. API bore also cannot be stored as pipe NPS.
+- Action: Prepare all four known-schema sheets using bounded row iteration, retain cached published numbers and raw source fields, keep API bore separate from unknown pipe NPS, and expose missing facing/quality limitations. Dataset preparation never creates a human engineering approval.
+- Evidence: Release 0.4.7 prepares 627 source rows with no mapping errors, tests missing-dimension workbooks and preserves the original private source hash.

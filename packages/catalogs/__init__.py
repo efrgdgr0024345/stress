@@ -85,6 +85,8 @@ def normalize_record(raw):
     record["family"] = normal(record["family"])
     record["quality"] = record["quality"].upper()
     for key in REQUIRED:
+        if key == 'nps' and 'api 6a' in normal(record['standard']) and record.get('api_bore'):
+            continue
         if not record[key]:
             raise ValueError(f"Missing required field: {key}")
     if record["family"] not in ("flange", "valve"):
@@ -200,6 +202,7 @@ def exact_match(records, spec):
     required += ["facing"] if family == "flange" else ["end_connection"]
     if "api 6a" in normal(spec.get("standard")):
         required.append("api_bore")
+        required.remove('nps')
     missing = [key for key in required if not normal(spec.get(key))]
     if missing:
         return {"status": "INCOMPLETE_SPEC", "missing": missing, "candidates": []}
@@ -210,6 +213,7 @@ def exact_match(records, spec):
             normal(record.get(key)) == normal(spec[key])
             for key in MATCH_FIELDS
             if normal(spec.get(key))
+            and not (key == 'nps' and 'api 6a' in normal(spec.get('standard')) and not normal(record.get('nps')))
         )
     ]
     return {
