@@ -318,7 +318,10 @@ app = FastAPI(title="CAESAR ISO Engineering API", version="0.2.0", lifespan=life
 
 @app.middleware("http")
 async def security_headers(request: Request, call_next):
-    if (DATA / "updates/maintenance.json").exists() and request.url.path.endswith("/api/v1/health") is False and "/api/v1/system/updates" not in request.url.path:
+    mount=request.scope.get('root_path','').rstrip('/')
+    path=request.url.path.removeprefix(mount)
+    public_probe=request.method in ('GET','HEAD') and (path in ('/','/index.html') or path.startswith('/assets/'))
+    if (DATA / "updates/maintenance.json").exists() and not public_probe and request.url.path.endswith("/api/v1/health") is False and "/api/v1/system/updates" not in request.url.path:
         return Response("System update in progress. Please retry shortly.", status_code=503, headers={"Retry-After":"30"})
     if request.method not in ("GET", "HEAD", "OPTIONS"):
         origin = request.headers.get("origin")

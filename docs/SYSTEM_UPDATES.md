@@ -30,6 +30,13 @@ in the stable feed. Never put secrets or runtime data in the release bundle.
 
 ## Installation and recovery
 
+Release 0.4.2 fixes a maintenance-mode check failure: the new server must allow
+GET/HEAD of its public frontend and assets while the updater checks the new
+release. Project requests remain blocked until installation completes. Older
+servers can install this fix through the existing updater; it needs no schema
+or dependency changes. A regression runs the real health-check function against
+the application in maintenance mode at both `/` and `/stress/`.
+
 The runner stages the release privately, boots it against a disposable database,
 backs up SQLite consistently and retains the previous code/public frontend.
 During a short maintenance window it swaps code, copies public assets, restarts

@@ -16,6 +16,28 @@ ROOT=Path(__file__).resolve().parents[2]
 class UpdateApiTests(unittest.TestCase):
     setUp=fixtures.ApiTests.setUp
     tearDown=fixtures.ApiTests.tearDown
+    def test_maintenance_public_checks_pass_but_project_actions_stay_blocked(self):
+        from services.api import main
+        from fastapi.testclient import TestClient
+        from urllib.parse import urlsplit
+        u.write(main.DATA/'updates/maintenance.json',{'active':True})
+        for mount in ('','/stress'):
+            client=TestClient(main.app,root_path=mount,base_url='https://testserver')
+            index=client.get(mount+'/')
+            self.assertEqual(index.status_code,200,index.text[:200])
+            import re
+            asset=re.search(r'assets/[A-Za-z0-9_.-]+\.js',index.text).group(0)
+            self.assertEqual(client.get(mount+'/'+asset).status_code,200)
+            self.assertEqual(client.post(mount+'/',json={}).status_code,503)
+            self.assertEqual(client.get(mount+'/api/v1/projects').status_code,503)
+            self.assertEqual(client.post(mount+'/api/v1/projects',json={}).status_code,503)
+            def fetch(url,limit=1000000):
+                response=client.get(urlsplit(url).path)
+                response.raise_for_status()
+                return response.content
+            with patch.object(main,'LOCAL_DEMO',False),patch.object(u,'fetch',side_effect=fetch):
+                self.assertTrue(u.healthy('https://testserver'+mount,main.BUILD_ID,ROOT))
+            client.close()
     def test_updates_require_admin(self):
         from services.api import main
         self.assertEqual(self.client.get('/api/v1/system/updates').status_code,200)

@@ -171,3 +171,11 @@ Use the existing entry format: a unique `LESSON-###` heading, category, status, 
 - Lesson: The recovery helper existed in GitHub but was omitted from the hosting ZIP, forcing an unnecessary download before a local password reset.
 - Action: Include the helper and recovery guide in the private application package. Support a direct local command without network access, and keep the helper unavailable through public web routes.
 - Evidence: Release 0.4.1 package regression requires the recovery files and verifies the script's HTTP path returns 404; the recovery implementation uses only local standard-library operations.
+
+## LESSON-022 — Maintenance mode must permit the updater's own checks
+
+- Category: Operations
+- Status: Adopted
+- Lesson: The updater successfully started a new API, but maintenance mode blocked its frontend check and caused rollback of an otherwise available release.
+- Action: Permit read-only public frontend and asset requests during maintenance while keeping project requests blocked. Test the real health-check function against the maintenance-enabled application, including subdirectory hosting.
+- Evidence: Release 0.4.2 regression covers both application mounts and proves project actions still return 503.
