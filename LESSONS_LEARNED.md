@@ -163,3 +163,11 @@ Use the existing entry format: a unique `LESSON-###` heading, category, status, 
 - Lesson: Checking only entered element rows can report completion when other active model edges have no data.
 - Action: Derive expected elements from the full topology, compare all required fields and test partial coverage explicitly. Use the same server-side table projection for website, Excel and CSV outputs.
 - Evidence: The one-of-three element regression remains incomplete; browser tests inspect the actual numeric workbook and CSV downloads.
+
+## LESSON-021 — Ship account recovery tools with the installed system
+
+- Category: Hosting
+- Status: Adopted
+- Lesson: The recovery helper existed in GitHub but was omitted from the hosting ZIP, forcing an unnecessary download before a local password reset.
+- Action: Include the helper and recovery guide in the private application package. Support a direct local command without network access, and keep the helper unavailable through public web routes.
+- Evidence: Release 0.4.1 package regression requires the recovery files and verifies the script's HTTP path returns 404; the recovery implementation uses only local standard-library operations.

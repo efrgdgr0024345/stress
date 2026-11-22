@@ -49,6 +49,8 @@ print("Cold and warm forked workers served authenticated health")
             temp = Path(temp)
             with zipfile.ZipFile(ROOT / "downloads/caesar-cpanel.zip") as archive:
                 names = archive.namelist()
+                self.assertIn('caesar-system/scripts/reset_admin.py',names)
+                self.assertIn('caesar-system/docs/ADMIN_RECOVERY.md',names)
                 self.assertFalse(any(part in {".git", ".local", ".env", ".venv", "node_modules", "__pycache__"} for name in names for part in Path(name).parts))
                 archive.extractall(temp)
             application = temp / "caesar-system"
@@ -98,7 +100,7 @@ with httpx.Client(transport=httpx.WSGITransport(app=mounted), base_url="https://
     assert bundle.status_code == 200
     with zipfile.ZipFile(io.BytesIO(bundle.content)) as archive:
         assert any(name.endswith(".pdf") for name in archive.namelist())
-    for path in ("/.env", "/.git/config", "/passenger_wsgi.py", "/requirements.txt", "/.local/workspace.sqlite3"):
+    for path in ("/.env", "/.git/config", "/passenger_wsgi.py", "/requirements.txt", "/.local/workspace.sqlite3", "/scripts/reset_admin.py"):
         assert client.get(path).status_code == 404, path
     result = client.post("/api/v1/auth/logout")
     assert "Path=" + mount + "/;" in result.headers["set-cookie"]

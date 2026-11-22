@@ -5,10 +5,32 @@ account-private setup. Existing setup files are reused on upgrades, so an
 upgrade can verify login without prompting the operator again. If those
 credentials are unknown, recover them from the hosting account's terminal.
 
-Download `scripts/reset_admin.py` to a private temporary file and run it with
-`/opt/alt/python312/bin/python3`. Run it normally in cPanel Terminal, not through
-a pipe. No root access, password arguments, email delivery or website deployment
-is needed.
+Release 0.4.1 and later include the recovery helper in the private hosting
+application. Run this directly in **cPanel Terminal**, from any directory:
+
+```bash
+/opt/alt/python312/bin/python3 "$HOME/caesar-system/scripts/reset_admin.py"
+```
+
+The reset is entirely local: Python's standard library reads the account's
+private database/configuration and updates the existing administrator. It does
+not contact GitHub or send passwords or project data to an external service.
+No root, application virtual environment or extra Python package is required.
+Run it interactively, not through a pipe.
+
+Earlier hosting ZIPs omitted this maintenance script. Those installations need
+the helper copied once into the private application (for example through cPanel
+File Manager), or can reuse a previously downloaded private temporary copy.
+GitHub is only a way to deliver that missing file; it is not part of the reset.
+If the earlier download command ran in the same terminal and its temporary file
+still exists, run it again without downloading:
+
+```bash
+/opt/alt/python312/bin/python3 "$caesar_reset_file"
+```
+
+Installing a new website release is not required to use a copied helper. Keep
+the script and account-private configuration outside the public website folder.
 
 The command displays the existing administrator email. Press Enter to keep it,
 or enter your preferred login email. Enter a new password of 12–1024 characters
