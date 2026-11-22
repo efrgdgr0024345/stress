@@ -193,6 +193,26 @@ class ReviewFlowTests(unittest.TestCase):
         p['automation']['partial_pages'][sheet['id']]['source_sha256']='different-source'
         self.assertFalse(next(s for s in scopes(p,{sheet['source_id']}) if s['kind']=='layout')['ready'])
 
+    def test_element_geometry_and_properties_are_bound_to_the_physical_review(self):
+        from packages.automation.recognize import identity
+        engineer,actor,p=self.reviewable()
+        for order,dimension in ((1,'100 mm'),(2,'200 mm')):
+            body=self.node(p,dimension,'Synthetic explicit dimensional evidence');body['order']=order
+            result=engineer.post(f"/api/v1/projects/{p['id']}/nodes",json=body)
+            self.assertEqual(result.status_code,200,result.text);p=result.json()
+        element_id=identity(p['id'],p['nodes'][0]['id'],p['nodes'][1]['id'])
+        element_path=f"/api/v1/projects/{p['id']}/results/elements/{element_id}"
+        result=engineer.patch(element_path,json={'version':p['version'],'dx_mm':'100','dy_mm':'0','dz_mm':'0','temperature_c':'90','evidence':'Synthetic engineering source model properties'})
+        self.assertEqual(result.status_code,200,result.text);p=self.sign_all(engineer,result.json())
+        path=f"/api/v1/projects/{p['id']}/reviews"
+        before=next(s for s in engineer.get(path).json()['scopes'] if s['kind']=='geometry')
+        self.assertIsNotNone(before['review'])
+        result=engineer.patch(element_path,json={'version':p['version'],'dx_mm':'100','dy_mm':'0','dz_mm':'0','temperature_c':'100','evidence':'Changed synthetic source operating temperature'})
+        self.assertEqual(result.status_code,200,result.text)
+        after=next(s for s in engineer.get(path).json()['scopes'] if s['kind']=='geometry')
+        self.assertNotEqual(before['sha256'],after['sha256'])
+        self.assertEqual(after['state'],'STALE')
+
     def test_independent_approval_requires_mfa_all_signoffs_and_explicit_issues(self):
         engineer,actor,p=self.reviewable()
         path=f"/api/v1/projects/{p['id']}/reviews"

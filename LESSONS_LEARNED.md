@@ -251,3 +251,11 @@ Use the existing entry format: a unique `LESSON-###` heading, category, status, 
 - Lesson: A checkbox on a changing project cannot show which facts a person accepted. Code rollback can also silently remove factor or reviewer checks if an older release ignores new security records.
 - Action: Seal explicit section decisions against their reviewed content, require an independent recent-factor reviewer, preserve approved snapshots and check packet integrity. Reject incompatible code downgrades when account/review security is in use. Generate authenticator QR codes locally and keep recovery material private.
 - Evidence: Release 0.5.2 uses disposable API/browser fixtures for review invalidation, independent approval, MFA replay/recovery, permissions, immutable issue downloads and security-contract downgrade checks. These tests do not certify real engineering work or encryption at rest.
+
+## LESSON-032 — Include the stored element contract in physical review hashes
+
+- Category: Engineering review integrity
+- Status: Adopted
+- Lesson: Physical nodes and analysis elements use different endpoint field names. A review hash that filters elements by the graph-edge names can omit their signed geometry and operating properties.
+- Action: Bind each line review to its stored from_point_id/to_point_id elements and retain compatibility with explicit graph endpoints. Require a fresh geometry review when element dimensions, material or operating properties change.
+- Evidence: Release 0.5.3 exercises the real element-edit API after section sign-off and confirms that a changed operating temperature invalidates the physical review. The issue was found while auditing the next component/model phase.

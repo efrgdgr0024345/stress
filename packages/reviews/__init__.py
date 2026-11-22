@@ -58,7 +58,7 @@ def scopes(project, processing_sources=()):
         if any(n['station_mm'] is None or not n.get('evidence') for n in nodes):missing.append('PHYSICAL_STATIONS_UNVERIFIED')
         if any(n.get('verification')=='proposed' for n in nodes):missing.append('NODE_PROPOSALS_UNREVIEWED')
         add('geometry',line,'Line '+line+' · physical model',{'nodes':nodes,
-              'elements':[e for e in project.get('analysis_model',{}).get('elements',[]) if e.get('from') in point_ids or e.get('to') in point_ids],
+              'elements':[e for e in project.get('analysis_model',{}).get('elements',[]) if e.get('from_point_id',e.get('from')) in point_ids or e.get('to_point_id',e.get('to')) in point_ids],
               'continuations':[c for c in project.get('continuations',[]) if c.get('point_id') in point_ids or c.get('line_id')==line],
               'model_frame':{k:project.get('analysis_model',{}).get(k) for k in ('local_origin_confirmed','origin_point_id','vertical_axis','piping_code_id','ambient_temperature_c')}},
               all(observed(s) for s in project['sheets'] if s['line_id']==line),missing)
