@@ -203,3 +203,11 @@ Use the existing entry format: a unique `LESSON-###` heading, category, status, 
 - Lesson: A function can fit package and memory limits locally without proving the provider runtime, account permissions, cold starts or actual billing.
 - Action: Separate local ZIP/container qualification from an authenticated provider smoke test. Preserve source hashes, confidence and explicit execution profiles; never label a provider function as the local no-network sandbox.
 - Evidence: The Functions demo records local qualification separately from live provider results and keeps private website transport outside its small-file demo scope.
+
+## LESSON-026 — Connect providers without exposing their credentials
+
+- Category: Administration and diagnostics
+- Status: Adopted
+- Lesson: A provider token belongs in private server storage. Returning it to an admin form, validation response, parser environment or troubleshooting log unnecessarily expands its exposure.
+- Action: Test before saving, retain a working credential on failed replacement, restrict access to the hosting operator, reject credential-bearing redirects, and record bounded job stages instead of secret-bearing request bodies. An ambiguous submission must stop rather than bill a silent duplicate.
+- Evidence: Release 0.4.5 adds the admin connection, separate demo runner, browser checks and API regressions covering credential privacy, permissions, deployment/result contracts and editable exports.

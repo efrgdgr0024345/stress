@@ -43,6 +43,8 @@ with (directory/"runner.lock").open("a") as lock:
         write(directory/"heartbeat.json",{"at":time.time(),"executor":"separate-process","software":pipeline.VERSION})
         from services.api.ocr_setup import run_pending
         if run_pending(api.DATA):continue
+        from services.api.digitalocean import advance as advance_provider_demo
+        if advance_provider_demo(api):continue
         worked=pipeline.process_one(api)
         if not worked:
             if not args.watch:break

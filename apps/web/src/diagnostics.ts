@@ -8,6 +8,7 @@ type View =
   | "activity"
   | "catalogs"
   | "logs"
+  | "admin"
   | "processing"
   | "results"
   | "login"

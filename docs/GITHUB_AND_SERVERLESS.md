@@ -62,3 +62,43 @@ publishing every large native dependency bundle as an artifact.
 See [the private function demo](../serverless/digitalocean/README.md) for commands,
 scope, limits, account connection and the distinction between local qualification
 and a successful live deployment.
+
+## Connect from the website (0.4.5)
+
+The hosting administrator can open **Admin connections** in the left sidebar,
+paste a DigitalOcean personal access token, and select **Save & test connection**.
+The token needs Functions read, create and admin permissions. The application
+tests namespace-list access before saving or replacing the credential; create
+and deployment permissions are additionally exercised by the worker demo.
+
+The token is stored in `CAESAR_DATA_DIR/providers/digitalocean/credentials.json`
+with owner-only permissions (0600), beneath private directories (0700), outside
+the public website and the replaceable application installation. It is not
+returned by the API, stored in browser localStorage, added to GitHub, sent to the
+PDF parser, or included in diagnostic events. This is a private server file,
+not encryption at rest or an external secret manager. The hosting account owner
+and its backup operator can read it. Automatic code updates preserve it.
+
+Select a project, active source PDF and region, then **Deploy & test worker**.
+The existing separate cron runner advances recorded build, namespace, private
+deployment, invocation, result polling and workbook stages. It uses the provider
+REST APIs; `doctl`, root access, a VPS and GitHub secrets are unnecessary for this
+website route. Requests are bounded, credential-bearing redirects are rejected,
+and an interrupted ambiguous invocation is not automatically repeated.
+
+The demo copies one PDF up to 700,000 bytes and processes its first two registered
+pages. Results appear as an unreviewed materials table with editable XLSX, CSV
+tables and a small diagnostic report. It does not rewrite the project's drawing
+or accepted engineering data. The most recent demo is retained; starting a new
+one replaces the previous demonstration copy and downloads. Temporary build
+files and the namespace capability are removed after successful completion.
+The private provider namespace/function remains for reuse; removing the saved
+token does not delete provider resources or revoke that token at DigitalOcean.
+
+Functions includes 90,000 GiB-seconds per team per month; additional compute is
+US$0.0000185 per GiB-second. Two 1 GiB invocations at their full 240-second limit
+cost US$0.00888 in compute before unused allowance and tax. Retries add usage;
+account-wide allowance consumption, transfer and current provider pricing must
+still be considered. This demo creates no Droplet, database, bucket or schedule.
+Normal large-file uploads still use the existing hosting worker; extending the
+provider adapter into general production transport remains separate work.

@@ -43,6 +43,12 @@ website uploads. Live provider qualification requires a secure account binding.
 See `serverless/digitalocean/README.md`. Original engineering and security gates
 remain required, and no provider deployment is claimed from local tests alone.
 
+OOS-012: The user requested website-managed DigitalOcean credentials and testing.
+Release 0.4.5 adds an operator-only connection, private owner-readable token file,
+durable small-PDF provider demonstration and website/XLSX/CSV results. This is an
+additional administration/deployment workflow. It does not complete the full
+large-file production provider transport or original engineering approval gates.
+
 See [original-plan alignment](docs/PLAN_ALIGNMENT.md),
 [working pipeline/setup](docs/PROCESSING_PIPELINE.md) and
 [Excel output contract](docs/EXCEL_OUTPUT.md).

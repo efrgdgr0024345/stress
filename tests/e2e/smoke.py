@@ -20,6 +20,7 @@ sys.path.insert(0, str(ROOT))
 from catalog_workflow import exercise_catalogs
 from real_drawing import exercise_real_drawing
 from pipeline_workflow import exercise_pipeline
+from admin_connections import exercise_connections
 
 Path("/tmp/caesar-screens").mkdir(exist_ok=True)
 
@@ -82,6 +83,7 @@ def run():
                     expect(
                         page.get_by_role("heading", name="Projects.")
                     ).to_be_visible()
+                    exercise_connections(page, base)
                     page.get_by_label("Search projects").fill("does-not-exist")
                     expect(
                         page.get_by_role("heading", name="No matching projects")

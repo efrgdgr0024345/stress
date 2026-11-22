@@ -1,0 +1,228 @@
+.admin-connections {
+  max-width: 1300px;
+}
+.connection-card {
+  margin: 24px 0;
+  padding: 28px;
+  border: 1px solid #dce3ed;
+  border-radius: 20px;
+  background: linear-gradient(145deg, #fff, #f9fbff);
+  box-shadow: 0 6px 24px #25365b08;
+}
+.connection-card h2 {
+  margin: 0 0 8px;
+  font-size: 21px;
+  letter-spacing: -0.5px;
+}
+.connection-card h3 {
+  margin: 0 0 8px;
+}
+.connection-heading {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+.connection-heading > div {
+  flex: 1;
+}
+.connection-heading p {
+  margin: 0;
+  color: #758096;
+  font-size: 13px;
+}
+.connection-icon {
+  display: grid;
+  place-items: center;
+  width: 58px;
+  height: 58px;
+  border-radius: 17px;
+  background: #e8f1ff;
+  color: #0878f9;
+}
+.connection-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 11px;
+  border-radius: 20px;
+  background: #edf0f5;
+  color: #627087;
+  font-size: 12px;
+  white-space: nowrap;
+}
+.connection-badge.connected {
+  background: #e2f7eb;
+  color: #168154;
+}
+.connection-form label,
+.connection-selects label {
+  display: block;
+  font-size: 13px;
+  font-weight: 650;
+  color: #35445b;
+}
+.connection-input-row {
+  display: flex;
+  gap: 10px;
+  margin-top: 8px;
+}
+.connection-input-row input {
+  flex: 1;
+  min-width: 0;
+  border: 1px solid #ccd7e4;
+  border-radius: 10px;
+  padding: 12px;
+  background: white;
+}
+.connection-hint {
+  color: #748096;
+  font-size: 13px;
+  line-height: 1.7;
+  margin: 12px 0;
+}
+.connection-links {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin-top: 16px;
+  font-size: 13px;
+}
+.connection-links a,
+.connection-links button {
+  display: inline-flex;
+  gap: 5px;
+  align-items: center;
+  color: #1274dd;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  font: inherit;
+}
+.connection-selects {
+  display: grid;
+  grid-template-columns: 1.4fr 1.4fr 1fr;
+  gap: 16px;
+  margin: 22px 0;
+}
+.connection-selects select {
+  display: block;
+  width: 100%;
+  margin-top: 8px;
+  padding: 11px;
+  border: 1px solid #ccd7e4;
+  border-radius: 10px;
+  background: white;
+}
+.connection-cost {
+  border-radius: 12px;
+  padding: 16px;
+  background: #edf4ff;
+  color: #446485;
+  font-size: 13px;
+  line-height: 1.7;
+  margin: 18px 0;
+}
+.connection-alert,
+.connection-notice {
+  border-radius: 12px;
+  padding: 16px;
+  margin: 14px 0;
+  font-size: 14px;
+  background: #fff0ec;
+  color: #9e4332;
+}
+.connection-notice {
+  background: #e7f7ef;
+  color: #22754e;
+  display: flex;
+  gap: 9px;
+  align-items: center;
+}
+.connection-alert small {
+  display: block;
+  margin-top: 8px;
+}
+.connection-progress {
+  margin-top: 24px;
+  padding-top: 22px;
+  border-top: 1px solid #e1e7ef;
+}
+.connection-timeline {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.connection-timeline li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 0;
+  font-size: 12px;
+  color: #728198;
+}
+.connection-timeline li > span {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #5aa9ff;
+}
+.connection-timeline li > span.failed {
+  background: #e56c59;
+}
+.connection-timeline b {
+  font-weight: 500;
+  color: #455771;
+}
+.connection-timeline small {
+  margin-left: auto;
+}
+.connection-results {
+  padding-top: 22px;
+}
+.connection-table {
+  overflow-x: auto;
+  margin-top: 22px;
+  border: 1px solid #dce3ed;
+  border-radius: 12px;
+}
+.connection-table table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+.connection-table th,
+.connection-table td {
+  padding: 12px 14px;
+  text-align: left;
+  border-bottom: 1px solid #edf0f5;
+}
+.connection-table th {
+  background: #eff4fb;
+  color: #607491;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.7px;
+}
+.connection-table tr:nth-child(even) {
+  background: #f8fbff;
+}
+@media (max-width: 800px) {
+  .connection-card {
+    padding: 18px;
+  }
+  .connection-input-row {
+    flex-direction: column;
+  }
+  .connection-selects {
+    grid-template-columns: 1fr;
+  }
+  .connection-heading {
+    flex-wrap: wrap;
+  }
+  .connection-timeline li {
+    flex-wrap: wrap;
+  }
+}

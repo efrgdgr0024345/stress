@@ -1103,6 +1103,9 @@ install_pipeline(sys.modules[__name__])
 from services.api.results import install as install_results
 install_results(sys.modules[__name__])
 
+from services.api.digitalocean import install as install_digitalocean
+install_digitalocean(sys.modules[__name__])
+
 from services.api.intake_guard import install as install_intake_guard
 install_intake_guard(sys.modules[__name__])
 

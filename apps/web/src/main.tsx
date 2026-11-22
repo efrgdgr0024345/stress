@@ -1,6 +1,7 @@
 import { APP_BASE, appPath } from "./paths";
 import { Updates } from "./updates";
 import { SystemLogs } from "./logs";
+import { AdminConnections } from "./admin";
 import { ProjectPipeline, type PipelineIssue } from "./pipeline";
 import { EngineeringResults } from "./results";
 import {
@@ -75,6 +76,7 @@ type Page =
   | "validation"
   | "activity"
   | "logs"
+  | "admin"
   | "processing"
   | "results"
   | "catalogs";
@@ -210,11 +212,11 @@ function App() {
             );
           else if (view === "catalogs") setPage("catalogs");
           else if (
-            view === "logs" &&
+            (view === "logs" || view === "admin") &&
             user.role === "admin" &&
             (local || user.id === "admin")
           )
-            setPage("logs");
+            setPage(view);
         })
         .catch((e) => notify(e.message, true));
     }
@@ -257,7 +259,7 @@ function App() {
       "",
       next === "projects"
         ? APP_BASE
-        : next === "catalogs" || next === "logs"
+        : next === "catalogs" || next === "logs" || next === "admin"
           ? `${APP_BASE}?view=${next}`
           : project
             ? `${APP_BASE}?project=${encodeURIComponent(project.id)}&view=${next}`
@@ -404,6 +406,17 @@ function App() {
             </button>
           )}
         </nav>
+        {user.role === "admin" && (local || user.id === "admin") && (
+          <nav>
+            <button
+              className={page === "admin" ? "active" : ""}
+              onClick={() => navigate("admin")}
+            >
+              <Settings2 size={18} />
+              Admin connections
+            </button>
+          </nav>
+        )}
         {project && (
           <>
             <div className="nav-caption project-caption">CURRENT PROJECT</div>
@@ -504,12 +517,15 @@ function App() {
                   ? "Component catalogs"
                   : page === "logs"
                     ? "Logs"
-                    : project?.title}
+                    : page === "admin"
+                      ? "Admin connections"
+                      : project?.title}
             </strong>
             {project &&
               page !== "projects" &&
               page !== "catalogs" &&
-              page !== "logs" && (
+              page !== "logs" &&
+              page !== "admin" && (
                 <>
                   <ChevronRight size={13} />
                   <span>{label(page)}</span>
@@ -532,6 +548,7 @@ function App() {
           </div>
         </header>
         {page === "logs" && <SystemLogs />}
+        {page === "admin" && <AdminConnections projects={projects} />}
         {page === "projects" && (
           <div className="page-content">
             <div className="page-heading">
@@ -793,7 +810,8 @@ function App() {
         {project &&
           page !== "projects" &&
           page !== "catalogs" &&
-          page !== "logs" && (
+          page !== "logs" &&
+          page !== "admin" && (
             <>
               <div className="project-top">
                 <div>
