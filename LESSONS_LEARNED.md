@@ -243,3 +243,11 @@ Use the existing entry format: a unique `LESSON-###` heading, category, status, 
 - Lesson: The hosting server served the PDF worker's .mjs asset as application/octet-stream. Browsers refused the module despite successful HTTP status, healthy APIs and an existing canvas element. The local server used the correct JavaScript MIME and did not expose the problem.
 - Action: Build the ES-module worker with a portable .js asset name. Validate its live MIME type, actual rendered page pixels and preview-page navigation instead of treating a visible placeholder canvas as successful rendering.
 - Evidence: The 0.5.0 live browser loop exposed the worker import failure. Release 0.5.1 changes the asset contract and strengthens the packaged-worker regression; live rendering is checked separately from API/export success.
+
+## LESSON-031 — Bind reviews to content and preserve account security on rollback
+
+- Category: Review and security
+- Status: Adopted
+- Lesson: A checkbox on a changing project cannot show which facts a person accepted. Code rollback can also silently remove factor or reviewer checks if an older release ignores new security records.
+- Action: Seal explicit section decisions against their reviewed content, require an independent recent-factor reviewer, preserve approved snapshots and check packet integrity. Reject incompatible code downgrades when account/review security is in use. Generate authenticator QR codes locally and keep recovery material private.
+- Evidence: Release 0.5.2 uses disposable API/browser fixtures for review invalidation, independent approval, MFA replay/recovery, permissions, immutable issue downloads and security-contract downgrade checks. These tests do not certify real engineering work or encryption at rest.

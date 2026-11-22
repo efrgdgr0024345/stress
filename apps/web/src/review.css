@@ -1,0 +1,266 @@
+.validation-grid {
+  align-items: start;
+}
+.review-security-state,
+.authenticator-setup {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+  margin: 16px 0 24px;
+}
+.review-security-state > svg {
+  color: #3375df;
+  flex-shrink: 0;
+}
+.review-security-state p,
+.authenticator-setup p {
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--muted);
+  margin: 6px 0;
+}
+.authenticator-setup {
+  align-items: flex-start;
+}
+.authenticator-setup img {
+  border: 1px solid #e1e6ef;
+  border-radius: 16px;
+  max-width: 48%;
+  height: auto;
+}
+.setup-key {
+  display: block;
+  overflow-wrap: anywhere;
+  font-size: 13px;
+  padding: 12px;
+  background: #f3f6fa;
+  border-radius: 10px;
+  margin: 12px 0;
+}
+.authenticator-setup small {
+  color: var(--muted);
+  line-height: 1.5;
+  display: block;
+}
+.recovery-panel {
+  padding: 20px;
+  background: #f3f7ff;
+  border: 1px solid #d7e5fc;
+  border-radius: 15px;
+}
+.recovery-panel p {
+  font-size: 13px;
+  line-height: 1.6;
+}
+.recovery-codes {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin: 20px 0;
+}
+.recovery-codes code {
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+.people-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+.people-table th,
+.people-table td {
+  padding: 16px;
+  border-bottom: 1px solid #e8edf3;
+  font-size: 13px;
+}
+.people-table th {
+  font-size: 11px;
+  color: var(--muted);
+}
+.people-table small {
+  display: block;
+  color: var(--muted);
+  margin-top: 5px;
+}
+.people-page > .notice {
+  margin-top: 20px;
+}
+.review-flow .panel-title {
+  justify-content: space-between;
+}
+.review-flow .panel-title > div {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+.review-progress {
+  height: 5px;
+  border-radius: 8px;
+  background: #e9eef6;
+  overflow: hidden;
+  margin: 18px 0;
+}
+.review-progress > span {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, #5d9bf7, #59b5a4);
+}
+.review-group {
+  border: 1px solid #e5eaf3;
+  border-radius: 12px;
+  margin: 10px 0;
+  overflow: hidden;
+}
+.review-group summary {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px;
+  background: #f8faff;
+  font-weight: 600;
+  font-size: 13px;
+}
+.review-group summary > span {
+  margin-left: auto;
+  font-weight: 400;
+  color: var(--muted);
+  font-size: 12px;
+}
+.review-scope {
+  padding: 14px;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  border-top: 1px solid #e8edf3;
+}
+.review-scope > svg {
+  color: #6f95c9;
+  flex-shrink: 0;
+}
+.review-scope > div {
+  flex: 1;
+  min-width: 0;
+}
+.review-scope b {
+  font-size: 12px;
+  display: block;
+  line-height: 1.5;
+}
+.review-scope small {
+  display: block;
+  color: var(--muted);
+  margin-top: 5px;
+  font-size: 11px;
+  line-height: 1.5;
+}
+.review-scope .button {
+  font-size: 11px;
+  white-space: nowrap;
+  padding: 8px 11px;
+}
+.review-final {
+  border-top: 1px solid #e5eaf3;
+  padding-top: 18px;
+  margin-top: 18px;
+}
+.review-final p,
+.review-flow > .muted {
+  font-size: 12px;
+  line-height: 1.6;
+}
+.review-final .button {
+  margin-top: 12px;
+}
+.review-history {
+  margin-top: 20px;
+}
+.review-history-item {
+  padding: 12px 0;
+  border-top: 1px solid #e5eaf3;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+.review-history-item > div {
+  flex: 1;
+}
+.review-history-item b,
+.review-history-item small {
+  display: block;
+  font-size: 12px;
+  line-height: 1.6;
+}
+.review-history-item small {
+  color: var(--muted);
+}
+.review-limitations {
+  max-height: 230px;
+  overflow: auto;
+  background: #fff9ec;
+  border: 1px solid #f2e4c7;
+  border-radius: 12px;
+  padding: 14px;
+  margin: 16px 0;
+}
+.review-limitations p {
+  font-size: 12px;
+  line-height: 1.6;
+  margin: 5px 0;
+}
+.review-dialog .check-row {
+  align-items: flex-start;
+  font-size: 13px;
+  line-height: 1.6;
+}
+.review-dialog .check-row input {
+  margin-top: 5px;
+  flex-shrink: 0;
+}
+.review-dialog .notice {
+  margin: 14px 0;
+}
+.review-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.review-hash {
+  font-family: monospace;
+  color: var(--muted);
+  font-size: 10px;
+  overflow-wrap: anywhere;
+}
+.review-dialog .form-field {
+  margin: 16px 0;
+}
+.security-link {
+  margin-left: 0;
+}
+.review-flow .review-pending {
+  color: #b47727;
+}
+.review-flow .review-complete {
+  color: #239b7e;
+}
+@media (max-width: 650px) {
+  .authenticator-setup {
+    flex-direction: column;
+  }
+  .authenticator-setup img {
+    max-width: 100%;
+  }
+  .recovery-codes {
+    grid-template-columns: 1fr;
+  }
+  .review-scope {
+    flex-wrap: wrap;
+  }
+  .people-table th,
+  .people-table td {
+    padding: 10px;
+  }
+  .review-scope .button {
+    margin-left: 28px;
+  }
+}

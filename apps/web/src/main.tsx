@@ -2,6 +2,8 @@ import { APP_BASE, appPath } from "./paths";
 import { Updates } from "./updates";
 import { SystemLogs } from "./logs";
 import { AdminConnections } from "./admin";
+import { AccountSecurityDialog, PeopleManager } from "./account";
+import { ReviewFlow } from "./reviews";
 import { ProjectPipeline, type PipelineIssue } from "./pipeline";
 import { EngineeringResults } from "./results";
 import {
@@ -44,6 +46,7 @@ import {
   SlidersHorizontal,
   Trash2,
   Upload,
+  UsersRound,
   X,
   ZoomIn,
   ZoomOut,
@@ -77,6 +80,7 @@ type Page =
   | "activity"
   | "logs"
   | "admin"
+  | "people"
   | "processing"
   | "results"
   | "catalogs";
@@ -135,6 +139,7 @@ function Empty({
 
 function App() {
   const [updatesOpen, setUpdatesOpen] = useState(false);
+  const [securityOpen, setSecurityOpen] = useState(false);
   const [user, setUser] = useState<User | null>(null),
     [starting, setStarting] = useState(true),
     [local, setLocal] = useState(false);
@@ -212,7 +217,7 @@ function App() {
             );
           else if (view === "catalogs") setPage("catalogs");
           else if (
-            (view === "logs" || view === "admin") &&
+            (view === "logs" || view === "admin" || view === "people") &&
             user.role === "admin" &&
             (local || user.id === "admin")
           )
@@ -259,7 +264,10 @@ function App() {
       "",
       next === "projects"
         ? APP_BASE
-        : next === "catalogs" || next === "logs" || next === "admin"
+        : next === "catalogs" ||
+            next === "logs" ||
+            next === "admin" ||
+            next === "people"
           ? `${APP_BASE}?view=${next}`
           : project
             ? `${APP_BASE}?project=${encodeURIComponent(project.id)}&view=${next}`
@@ -415,6 +423,13 @@ function App() {
               <Settings2 size={18} />
               Admin connections
             </button>
+            <button
+              className={page === "people" ? "active" : ""}
+              onClick={() => navigate("people")}
+            >
+              <UsersRound size={18} />
+              People & access
+            </button>
           </nav>
         )}
         {project && (
@@ -519,13 +534,16 @@ function App() {
                     ? "Logs"
                     : page === "admin"
                       ? "Admin connections"
-                      : project?.title}
+                      : page === "people"
+                        ? "People & access"
+                        : project?.title}
             </strong>
             {project &&
               page !== "projects" &&
               page !== "catalogs" &&
               page !== "logs" &&
-              page !== "admin" && (
+              page !== "admin" &&
+              page !== "people" && (
                 <>
                   <ChevronRight size={13} />
                   <span>{label(page)}</span>
@@ -533,6 +551,14 @@ function App() {
               )}
           </div>
           <div className="top-actions">
+            <button
+              className="icon-button"
+              aria-label="Account security"
+              title="Account security"
+              onClick={() => setSecurityOpen(true)}
+            >
+              <ShieldCheck size={18} />
+            </button>
             <span className="environment-label">
               <span className="online-dot" />
               {local ? "Local development" : "Authenticated workspace"}
@@ -549,6 +575,7 @@ function App() {
         </header>
         {page === "logs" && <SystemLogs />}
         {page === "admin" && <AdminConnections projects={projects} />}
+        {page === "people" && <PeopleManager notify={notify} />}
         {page === "projects" && (
           <div className="page-content">
             <div className="page-heading">
@@ -811,7 +838,8 @@ function App() {
           page !== "projects" &&
           page !== "catalogs" &&
           page !== "logs" &&
-          page !== "admin" && (
+          page !== "admin" &&
+          page !== "people" && (
             <>
               <div className="project-top">
                 <div>
@@ -1046,69 +1074,19 @@ function App() {
                         investigate, not an inferred dimension.
                       </p>
                     </div>
-                    <Badge tone="amber">Review draft only</Badge>
+                    <Badge tone={project.review_approval ? "green" : "amber"}>
+                      {project.review_approval
+                        ? "Review issue approved"
+                        : "Review draft only"}
+                    </Badge>
                   </div>
                   <div className="validation-grid">
-                    <div className="panel">
-                      <div className="panel-title">
-                        <ClipboardCheck size={18} />
-                        <h3>Review checklist</h3>
-                      </div>
-                      <p className="muted">
-                        Confirm these reviews after inspecting every source
-                        page.
-                      </p>
-                      <label className="check-row">
-                        <input
-                          type="checkbox"
-                          checked={project.materials_reviewed}
-                          disabled={busy}
-                          onChange={(e) =>
-                            mutation("/review", {
-                              version: project.version,
-                              materials_reviewed: e.target.checked,
-                              layout_reviewed: project.layout_reviewed,
-                            })
-                          }
-                        />
-                        <div>
-                          <b>Materials reconciliation reviewed</b>
-                          <small>
-                            Source quantities, component instances, and
-                            unresolved items accounted for.
-                          </small>
-                        </div>
-                      </label>
-                      <label className="check-row">
-                        <input
-                          type="checkbox"
-                          checked={project.layout_reviewed}
-                          disabled={busy}
-                          onChange={(e) =>
-                            mutation("/review", {
-                              version: project.version,
-                              materials_reviewed: project.materials_reviewed,
-                              layout_reviewed: e.target.checked,
-                            })
-                          }
-                        />
-                        <div>
-                          <b>Annotation layout reviewed</b>
-                          <small>
-                            All pages checked for collisions, dimensions,
-                            north-arrow and title clearance.
-                          </small>
-                        </div>
-                      </label>
-                      <div className="notice amber">
-                        <ShieldCheck size={18} />
-                        <span>
-                          Verified-for-modelling release is disabled until
-                          catalog matching, lead approval, and target-editor
-                          checks are implemented and validated.
-                        </span>
-                      </div>
-                    </div>
+                    <ReviewFlow
+                      project={project}
+                      onUpdate={update}
+                      onSecurity={() => setSecurityOpen(true)}
+                      notify={notify}
+                    />
                     <div className="panel release-summary">
                       <span className="eyebrow">CURRENT REVISION</span>
                       <h3>
@@ -1269,6 +1247,9 @@ function App() {
           <CatalogManager busy={busy} setBusy={setBusy} notify={notify} />
         )}
       </main>
+      {securityOpen && (
+        <AccountSecurityDialog onClose={() => setSecurityOpen(false)} />
+      )}
       {toast && (
         <div role="status" className={`toast ${toast.error ? "error" : ""}`}>
           {toast.error ? <CircleHelp size={18} /> : <Check size={18} />}
@@ -1709,6 +1690,7 @@ function Login({
 }) {
   const [email, setEmail] = useState(""),
     [password, setPassword] = useState(""),
+    [code, setCode] = useState(""),
     [error, setError] = useState(""),
     [busy, setBusy] = useState(false);
   const enter = async (isLocal = false) => {
@@ -1717,7 +1699,7 @@ function Login({
       onLogin(
         await api<User>(isLocal ? "/auth/local" : "/auth/login", {
           method: "POST",
-          body: JSON.stringify({ email, password }),
+          body: JSON.stringify({ email, password, code: code || null }),
         }),
       );
     } catch (e) {
@@ -1804,6 +1786,18 @@ function Login({
                 onChange={(e) => setPassword(e.target.value)}
                 autoComplete="current-password"
               />
+            </label>
+            <label className="form-field">
+              Authenticator or recovery code
+              <input
+                value={code}
+                onChange={(e) => setCode(e.target.value)}
+                autoComplete="one-time-code"
+                maxLength={80}
+              />
+              <small>
+                Required only when your account has an authenticator enabled.
+              </small>
             </label>
             <button className="button primary full" disabled={busy}>
               Sign in

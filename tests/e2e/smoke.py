@@ -21,6 +21,7 @@ from catalog_workflow import exercise_catalogs
 from real_drawing import exercise_real_drawing
 from pipeline_workflow import exercise_pipeline
 from admin_connections import exercise_connections
+from review_workflow import exercise_reviews
 
 Path("/tmp/caesar-screens").mkdir(exist_ok=True)
 
@@ -334,6 +335,7 @@ def run():
                     expect(page.locator(".node-glyph")).to_have_count(1)
                     exercise_pipeline(page,context,base,tmp)
                     exercise_real_drawing(page, context, base, tmp)
+                    exercise_reviews(page,context,base,browser)
                     # A mobile viewport must not introduce document-level horizontal scrolling.
                     page.set_viewport_size({"width": 390, "height": 844})
                     page.goto(base + "/")

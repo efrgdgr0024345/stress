@@ -143,7 +143,9 @@ def advance(api,job,progress,next_stage=None,state="QUEUED",error=None,next_at=0
 
 def actor_for(api,job,conn):
     row=conn.execute("SELECT * FROM users WHERE id=? AND tenant=?",(job["actor"],job["tenant"])).fetchone()
-    if not row or row["role"]=="viewer":raise PermissionError("AUTHOR_PERMISSION_REVOKED")
+    if not row or row["role"] not in ('admin','engineer'):raise PermissionError("AUTHOR_PERMISSION_REVOKED")
+    from services.api.account_security import active
+    if not active(conn,row['id']):raise PermissionError('AUTHOR_PERMISSION_REVOKED')
     return dict(row)
 
 

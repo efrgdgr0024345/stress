@@ -74,7 +74,7 @@ def replace_configuration(path, content):
         Path(temporary).unlink(missing_ok=True)
 
 
-def reset_credentials(home, email, password):
+def reset_credentials(home, email, password, reset_mfa=False):
     if not email or "@" not in email or len(email) > 254:
         raise RecoveryError("Enter a valid login email address.")
     if not 12 <= len(password) <= 1024:
@@ -91,6 +91,14 @@ def reset_credentials(home, email, password):
     backup = backup_root / (datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ") + "-" + secrets.token_hex(4))
     backup.mkdir(mode=0o700)
     encoded = password_hash(password)
+    mfa=database.parent/'security/mfa/admin.json'
+    mfa_original=None;mfa_changed=False
+    if reset_mfa and (mfa.is_symlink() or any(p.is_symlink() for p in mfa.parents if p.is_relative_to(database.parent))):
+        raise RecoveryError('Private authenticator storage must not use symlinks.')
+    if reset_mfa and mfa.exists():
+        if mfa.is_symlink() or mfa.stat().st_mode&0o077:
+            raise RecoveryError('Private authenticator storage requires operator attention.')
+        mfa_original=mfa.read_bytes()
     connection = connect(database)
     configuration_changed = False
     try:
@@ -102,14 +110,23 @@ def reset_credentials(home, email, password):
             raise RecoveryError("That email belongs to another existing account; nothing changed.")
         private_write(backup / "configuration.json", original)
         private_write(backup / "administrator.json", json.dumps(old, indent=2).encode())
+        if reset_mfa and mfa_original is not None:
+            private_write(backup/'authenticator.json',mfa_original)
+            replace_configuration(mfa,b'{"enabled":false}\n');mfa_changed=True
         connection.execute("UPDATE users SET email=?,password=? WHERE id=? AND role=?", (email, encoded, old["id"], "admin"))
         connection.execute("DELETE FROM sessions WHERE user_id=?", (old["id"],))
+        if connection.execute("SELECT 1 FROM sqlite_master WHERE name='session_assurance'").fetchone():
+            connection.execute('DELETE FROM session_assurance WHERE user_id=?',(old['id'],))
+        if reset_mfa and connection.execute("SELECT 1 FROM sqlite_master WHERE name='mfa_accounts'").fetchone():
+            connection.execute('INSERT OR REPLACE INTO mfa_accounts VALUES (?,?,?)',(old['id'],0,None))
         connection.execute("INSERT INTO audit VALUES (?,?,?,?,?,?)", (secrets.token_hex(16), "", old["id"], "Administrator credentials recovered", "Account-owner terminal recovery; administrator sessions revoked", datetime.now(timezone.utc).isoformat()))
+        if reset_mfa:connection.execute('INSERT INTO audit VALUES (?,?,?,?,?,?)',(secrets.token_hex(16),'',old['id'],'Administrator authenticator recovered','Account-owner terminal reset; previous factor and recovery codes disabled',datetime.now(timezone.utc).isoformat()))
         replace_configuration(settings, new_configuration)
         configuration_changed = True
         connection.commit()
     except BaseException:
         connection.rollback()
+        if mfa_changed:replace_configuration(mfa,mfa_original)
         if configuration_changed:
             try:
                 replace_configuration(settings, original)
@@ -121,7 +138,7 @@ def reset_credentials(home, email, password):
     return {"email": email, "backup": str(backup)}
 
 
-def main():
+def main(reset_mfa=False):
     if not sys.stdin.isatty():
         raise RecoveryError("Run this downloaded file directly in cPanel Terminal; do not pipe it into Python.")
     home = Path.home()
@@ -136,18 +153,22 @@ def main():
     password = getpass("Set a NEW password (12+ characters; hidden): ")
     if password != getpass("Confirm the NEW password: "):
         raise RecoveryError("Passwords do not match; nothing changed.")
-    result = reset_credentials(home, email, password)
+    result = reset_credentials(home, email, password, reset_mfa=True) if reset_mfa else reset_credentials(home, email, password)
     print("\nAdministrator login updated.")
     print("Website: https://easyai.com.au/stress/")
     print("Login email:", result["email"])
     print("Use the new password you just entered. It has not been printed.")
     print("Previous administrator sessions revoked; projects and drawings retained.")
+    if reset_mfa:print('Previous authenticator disabled. Set up a new authenticator in Account security before final approvals.')
     print("Private recovery backup:", result["backup"])
 
 
 if __name__ == "__main__":
     try:
-        main()
+        import argparse
+        parser=argparse.ArgumentParser(description=__doc__)
+        parser.add_argument('--reset-mfa',action='store_true',help='Also disable a lost administrator authenticator and its recovery codes.')
+        main(reset_mfa=parser.parse_args().reset_mfa)
     except (RecoveryError, OSError, ValueError, sqlite3.Error, KeyboardInterrupt) as exc:
         print("RECOVERY STOPPED: " + (str(exc) if isinstance(exc, RecoveryError) else type(exc).__name__))
         raise SystemExit(1)

@@ -102,6 +102,12 @@ export interface Project {
   description: string;
   version: number;
   status: string;
+  review_approval?: {
+    id: string;
+    revision: number;
+    level: string;
+    actor_name: string;
+  };
   sample: boolean;
   created: string;
   updated: string;

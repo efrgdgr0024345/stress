@@ -15,6 +15,23 @@ from scripts import reset_admin as recovery
 
 
 class AdminRecoveryTests(unittest.TestCase):
+    def test_password_reset_retains_factor_and_explicit_terminal_recovery_disables_it(self):
+        from services.api import account_security as security
+        from services.api.updates import write,read
+        seed='GEZDGNBVGY3TQOJQGEZDGNBVGY3TQOJQ'
+        filename=security.path(main,'admin')
+        original={'enabled':True,'secret':seed,'last_counter':-1,'recovery_hashes':[]}
+        write(filename,original)
+        recovery.reset_credentials(self.home,self.email,self.new_password)
+        self.assertEqual(read(filename),original)
+        self.assertEqual(self.client.post('/api/v1/auth/login',json={'email':self.email,'password':self.new_password}).status_code,401)
+        result=recovery.reset_credentials(self.home,self.email,self.new_password,reset_mfa=True)
+        self.assertEqual(read(filename),{'enabled':False})
+        self.assertEqual((Path(result['backup'])/'authenticator.json').stat().st_mode&0o777,0o600)
+        self.assertEqual(json.loads((Path(result['backup'])/'authenticator.json').read_text()),original)
+        self.assertEqual(self.client.post('/api/v1/auth/login',json={'email':self.email,'password':self.new_password}).status_code,200)
+        with main.db() as conn:self.assertEqual(conn.execute("SELECT COUNT(*) FROM audit WHERE action='Administrator authenticator recovered'").fetchone()[0],1)
+
     def setUp(self):
         self.temp = tempfile.TemporaryDirectory()
         self.home = Path(self.temp.name)

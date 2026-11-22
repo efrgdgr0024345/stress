@@ -1,4 +1,4 @@
-# Implementation status — 0.5.0
+# Implementation status — 0.5.2
 
 ## Implemented review application
 
@@ -9,7 +9,12 @@ Version 0.5.0 adds ordinary-upload DigitalOcean page processing, scoped transfer
 early per-page review in the unchanged project UI, and bounded shared budgets.
 The canonical flange workbook is now registered privately and all 627 records
 are prepared for human dataset approval. This remains an engineering-review
-pilot; original graph/approval/security acceptance gates are still open.
+pilot; original graph/security/application qualification gates are still open.
+Normal cloud processing and actual PDF rendering passed live tests on the real
+two-page source and a larger synthetic three-page file in releases 0.5.0–0.5.1.
+Release 0.5.2 adds scoped reviews, independent sealed engineering-review issues,
+workspace people/roles and authenticator setup. These new controls are tested
+with disposable accounts; live release verification is recorded separately.
 See [execution ledger](../PLAN_EXECUTION.md) and [plan alignment](PLAN_ALIGNMENT.md).
 
 - macOS-inspired React interface and root `loader.php`, with each lesson displayed in a distinct coloured icon card beneath Load project. The Markdown register is version controlled and read dynamically.
@@ -23,6 +28,7 @@ See [execution ledger](../PLAN_EXECUTION.md) and [plan alignment](PLAN_ALIGNMENT
 - Generated PDF preview inside the website and downloadable traceability ZIP. Standard native annotation objects and original content-stream integrity checks; no screenshot-only additions.
 - Revision comparison, JSON snapshot download and restoration as a new draft, preserving prior snapshots and exports.
 - Server-side tenant/role checks, sessions, optimistic edit conflicts, source hashes, audit events and version-idempotent artifacts.
+- Content-bound section reviews during processing, explicit exceptions, independent MFA-protected review issues, integrity-checked preserved ZIPs and new drafts after edits. See [review workflow](REVIEW_WORKFLOW.md).
 - Repeatable setup/start scripts, isolated Python environment, npm lockfile, Docker/Compose, CI, API/domain tests and a real Chromium workflow with disposable storage.
 - Administrator Logs sidebar with structured request/browser/PDF/update events, filters, request correlation and privacy-conscious diagnostic downloads. See [capture limits](LOGGING.md).
 - GitHub release checking, staged code-compatible updates, private backups, failed-health rollback and administrator-triggered rollback. Automatic updates require the account-level cron runner and explicit opt-in.
@@ -43,10 +49,10 @@ See [execution ledger](../PLAN_EXECUTION.md) and [plan alignment](PLAN_ALIGNMENT
 - Shared continuation linking is an explicit user assertion. Automatic candidate finding, per-axis discrepancy calculations and independent continuation approval are pending.
 - Source-aware provisional layout avoids extracted exclusions where supported. Wrapping/bounds checks prevent truncated native tables/notes. Complete leader/collision qualification remains open and layout requires review.
 - The catalog mapper is general and reviewable, not an assertion that the missing canonical workbooks have been imported. Historical 1010 numeric acceptance gates remain unrun.
-- Release remains engineering-review draft. Final engineering approval, verified-for-modelling gates, separate lead/dataset workflows, MFA and external editor qualification are not claimed.
+- Engineering-review issues can have explicit independent approval. Verified-for-modelling release, complete target application qualification and production security are not claimed. MFA/people controls are implemented; private seed/key files are permission-protected, not encryption at rest.
 - Standard PDF annotations support broad compatibility. The browser editor is the primary working environment; individual third-party readers may differ in their annotation editing features.
 - SQLite/local files are pilot adapters. Scoped remote page transport is implemented in 0.5.0; PostgreSQL/S3, malware scanning, retention/restore drills and full production monitoring remain open. Local bounded registration/splitting is not a separate filesystem sandbox.
-- ZIP drawing-pack upload, full native CAESAR component export, independent final approvals and external annotation re-import are not implemented. The first native export profile blocks unsupported components.
+- ZIP drawing-pack upload, full native CAESAR component export and external annotation re-import are not implemented. The first native export profile blocks unsupported components.
 
 ## Reference assets
 

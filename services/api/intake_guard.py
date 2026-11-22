@@ -27,7 +27,7 @@ class IntakeGuard:
         if heavy:
             try:
                 actor=self.api.user(Request(scope))
-                if actor["role"]=="viewer":raise HTTPException(403,"Engineering editor access required.")
+                if actor["role"] not in ('admin','engineer'):raise HTTPException(403,"Engineering editor access required.")
             except HTTPException as error:return await reject(error.status_code,str(error.detail))
         try:
             size=int(headers.get(b"content-length",b"0"))

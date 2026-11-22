@@ -1,0 +1,80 @@
+"""Content-bound review scopes; display changes never become physical proof."""
+import hashlib
+import json
+from copy import deepcopy
+from packages.engineering import validate
+
+
+def digest(value):
+    return hashlib.sha256(json.dumps(value,sort_keys=True,separators=(',',':'),ensure_ascii=True,allow_nan=False).encode()).hexdigest()
+
+
+def scopes(project, processing_sources=()):
+    result=[]
+    partial=project.get('automation',{}).get('partial_pages',{})
+    evidence=project.get('automation',{}).get('evidence_pages',[])
+    def observed(sheet):
+        return (sheet['source_id'] not in processing_sources or
+                partial.get(sheet['id'],{}).get('source_sha256')==sheet['sha256'] or
+                any(p['sheet_id']==sheet['id'] and p['source_sha256']==sheet['sha256'] for p in evidence))
+    def add(kind,key,title,payload,ready,blocking):
+        result.append({'key':kind+':'+key,'kind':kind,'title':title,'sha256':digest(payload),
+                       'ready':ready,'blocking':sorted(set(blocking)),'payload':payload})
+    for sheet in project['sheets']:
+        title=sheet.get('printed_id') or sheet['filename']+' · page '+str(sheet['page_index']+1)
+        proof={k:sheet.get(k) for k in ('id','line_id','printed_id','width','height','rotation','content_hash')}
+        identity=[]
+        if not sheet.get('printed_id') or not sheet.get('line_id'):identity.append('DRAWING_IDENTITY_INCOMPLETE')
+        if not sheet.get('identity_verified'):identity.append('DRAWING_IDENTITY_UNREVIEWED')
+        add('identity',sheet['id'],title+' · identity',proof,True,identity)
+        items=[m for m in project['materials'] if m['sheet_id']==sheet['id']]
+        missing=[]
+        if not items:missing.append('NO_MATERIAL_ROWS')
+        for item in items:
+            if item.get('verification')!='reviewed':missing.append('MATERIAL_PROPOSALS_UNREVIEWED')
+            if item.get('quantity_unit','count')=='unresolved' or (item.get('quantity') is None and item.get('quantity_value') is None):missing.append('SOURCE_QUANTITY_UNKNOWN')
+            if item['item_no'].startswith('unreadable-'):missing.append('SOURCE_ITEM_NUMBER_UNREADABLE')
+            if item['family'] in ('flange','valve') and not item.get('catalog_match'):missing.append('CATALOG_MATCH_UNRESOLVED')
+        add('materials',sheet['id'],title+' · materials',{'sheet':proof,'items':items},observed(sheet),missing)
+        graphics=[]
+        for node in project['nodes']:
+            for instance in node['instances']:
+                if instance['sheet_id']==sheet['id']:
+                    graphics.append({'point_id':node['id'],'number':node['number'],'reasons':node.get('reasons',[]),**instance})
+        layout=[]
+        if sheet.get('axis') is None:layout.append('AXIS_PLACEMENT_UNRESOLVED')
+        if any(m['family'] in ('flange','valve') for m in items) and sheet.get('table') is None:layout.append('SCHEDULE_PLACEMENT_UNRESOLVED')
+        visible=[{k:m.get(k) for k in ('item_no','description','size','quantity','quantity_value','quantity_unit','catalog_match')} for m in items]
+        add('layout',sheet['id'],title+' · presentation',{'sheet':proof,'axis':sheet.get('axis'),
+             'table':sheet.get('table'),'graphics':graphics,'schedule':visible,
+             'notes':[a for a in project.get('annotations',[]) if a['sheet_id']==sheet['id']]},observed(sheet),layout)
+    lines=list(dict.fromkeys([s['line_id'] for s in project['sheets']]+[n['line_id'] for n in project['nodes']]))
+    for line in lines:
+        nodes=[{k:n.get(k) for k in ('id','line_id','route','order','takeoff_id','kind','station_mm','coordinates_mm','dimension_input','evidence','verification','component_ports')}
+               for n in project['nodes'] if n['line_id']==line]
+        point_ids={n['id'] for n in nodes}
+        missing=[]
+        if not nodes:missing.append('NO_PHYSICAL_NODES')
+        if any(n['station_mm'] is None or not n.get('evidence') for n in nodes):missing.append('PHYSICAL_STATIONS_UNVERIFIED')
+        if any(n.get('verification')=='proposed' for n in nodes):missing.append('NODE_PROPOSALS_UNREVIEWED')
+        add('geometry',line,'Line '+line+' · physical model',{'nodes':nodes,
+              'elements':[e for e in project.get('analysis_model',{}).get('elements',[]) if e.get('from') in point_ids or e.get('to') in point_ids],
+              'continuations':[c for c in project.get('continuations',[]) if c.get('point_id') in point_ids or c.get('line_id')==line],
+              'model_frame':{k:project.get('analysis_model',{}).get(k) for k in ('local_origin_confirmed','origin_point_id','vertical_axis','piping_code_id','ambient_temperature_c')}},
+              all(observed(s) for s in project['sheets'] if s['line_id']==line),missing)
+    return result
+
+
+def issues(project):
+    output=[]
+    numbers={n.get('number'):n['id'] for n in project['nodes']}
+    for value in validate(deepcopy(project)):
+        target={k:value.get(k) for k in ('code','sheet_id','material_id','point_id','evidence_id','element_id','line_id','route','message')}
+        if value.get('node') in numbers:target['point_id']=numbers[value['node']]
+        output.append({**value,'id':digest(target)[:24]})
+    return output
+
+
+def snapshot_hash(project):
+    # Status/approval receipts are consequences of the decision, not its input.
+    return digest({k:v for k,v in project.items() if k not in ('issues','status','review_approval','updated','graph')})

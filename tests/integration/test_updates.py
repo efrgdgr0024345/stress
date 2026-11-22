@@ -66,6 +66,26 @@ class UpdateApiTests(unittest.TestCase):
         finally:main.LOCAL_DEMO=previous
 
 class ReleaseTests(unittest.TestCase):
+    def test_security_downgrade_cannot_bypass_mfa_disabled_accounts_or_reviews(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root,public,data,directory,config,release=self.fixture(Path(temporary))
+            self.assertEqual(u.required_security_contract(data),0)
+            u.security_compatible(data,root)
+            u.write(data/'security/mfa/fixture.json',{'enabled':True,'secret':'DISPOSABLE'})
+            with self.assertRaisesRegex(ValueError,'predates'):u.security_compatible(data,root)
+            u.write(root/'RELEASE.json',{'version':'compatible','security_contract':1})
+            u.security_compatible(data,root)
+            (data/'security/mfa/fixture.json').unlink()
+            with sqlite3.connect(data/'workspace.sqlite3') as conn:
+                conn.execute('CREATE TABLE account_state (user_id TEXT,enabled INTEGER)')
+                conn.execute("INSERT INTO account_state VALUES ('disabled-fixture',0)")
+            self.assertEqual(u.required_security_contract(data),1)
+            with sqlite3.connect(data/'workspace.sqlite3') as conn:
+                conn.execute('DELETE FROM account_state')
+                conn.execute('CREATE TABLE review_signoffs (id TEXT)')
+                conn.execute("INSERT INTO review_signoffs VALUES ('signed-fixture')")
+            self.assertEqual(u.required_security_contract(data),1)
+
     def test_update_waits_for_inflight_cloud_pages_until_the_result_is_delivered(self):
         with tempfile.TemporaryDirectory() as temporary:
             root,public,data,directory,config,release=self.fixture(Path(temporary))

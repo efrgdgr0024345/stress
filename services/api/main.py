@@ -16,8 +16,9 @@ import time
 from uuid import uuid4
 
 from fastapi import Depends, FastAPI, File, HTTPException, Request, Response, UploadFile
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
+from fastapi.exceptions import RequestValidationError
 from pydantic import BaseModel, ConfigDict, Field
 
 from packages.engineering import compute_reasons, dimension_mm, renumber, validate
@@ -72,6 +73,10 @@ def initialize():
         """)
         from services.api.pipeline import schema as pipeline_schema
         pipeline_schema(conn)
+        from services.api.account_security import schema as security_schema
+        security_schema(conn)
+        from services.api.review_flow import schema as review_schema
+        review_schema(conn)
         if LOCAL_DEMO:
             conn.execute(
                 "INSERT OR IGNORE INTO users VALUES (?,?,?,?,?,?)",
@@ -315,6 +320,12 @@ async def lifespan(app):
 
 app = FastAPI(title="CAESAR ISO Engineering API", version="0.2.0", lifespan=lifespan)
 
+@app.exception_handler(RequestValidationError)
+async def safe_validation_error(request, error):
+    return JSONResponse(status_code=422,content={'detail':[
+        {key:item[key] for key in ('loc','msg','type') if key in item}
+        for item in error.errors()[:30]]})
+
 
 @app.middleware("http")
 async def security_headers(request: Request, call_next):
@@ -352,12 +363,15 @@ def user(request: Request):
         ).fetchone()
     if not row or (not LOCAL_DEMO and row["id"] == "local-engineer"):
         raise HTTPException(401, "Sign in to your workspace.")
+    from services.api.account_security import active as active_account
+    with db() as conn:
+        if not active_account(conn,row['id']):raise HTTPException(401,'Sign in to your workspace.')
     diag.bind_actor(dict(row))
     return dict(row)
 
 
 def editor(actor=Depends(user)):
-    if actor["role"] == "viewer":
+    if actor["role"] not in ('admin','engineer'):
         raise HTTPException(403, "Engineering editor permission required.")
     return actor
 
@@ -375,12 +389,17 @@ def change(project_id, version, actor, action, update):
     diag.emit(DATA,"project.change.started","DEBUG",base_revision=version)
     with LOCK, db() as conn:
         conn.execute("BEGIN IMMEDIATE")
+        who=conn.execute('SELECT role FROM users WHERE id=? AND tenant=?',(actor['id'],actor['tenant'])).fetchone()
+        from services.api.account_security import active
+        if not who or who['role'] not in ('admin','engineer') or not active(conn,actor['id']):
+            raise HTTPException(403,'Engineering editor access changed. Sign in again.')
         project = project_read(project_id, actor, conn)
         if project["version"] != version:
             raise HTTPException(
                 409, "This project changed in another session. Reload before saving."
             )
         update(project)
+        project['contributors'] = sorted(set(project.get('contributors', [])) | {actor['id']})
         compute_reasons(project["nodes"])
         project["version"] += 1
         project["updated"] = now()
@@ -417,6 +436,8 @@ def session(response, actor, request):
                 int(time.time()) + 43200,
             ),
         )
+        from services.api.account_security import bind as bind_assurance
+        bind_assurance(conn,hashlib.sha256(token.encode()).hexdigest(),actor['id'],actor.get('_mfa_verified',False))
     response.set_cookie(
         "caesar_session",
         token,
@@ -448,6 +469,7 @@ def me(actor=Depends(user)):
 class Login(BaseModel):
     email: str = Field(max_length=254)
     password: str = Field(max_length=1024)
+    code: str | None = Field(default=None,max_length=80)
 
 
 @app.post("/api/v1/auth/local")
@@ -467,10 +489,13 @@ def local_login(response: Response, request: Request):
 def login(body: Login, response: Response, request: Request):
     with db() as conn:
         row = conn.execute(
-            "SELECT * FROM users WHERE email=?", (body.email,)
+            "SELECT * FROM users WHERE lower(email)=?", (body.email.strip().casefold(),)
         ).fetchone()
+        from services.api.account_security import active as active_account
+        enabled=bool(row and active_account(conn,row['id']))
     if (
         not row
+        or not enabled
         or not row["password"]
         or not secrets.compare_digest(
             password_hash(body.password, row["password"].split(":")[0]), row["password"]
@@ -478,12 +503,19 @@ def login(body: Login, response: Response, request: Request):
     ):
         diag.emit(DATA,"security.login_failed","WARNING",reason="credentials_rejected")
         raise HTTPException(401, "Email or password is incorrect.")
-    return session(response, dict(row), request)
+    actor=dict(row)
+    from services.api.account_security import status as security_status, verify as verify_factor
+    if security_status(sys.modules[__name__],actor)['enabled']:
+        if not body.code:raise HTTPException(401,'Enter your authenticator or recovery code.')
+        verify_factor(sys.modules[__name__],actor,body.code)
+        actor['_mfa_verified']=True
+    return session(response, actor, request)
 
 
 @app.post("/api/v1/auth/logout")
 def logout(request: Request, response: Response):
     with db() as conn:
+        conn.execute('DELETE FROM session_assurance WHERE session_hash=?', (hashlib.sha256(request.cookies.get('caesar_session', '').encode()).hexdigest(),))
         conn.execute(
             "DELETE FROM sessions WHERE token=?",
             (
@@ -793,7 +825,7 @@ def apply_node(project, body, node_id=None):
         node.update(data)
         node["verification"]="reviewed"
     else:
-        project["nodes"].append({**data, "id": uid(), "number": None})
+        project["nodes"].append({**data, "id": uid(), "number": None, "verification":"reviewed"})
     if body.route != "main":
         for member in project["nodes"]:
             if member["line_id"] == body.line_id and member["route"] == body.route:
@@ -1115,6 +1147,13 @@ from services.api.remote_pages import install as install_remote_pages
 install_remote_pages(sys.modules[__name__])
 from services.api.remote_setup import install as install_remote_setup
 install_remote_setup(sys.modules[__name__])
+
+from services.api.account_security import install as install_account_security
+install_account_security(sys.modules[__name__])
+from services.api.people import install as install_people
+install_people(sys.modules[__name__])
+from services.api.review_flow import install as install_review_flow
+install_review_flow(sys.modules[__name__])
 
 from services.api.intake_guard import install as install_intake_guard
 install_intake_guard(sys.modules[__name__])

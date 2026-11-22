@@ -9,6 +9,7 @@ type View =
   | "catalogs"
   | "logs"
   | "admin"
+  | "people"
   | "processing"
   | "results"
   | "login"

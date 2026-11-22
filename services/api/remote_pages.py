@@ -313,7 +313,9 @@ def install(api):
                 raise HTTPException(401, 'Page grant not valid.')
             task = dict(row)
             actor = conn.execute('SELECT role FROM users WHERE id=? AND tenant=?', (task['actor'], task['tenant'])).fetchone()
-            if task['expires'] < time.time() or task['run_state'] in ('CANCELLED', 'SUPERSEDED') or (not result and task['run_state'] in ('FAILED', 'DONE')) or not actor or actor['role'] == 'viewer':
+            from services.api.account_security import active as active_account
+            enabled=active_account(conn,task['actor'])
+            if task['expires'] < time.time() or task['run_state'] in ('CANCELLED', 'SUPERSEDED') or (not result and task['run_state'] in ('FAILED', 'DONE')) or not actor or actor['role'] not in ('admin','engineer') or not enabled:
                 raise HTTPException(410, 'Page grant expired or revoked.')
             if task['activation'] and task['activation'] != activation:
                 raise HTTPException(409, 'Another activation already owns this page.')
@@ -353,6 +355,10 @@ def install(api):
             conn.execute('BEGIN IMMEDIATE')
             current = conn.execute('SELECT * FROM remote_pages WHERE id=?', (identity,)).fetchone()
             state = conn.execute('SELECT state FROM pipeline_runs WHERE id=?', (task['run_id'],)).fetchone()
+            who=conn.execute('SELECT role FROM users WHERE id=? AND tenant=?',(task['actor'],task['tenant'])).fetchone()
+            from services.api.account_security import active
+            if not who or who['role'] not in ('admin','engineer') or not active(conn,task['actor']):
+                raise HTTPException(410,'Account access changed during result delivery.')
             if not state or state['state'] in ('CANCELLED', 'SUPERSEDED'):
                 raise HTTPException(410, 'Page run revoked during result delivery.')
             if current['activation'] != task['activation'] or current['grant_hash'] != task['grant_hash'] or current['expires'] < time.time():

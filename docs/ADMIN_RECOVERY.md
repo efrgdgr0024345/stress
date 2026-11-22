@@ -47,6 +47,13 @@ the running API reads credentials from SQLite, so no restart is required.
 
 ## Privacy and recovery limits
 
+Password recovery retains an enabled authenticator by default. If both the
+authenticator and recovery codes are lost, the hosting account owner can run
+the installed helper with `--reset-mfa`. This additionally backs up and disables
+the existing administrator factor and recovery codes, revokes session assurance
+and records a recovery audit event. Enroll a new factor in Account security.
+See [review and account controls](REVIEW_WORKFLOW.md).
+
 The private settings file must already exist with mode 600. The database must
 already exist in private storage; this script does not create an administrator
 in an unknown database or promote another account. Duplicate login emails and
