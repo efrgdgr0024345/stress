@@ -13,7 +13,7 @@ class BodyLimit(Exception):
 class IntakeGuard:
     def __init__(self, app, api):self.app,self.api=app,api
     async def __call__(self,scope,receive,send):
-        if scope["type"]!="http" or scope["method"] not in ("POST","PUT","PATCH"):
+        if scope["type"]!="http" or scope["method"] not in ("POST","PUT","PATCH","DELETE"):
             return await self.app(scope,receive,send)
         path=scope.get("path","");headers=dict(scope.get("headers",[]))
         heavy=path.endswith(("/sources","/intake","/catalogs/import"))

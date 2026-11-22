@@ -136,3 +136,10 @@ class PhysicalModelTests(unittest.TestCase):
         self.assertEqual(self.client.post(path,json=decision).status_code,403)
         with main.db() as conn:conn.execute("UPDATE projects SET tenant='other' WHERE id=?",(p['id'],))
         self.assertEqual(self.client.get(f"/api/v1/projects/{p['id']}/physical-model").status_code,404)
+
+    def test_delete_source_dimension_body_is_bounded_before_json_parsing(self):
+        p=self.points(1);version=p['version']
+        response=self.client.request('DELETE',f"/api/v1/projects/{p['id']}/physical-model/dimensions/{main.uid()}",
+            content=b'{"reason":"'+b'x'*(3*1024*1024)+b'"}',headers={'Content-Type':'application/json'})
+        self.assertEqual(response.status_code,413)
+        self.assertEqual(self.client.get(f"/api/v1/projects/{p['id']}").json()['version'],version)

@@ -8,7 +8,7 @@ from pathlib import Path
 from typing import Literal
 from fastapi import Depends,HTTPException,Request
 from pydantic import BaseModel,ConfigDict,Field
-from services.api.updates import lock,pipeline_guard,write
+from services.api.updates import lock,pipeline_guard,write,read
 from services.api import account_security
 
 UUID=re.compile(r'^[a-f0-9-]{36}$')
@@ -16,7 +16,7 @@ PROJECT_TABLES=('projects','revisions','sources','artifacts','pipeline_runs','pi
                 'artifact_keys','review_signoffs','project_approvals','review_qualifications')
 
 
-def plan(conn,tenant):
+def plan(conn,tenant,data=None):
     projects=[dict(r) for r in conn.execute('SELECT * FROM projects WHERE tenant=? ORDER BY id',(tenant,))]
     ids={p['id'] for p in projects}
     rows={}
@@ -28,12 +28,17 @@ def plan(conn,tenant):
     rows['remote_pages']=[dict(r) for r in conn.execute('SELECT * FROM remote_pages') if r['run_id'] in runs]
     rows['audit']=[dict(r) for r in conn.execute('SELECT * FROM audit') if r['project_id'] in ids]
     users=[dict(r) for r in conn.execute("SELECT * FROM users WHERE tenant=? AND email LIKE 'software-review-%@example.invalid' AND name LIKE 'Software QA %' AND id<>'admin'",(tenant,))]
-    core={'project_records':rows,'temporary_accounts':users}
+    demo=read(Path(data)/'providers/digitalocean/demo.json') if data else {}
+    prototype={k:demo.get(k) for k in ('id','state','project_id') if k in demo}
+    # Only the selected workspace's demonstration is part of this reset.
+    if prototype.get('project_id') not in ids:prototype={}
+    core={'project_records':rows,'temporary_accounts':users,'prototype_demo':prototype}
     sha=hashlib.sha256(json.dumps(core,sort_keys=True,separators=(',',':')).encode()).hexdigest()
-    return {'sha256':sha,'rows':rows,'users':users,'counts':{
+    return {'sha256':sha,'rows':rows,'users':users,'prototype_demo':prototype,'counts':{
         'projects':len(projects),'source_files':len(rows['sources']),'exports':len(rows['artifacts']),
         'approved_issues':len(rows['project_approvals']),'processing_runs':len(runs),
-        'temporary_accounts':len(users)},'active':any(r['state'] not in ('DONE','FAILED','CANCELLED','SUPERSEDED') for r in rows['pipeline_runs'])}
+        'temporary_accounts':len(users),'processing_demonstrations':int(bool(prototype))},
+        'active':any(r['state'] not in ('DONE','FAILED','CANCELLED','SUPERSEDED') for r in rows['pipeline_runs']) or prototype.get('state') in ('queued','running','waiting')}
 
 
 def paths(api,value):
@@ -47,6 +52,10 @@ def paths(api,value):
         result.extend(api.DATA/'pipeline/remote-pages'/(row['id']+suffix) for suffix in ('.pdf','.json'))
     for user in value['users']:
         result.append(account_security.path(api,user['id']))
+    demo=value.get('prototype_demo',{})
+    if demo:
+        if not UUID.fullmatch(demo.get('id','')):raise HTTPException(409,'Legacy demonstration storage requires operator review before reset.')
+        result.extend((api.DATA/'providers/digitalocean/demo.json',api.DATA/'providers/digitalocean'/demo['id']))
     found=[]
     for path in result:
         if path.is_symlink() or any(p.is_symlink() for p in path.parents if p.is_relative_to(api.DATA)):
@@ -57,13 +66,13 @@ def paths(api,value):
 
 def execute(api,actor,expected):
     directory=api.DATA/'updates';backup=None;moved=[];committed=False
-    with lock(directory),pipeline_guard(directory) as idle:
+    with lock(directory),pipeline_guard(directory) as idle,lock(api.DATA/'providers/digitalocean'):
         if not idle:raise HTTPException(409,'Let the processing/update worker finish before clearing the workspace.')
         if (directory/'maintenance.json').exists():raise HTTPException(409,'A maintenance operation is already active.')
         write(directory/'maintenance.json',{'active':True,'purpose':'workspace-reset'})
         try:
             with api.LOCK,api.db() as conn:
-                conn.execute('BEGIN IMMEDIATE');value=plan(conn,actor['tenant'])
+                conn.execute('BEGIN IMMEDIATE');value=plan(conn,actor['tenant'],api.DATA)
                 if value['sha256']!=expected:raise HTTPException(409,'Workspace changed. Refresh the reset preview before clearing it.')
                 if value['active']:raise HTTPException(409,'Finish or cancel pending drawing jobs before clearing their data.')
                 targets=paths(api,value)
@@ -123,7 +132,7 @@ def install(api):
 
     @api.app.get('/api/v1/system/workspace-reset')
     def preview(actor=Depends(owner)):
-        with api.db() as conn:value=plan(conn,actor['tenant'])
+        with api.db() as conn:value=plan(conn,actor['tenant'],api.DATA)
         return {'plan_sha256':value['sha256'],'counts':value['counts'],'processing':value['active'],
                 'mfa':account_security.status(api,actor),'reference_catalogs_retained':True}
 

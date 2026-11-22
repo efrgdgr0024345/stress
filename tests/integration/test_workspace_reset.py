@@ -24,6 +24,10 @@ class WorkspaceResetTests(unittest.TestCase):
         p=self.upload(self.create());source=main.DATA/'sources'/f"{p['sheets'][0]['source_id']}.pdf";original=source.read_bytes()
         reference=main.DATA/'catalogs/reference.xlsx';reference.write_bytes(b'private fixture reference')
         credentials=main.DATA/'providers/digitalocean/credentials.json';write(credentials,{'token':'private-disposable-fixture'})
+        demo_id=main.uid();demo=main.DATA/'providers/digitalocean'/demo_id;demo.mkdir()
+        (demo/'results.xlsx').write_bytes(b'disposable demonstration output')
+        write(demo.parent/'demo.json',{'id':demo_id,'project_id':p['id'],'state':'done'})
+        write(demo.parent/'processing/setup.json',{'state':'ready'})
         with main.db() as conn:
             conn.execute('INSERT INTO catalogs VALUES (?,?,?,?,?,?)',('reference','local','reference.xlsx','a'*64,main.now(),'{}'))
             conn.execute("INSERT INTO remote_usage VALUES ('month:fixture',17)")
@@ -34,6 +38,8 @@ class WorkspaceResetTests(unittest.TestCase):
         self.assertEqual(self.client.get(f"/api/v1/projects/{p['id']}").status_code,404)
         self.assertFalse(source.exists());self.assertTrue(reference.exists())
         self.assertEqual(json.loads(credentials.read_text())['token'],'private-disposable-fixture')
+        self.assertFalse(demo.exists());self.assertFalse((demo.parent/'demo.json').exists())
+        self.assertEqual(json.loads((demo.parent/'processing/setup.json').read_text())['state'],'ready')
         backup=main.DATA/'reset-backups'/response.json()['backup_id']
         self.assertEqual((backup/'files'/source.relative_to(main.DATA)).read_bytes(),original)
         self.assertEqual((backup/'database.sqlite3').stat().st_mode&0o777,0o600)
