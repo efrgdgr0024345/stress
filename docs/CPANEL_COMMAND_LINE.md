@@ -18,8 +18,8 @@ curl -fL --proto '=https' https://raw.githubusercontent.com/efrgdgr0024345/stres
 
 For an immutable installer, replace `main` in that download URL with its
 reviewed commit SHA. The application ZIP itself is pinned to commit
-`1b3d021a7a77f8df39db54f68fb890c5fa16519d` and checked against SHA-256
-`40951bd575b638dbb124a7fa053fd50023c3d7e70e512cb41fbb8adbebb3c4b6`.
+`1878feb89e81320c610a43f0b3da6452283db4ef` and checked against SHA-256
+`1f8378692ab99d19c8bbb9b71272ee5543658fb6a9dcc62cd5292f981becb695`.
 Updating the ZIP in main does not silently change this tested release.
 
 ## What happens
@@ -113,4 +113,4 @@ repair, then verifies login again. Access restrictions and login failures do
 not trigger routing changes. Use the final setup status after all recovery
 steps finish; the actual host remains unverified until those checks succeed.
 
-The 0.3.0 release includes the administrator System updates panel and cron setup. See [update/rollback policy](SYSTEM_UPDATES.md) and [DigitalOcean cost research](WORKER_COSTS.md). Automatic installation is off until explicitly enabled.
+Release 0.3.1 retains the administrator System updates panel and cron setup, adds Logs and real reviewed-drawing regressions, and enables notes-only review export. Existing 0.3.0 installations can install it through System updates. See [update/rollback policy](SYSTEM_UPDATES.md), [logging](LOGGING.md), [real drawing evidence](REAL_DRAWING_VALIDATION.md) and [DigitalOcean cost research](WORKER_COSTS.md). Automatic installation is off until explicitly enabled.
