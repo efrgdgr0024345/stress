@@ -211,3 +211,11 @@ Use the existing entry format: a unique `LESSON-###` heading, category, status, 
 - Lesson: A provider token belongs in private server storage. Returning it to an admin form, validation response, parser environment or troubleshooting log unnecessarily expands its exposure.
 - Action: Test before saving, retain a working credential on failed replacement, restrict access to the hosting operator, reject credential-bearing redirects, and record bounded job stages instead of secret-bearing request bodies. An ambiguous submission must stop rather than bill a silent duplicate.
 - Evidence: Release 0.4.5 adds the admin connection, separate demo runner, browser checks and API regressions covering credential privacy, permissions, deployment/result contracts and editable exports.
+
+## LESSON-027 — Test the provider's empty and summary responses
+
+- Category: Provider integration
+- Status: Adopted
+- Lesson: DigitalOcean returns a null namespace list for an empty account and blank deployment credentials in list summaries. A successful action upload also echoes its full binary code. Simplified API fixtures missed all three behaviours.
+- Action: Accept a present null list as empty, fetch full namespace details before deployment, and acknowledge a successful action upload without buffering its large echo. Record HTTP status, safe response types, duration and provider request IDs; never record credentials or document contents.
+- Evidence: Release 0.4.6 adds these live-observed contracts and regression coverage. The private Sydney function successfully processed the actual 1010 drawing's first page during provider qualification.

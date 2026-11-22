@@ -20,7 +20,7 @@ from tests.integration import test_api as fixtures
 TOKEN = 'dop_v1_PRIVATE_TEST_ONLY_SENTINEL_1234567890'
 NAMESPACE = {'api_host': 'https://faas-syd1-test.doserverless.co',
              'namespace': 'fn-11111111-1111-4111-8111-111111111111',
-             'uuid': '11111111-1111-4111-8111-111111111111', 'key': 'PRIVATE_NAMESPACE_KEY'}
+             'uuid': '11111111-1111-4111-8111-111111111111', 'key': 'PRIVATE_NAMESPACE_KEY_TEST_ONLY'}
 
 
 class DigitalOceanTests(unittest.TestCase):
@@ -71,6 +71,40 @@ class DigitalOceanTests(unittest.TestCase):
         with patch.object(main, 'LOCAL_DEMO', False):
             self.assertEqual(self.client.get('/api/v1/system/digitalocean').status_code, 403)
 
+    def test_empty_account_null_namespace_list_is_valid_but_missing_or_invalid_list_is_rejected(self):
+        with patch.object(provider, 'request', return_value={'namespaces': None}):
+            result = self.client.post('/api/v1/system/digitalocean', json={'token': TOKEN})
+        self.assertEqual(result.status_code, 200, result.text)
+        self.assertTrue(result.json()['configured'])
+        for invalid in ({}, {'namespaces': {}}, {'namespaces': ['bad']}):
+            with patch.object(provider, 'request', return_value=invalid):
+                result = self.client.post('/api/v1/system/digitalocean', json={'token': TOKEN + '_NEW'})
+            self.assertEqual(result.status_code, 422)
+            self.assertEqual(provider.credentials(main.DATA)['token'], TOKEN)
+        report = self.client.get('/api/v1/system/logs/export').json()
+        check = next(e for e in report['events'] if e['event'] == 'provider.namespaces.checked')
+        self.assertTrue(check['details']['empty_list_was_null'])
+
+    def test_provider_http_diagnostics_include_safe_shape_status_and_request_id_without_response_values(self):
+        class Response:
+            status = 200
+            headers = {'Content-Type': 'application/json; charset=utf-8', 'X-Request-Id': 'b939eebf-3cc7-4fea-9b65-2502fa067ead'}
+            def read(self, limit):
+                return json.dumps({'namespaces': None, 'key': TOKEN, 'unexpected': TOKEN}).encode()
+            def __enter__(self): return self
+            def __exit__(self, *args): pass
+        with patch.object(provider, 'build_opener') as opener:
+            opener.return_value.open.return_value = Response()
+            response = self.client.post('/api/v1/system/digitalocean', json={'token': TOKEN})
+        self.assertEqual(response.status_code, 200, response.text)
+        report = self.client.get('/api/v1/system/logs/export').json()
+        event = next(e for e in report['events'] if e['event'] == 'provider.http.completed')
+        self.assertEqual(event['details']['http_status'], 200)
+        self.assertEqual(event['details']['shape'], {'namespaces': 'NoneType'})
+        self.assertEqual(event['details']['provider_request_id'], Response.headers['X-Request-Id'])
+        self.assertNotIn(TOKEN, json.dumps(report))
+        self.assertNotIn('unexpected', json.dumps(report))
+
     def test_namespace_auth_rejects_untrusted_destinations_and_redirects(self):
         for host in ('http://x.doserverless.co', 'https://doserverless.co.attacker.invalid',
                      'https://127.0.0.1', 'https://x.doserverless.co@attacker.invalid',
@@ -88,6 +122,39 @@ class DigitalOceanTests(unittest.TestCase):
             opener.return_value.open.side_effect = HTTPError(provider.API, 302, 'TOKEN_SHOULD_NOT_APPEAR', {}, None)
             with self.assertRaisesRegex(provider.ProviderError, '^PROVIDER_HTTP_302$'):
                 provider.request(provider.API, 'Bearer ' + TOKEN)
+
+    def test_deployment_ack_does_not_buffer_the_provider_binary_echo_but_normal_reads_stay_bounded(self):
+        class Response:
+            status = 200
+            headers = {'Content-Type': 'application/json'}
+            def read(self, limit):
+                raise AssertionError('A successful action upload must not buffer its large binary echo')
+            def __enter__(self): return self
+            def __exit__(self, *args): pass
+        with patch.object(provider, 'build_opener') as opener:
+            opener.return_value.open.return_value = Response()
+            self.assertEqual(provider.request(provider.API, 'Bearer ' + TOKEN, method='PUT', body={}, acknowledge=True), {'accepted': True})
+        with patch.object(provider, 'request', return_value={}) as remote:
+            provider.namespace_api(NAMESPACE, '/actions/caesar-demo/extract?overwrite=true', 'PUT', {})
+            self.assertTrue(remote.call_args.kwargs['acknowledge'])
+        class TooBig(Response):
+            def read(self, limit): return b'X' * limit
+        with patch.object(provider, 'build_opener') as opener:
+            opener.return_value.open.return_value = TooBig()
+            with self.assertRaisesRegex(provider.ProviderError, '^PROVIDER_RESPONSE_TOO_LARGE$'):
+                provider.request(provider.API, 'Bearer ' + TOKEN)
+
+    def test_namespace_creation_handles_null_list_and_detail_identity_is_checked(self):
+        self.connect()
+        project = self.upload(self.create())
+        provider.queue(main, {'id': 'local-engineer', 'tenant': 'local', 'role': 'admin'}, project['id'], project['sheets'][0]['source_id'], 'syd1')
+        provider.record(main.DATA, provider.current(main.DATA), 'namespace')
+        with patch.object(provider, 'request', side_effect=[{'namespaces': None}, {'namespace': NAMESPACE}]):
+            self.assertTrue(provider.advance(main))
+        self.assertEqual(provider.current(main.DATA)['stage'], 'deploy')
+        with patch.object(provider, 'request', return_value={'namespace': {**NAMESPACE, 'namespace': 'fn-' + '0' * 36}}):
+            with self.assertRaisesRegex(provider.ProviderError, '^NAMESPACE_IDENTITY_MISMATCH$'):
+                provider.namespace_details(TOKEN, NAMESPACE)
 
     def test_full_demo_pending_activation_to_website_excel_and_csv_without_project_mutation(self):
         self.connect()
@@ -109,9 +176,12 @@ class DigitalOceanTests(unittest.TestCase):
             write(output / 'build-report.json', {'zip_sha256': hashlib.sha256(package).hexdigest()})
         with patch('scripts.build_functions_demo.build', side_effect=build):
             self.assertTrue(provider.advance(main))
-        namespace = {**NAMESPACE, 'label': 'irrelevant', 'region': 'syd1'}
-        with patch.object(provider, 'request', side_effect=[{'namespaces': []}, {'namespace': namespace}]):
+        label = 'caesar-demo-' + hashlib.sha256(str(main.DATA.resolve()).encode()).hexdigest()[:10]
+        namespace = {**NAMESPACE, 'label': label, 'region': 'syd1'}
+        summary = {**namespace, 'uuid': '', 'key': ''}
+        with patch.object(provider, 'request', side_effect=[{'namespaces': [summary]}, {'namespace': namespace}]) as remote:
             self.assertTrue(provider.advance(main))
+            self.assertEqual(remote.call_args.args[0], provider.API + '/' + namespace['namespace'])
         with patch.object(provider, 'namespace_api', return_value={}) as remote:
             self.assertTrue(provider.advance(main))
             action = remote.call_args.args[3]

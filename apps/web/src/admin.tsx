@@ -68,6 +68,8 @@ function explain(code: string) {
     return "Enter the full DigitalOcean personal access token.";
   if (code === "PROVIDER_CONNECTION_FAILED")
     return "The hosting server could not reach DigitalOcean. Check outbound HTTPS access.";
+  if (code === "PROVIDER_RESPONSE_INVALID" || code === "PROVIDER_JSON_INVALID")
+    return "DigitalOcean returned an unexpected response. Open Logs and search provider.http for the HTTP status, response structure and provider request ID.";
   if (code === "FUNCTION_PROCESSING_FAILED")
     return "The provider function finished without usable extraction evidence. Check the private function activation in DigitalOcean.";
   if (code === "SUBMISSION_INTERRUPTED_CHECK_PROVIDER")

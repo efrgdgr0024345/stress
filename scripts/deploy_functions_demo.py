@@ -21,8 +21,8 @@ sys.path.insert(0,str(ROOT))
 API='https://api.digitalocean.com/v2/functions/namespaces'
 
 
-def api(token,method='GET',body=None):
-    request=Request(API,data=json.dumps(body).encode() if body is not None else None,method=method,headers={'Authorization':'Bearer '+token,'Content-Type':'application/json'})
+def api(token,method='GET',body=None,path=''):
+    request=Request(API+path,data=json.dumps(body).encode() if body is not None else None,method=method,headers={'Authorization':'Bearer '+token,'Content-Type':'application/json'})
     try:
         with urlopen(request,timeout=30) as response:return json.load(response)
     except HTTPError as error:raise RuntimeError(f'DigitalOcean Functions API returned HTTP {error.code}.') from None
@@ -51,12 +51,13 @@ def deploy(build,region,report):
     if not qualification.get('passed'):raise ValueError('Local function qualification must pass before deployment.')
     package=build/'deploy/packages/caesar/extract/extract.zip'
     if hashlib.sha256(package.read_bytes()).hexdigest()!=qualification['build']['zip_sha256']:raise ValueError('Deployment artifact differs from the qualified ZIP.')
-    namespaces=api(token).get('namespaces',[])
-    matches=[n for n in namespaces if n.get('label')=='caesar-functions-demo' and n.get('region')==region]
+    from services.api.digitalocean import namespaces
+    available=namespaces(api(token))
+    matches=[n for n in available if n.get('label')=='caesar-functions-demo' and n.get('region')==region]
     if len(matches)>1:raise RuntimeError('More than one demo namespace matches; no namespace changed.')
-    if matches:namespace=matches[0]
+    if matches:namespace=api(token,path='/'+matches[0]['namespace'])['namespace']
     else:namespace=api(token,'POST',{'region':region,'label':'caesar-functions-demo'})['namespace']
-    namespace_id=namespace['uuid']
+    namespace_id=namespace['namespace']
     cli(['install']);cli(['connect',namespace_id]);cli(['deploy',str(build/'deploy'),'--include','caesar/extract'])
     source=(ROOT/'fixtures/1010/1010 Reviewed.pdf').read_bytes();digest=hashlib.sha256(source).hexdigest()
     evidence_report={'format':'caesar-functions-live-demo-1','namespace_id':namespace_id,'region':region,'function':'caesar/extract','web_access':False,'source_sha256':digest,'digitalocean_live_tested':True,'engineering_verified':False,'pages':[]}

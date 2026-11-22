@@ -102,3 +102,11 @@ account-wide allowance consumption, transfer and current provider pricing must
 still be considered. This demo creates no Droplet, database, bucket or schedule.
 Normal large-file uploads still use the existing hosting worker; extending the
 provider adapter into general production transport remains separate work.
+
+Provider diagnostics (0.4.6) record HTTP status, method, resource category, response
+size/types, timing and the provider request ID when available. Search `provider.`
+in Logs to follow connection, deployment, activation and page-completion events.
+Neither raw provider responses nor uploaded function/PDF bodies are logged.
+An empty namespace list may be null; deployment credentials are obtained from
+the full namespace detail endpoint rather than redacted list summaries. A
+successful action PUT is acknowledged without reading its large binary echo.

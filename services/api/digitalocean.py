@@ -4,6 +4,7 @@ Account credentials never enter function inputs, public status or diagnostics.
 The existing account cron runner advances durable stages outside Passenger.
 """
 import base64
+from contextvars import ContextVar
 from copy import deepcopy
 import gzip
 import hashlib
@@ -28,10 +29,40 @@ REGIONS = ('syd1', 'sgp1', 'nyc3', 'fra1')
 API = 'https://api.digitalocean.com/v2/functions/namespaces'
 ACTIVE = ('queued', 'running', 'waiting')
 MAX_PDF = 700000
+TRACE_DATA = ContextVar('provider_trace_data', default=None)
 
 
 class ProviderError(Exception):
     pass
+
+
+def response_shape(value):
+    """Only field names/types from a fixed allowlist, never provider values."""
+    if not isinstance(value, dict):
+        return {'root': type(value).__name__}
+    return {key: type(value[key]).__name__ for key in
+            ('namespaces', 'namespace', 'response', 'result', 'activationId', 'error') if key in value}
+
+
+def namespaces(response):
+    # DigitalOcean serializes an empty Go slice as null, not necessarily [].
+    if 'namespaces' not in response or (response['namespaces'] is not None and not isinstance(response['namespaces'], list)):
+        raise ProviderError('PROVIDER_RESPONSE_INVALID')
+    values = response['namespaces'] or []
+    if any(not isinstance(value, dict) for value in values):
+        raise ProviderError('PROVIDER_RESPONSE_INVALID')
+    return values
+
+
+def namespace_details(token, summary):
+    name = summary.get('namespace', '')
+    if not re.fullmatch(r'fn-[a-f0-9-]{36}', name):
+        raise ProviderError('NAMESPACE_ID_REJECTED')
+    response = request(API + '/' + quote(name, safe=''), 'Bearer ' + token)
+    value = response.get('namespace')
+    if not isinstance(value, dict) or value.get('namespace') != name:
+        raise ProviderError('NAMESPACE_IDENTITY_MISMATCH')
+    return value
 
 
 class NoRedirect(HTTPRedirectHandler):
@@ -39,25 +70,59 @@ class NoRedirect(HTTPRedirectHandler):
         return None
 
 
-def request(url, authorization, method='GET', body=None, pending=False):
+def request(url, authorization, method='GET', body=None, pending=False, acknowledge=False):
     """Only callers construct URLs; never follow redirects with credentials."""
     req = Request(url, data=json.dumps(body).encode() if body is not None else None,
                   method=method, headers={'Authorization': authorization,
                   'Content-Type': 'application/json', 'User-Agent': 'CAESAR-provider-demo'})
+    started = time.monotonic()
+    target = ('activation' if '/activations/' in url else 'action' if '/actions/' in url else
+              'package' if '/packages/' in url else 'namespaces')
+    metadata = {'method': method, 'target': target}
+    def trace(event, level='DEBUG', **extra):
+        if TRACE_DATA.get() is not None:
+            diag.emit(TRACE_DATA.get(), event, level, **metadata,
+                      duration_ms=round((time.monotonic() - started) * 1000), **extra)
     try:
         with build_opener(NoRedirect()).open(req, timeout=60) as response:
+            metadata['http_status'] = response.status
+            identity = response.headers.get('X-Request-Id', '')
+            if re.fullmatch(r'[a-zA-Z0-9-]{1,128}', identity):
+                metadata['provider_request_id'] = identity
+            media = response.headers.get('Content-Type', '').split(';')[0]
+            metadata['media_type'] = media if media in ('application/json', 'text/html', 'text/plain') else 'other'
+            if acknowledge:
+                # OpenWhisk echoes the complete 40+ MB base64 action code in a
+                # successful PUT. The HTTP acknowledgement is sufficient; do
+                # not buffer or log the uploaded binary again.
+                trace('provider.http.completed', acknowledgement_only=True)
+                return {'accepted': True}
             content = response.read(2_000_001)
+        metadata['response_bytes'] = len(content)
         if len(content) > 2_000_000:
+            trace('provider.http.rejected', 'ERROR', error_code='PROVIDER_RESPONSE_TOO_LARGE')
             raise ProviderError('PROVIDER_RESPONSE_TOO_LARGE')
-        value = json.loads(content)
+        try:
+            value = json.loads(content)
+        except ValueError:
+            trace('provider.http.rejected', 'ERROR', error_code='PROVIDER_JSON_INVALID')
+            raise ProviderError('PROVIDER_JSON_INVALID') from None
+        trace('provider.http.completed', shape=response_shape(value))
         if not isinstance(value, dict):
             raise ProviderError('PROVIDER_RESPONSE_INVALID')
         return value
     except HTTPError as error:
+        metadata['http_status'] = error.code
+        identity = error.headers.get('X-Request-Id', '') if error.headers else ''
+        if re.fullmatch(r'[a-zA-Z0-9-]{1,128}', identity):
+            metadata['provider_request_id'] = identity
         if pending and error.code == 404:
+            trace('provider.http.pending')
             return None
+        trace('provider.http.failed', 'ERROR', error_code=f'PROVIDER_HTTP_{error.code}')
         raise ProviderError(f'PROVIDER_HTTP_{error.code}') from None
-    except (URLError, TimeoutError, OSError, ValueError):
+    except (URLError, TimeoutError, OSError):
+        trace('provider.http.failed', 'ERROR', error_code='PROVIDER_CONNECTION_FAILED')
         raise ProviderError('PROVIDER_CONNECTION_FAILED') from None
 
 
@@ -88,9 +153,14 @@ def save(data, token):
     if not isinstance(token, str) or not 20 <= len(token) <= 512 or not re.fullmatch(r'[A-Za-z0-9_-]+', token):
         raise ProviderError('TOKEN_FORMAT_INVALID')
     # Test the required Functions permission before replacing a working token.
-    response = request(API, 'Bearer ' + token)
-    if not isinstance(response.get('namespaces'), list):
-        raise ProviderError('PROVIDER_RESPONSE_INVALID')
+    context = TRACE_DATA.set(data)
+    try:
+        response = request(API, 'Bearer ' + token)
+        available = namespaces(response)
+        diag.emit(data, 'provider.namespaces.checked', namespaces_count=len(available),
+                  empty_list_was_null=response['namespaces'] is None)
+    finally:
+        TRACE_DATA.reset(context)
     credentials(data)  # Validate the destination before replacing it.
     write(directory(data) / 'credentials.json', {'token': token, 'verified_at': time.time()})
     return connection(data)
@@ -167,9 +237,12 @@ def namespace_api(namespace, path, method='GET', body=None, pending=False):
     name = namespace.get('namespace', '')
     if not re.fullmatch(r'fn-[a-f0-9-]{36}', name) or not re.fullmatch(r'[a-f0-9-]{36}', namespace.get('uuid', '')):
         raise ProviderError('NAMESPACE_ID_REJECTED')
+    if not isinstance(namespace.get('key'), str) or not re.fullmatch(r'[A-Za-z0-9_-]{20,512}', namespace['key']):
+        raise ProviderError('NAMESPACE_CREDENTIALS_MISSING')
     auth = base64.b64encode((namespace['uuid'] + ':' + namespace['key']).encode()).decode()
     return request(host.rstrip('/') + '/api/v1/namespaces/' + quote(name, safe='') + path,
-                   'Basic ' + auth, method, body, pending)
+                   'Basic ' + auth, method, body, pending,
+                   acknowledge=method == 'PUT' and path.startswith('/actions/'))
 
 
 def find_result(value):
@@ -191,6 +264,7 @@ def advance(api):
         return False
     work = directory(api.DATA) / job['id']
     stage = job['stage']
+    context = TRACE_DATA.set(api.DATA)
     try:
         token = credentials(api.DATA).get('token')
         if not token:
@@ -208,10 +282,10 @@ def advance(api):
         elif stage == 'namespace':
             label = 'caesar-demo-' + hashlib.sha256(str(api.DATA.resolve()).encode()).hexdigest()[:10]
             response = request(API, 'Bearer ' + token)
-            matches = [n for n in response.get('namespaces', []) if n.get('label') == label and n.get('region') == job['region']]
+            matches = [n for n in namespaces(response) if n.get('label') == label and n.get('region') == job['region']]
             if len(matches) > 1:
                 raise ProviderError('NAMESPACE_AMBIGUOUS')
-            namespace = matches[0] if matches else request(API, 'Bearer ' + token, 'POST', {'label': label, 'region': job['region']})['namespace']
+            namespace = namespace_details(token, matches[0]) if matches else request(API, 'Bearer ' + token, 'POST', {'label': label, 'region': job['region']})['namespace']
             write(work / 'namespace.json', namespace)
             record(api.DATA, job, 'deploy')
         elif stage == 'deploy':
@@ -250,6 +324,15 @@ def advance(api):
                 write(directory(api.DATA) / 'demo.json', job)
                 return False
             result = find_result(response)
+            completion = response.get('response', {})
+            provider_status = completion.get('status')
+            own_error = result.get('error') if isinstance(result, dict) else None
+            diag.emit(api.DATA, 'provider.function.completed', job_id=job['id'],
+                      page=job['page'] + 1, activation_id=job['activation'],
+                      duration_ms=response.get('duration') if type(response.get('duration')) is int else None,
+                      success=completion.get('success') is True,
+                      provider_status=provider_status if provider_status in ('success', 'application error', 'developer error', 'whisk internal error') else 'other',
+                      worker_error=own_error if isinstance(own_error, str) and re.fullmatch(r'[A-Z0-9_]{1,80}', own_error) else None)
             if not result or result.get('ok') is not True or result.get('encoding') != 'gzip+base64':
                 raise ProviderError('FUNCTION_PROCESSING_FAILED')
             packed = base64.b64decode(result['evidence'], validate=True)
@@ -269,6 +352,7 @@ def advance(api):
             job['results'].append({'page': sheet['page_index'] + 1, 'words': len(evidence['words']),
                                    'ocr_used': evidence['ocr_used'], 'material_proposals': len(proposed),
                                    'elapsed_ms': result.get('elapsed_ms'), 'parser_peak_rss_kib': result.get('parser_peak_rss_kib')})
+            diag.emit(api.DATA, 'provider.page.completed', job_id=job['id'], **job['results'][-1])
             job['page'] += 1
             job.pop('next_at', None)
             record(api.DATA, job, 'invoke' if job['page'] < job['page_count'] else 'report')
@@ -302,6 +386,8 @@ def advance(api):
         diag.exception(api.DATA, 'provider.demo.failed', error, job_id=job['id'], stage=stage)
         code = str(error) if isinstance(error, ProviderError) and re.fullmatch(r'[A-Z0-9_]{1,80}', str(error)) else 'DEMO_STAGE_FAILED'
         record(api.DATA, job, stage, 'failed', error=code)
+    finally:
+        TRACE_DATA.reset(context)
     return True
 
 
