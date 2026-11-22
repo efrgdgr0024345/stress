@@ -1,0 +1,54 @@
+{
+  "release": "0.5.2",
+  "checked_at_utc": "2026-11-22T13:21:09.825946+00:00",
+  "live_url": "https://easyai.com.au/stress/",
+  "checks": [
+    {
+      "project_id": "27830266-ab23-4022-ac5f-c5db32b0a7d9",
+      "revision": 5,
+      "drawings": 2,
+      "review_sections": 7,
+      "scope_kinds": {
+        "identity": 2,
+        "materials": 2,
+        "layout": 2,
+        "geometry": 1
+      },
+      "processing_complete": true,
+      "verified_modelling_available": false
+    },
+    {
+      "project_id": "dfb830f4-e099-4501-b847-394f1ede66b0",
+      "revision": 6,
+      "drawings": 3,
+      "review_sections": 10,
+      "scope_kinds": {
+        "identity": 3,
+        "materials": 3,
+        "layout": 3,
+        "geometry": 1
+      },
+      "processing_complete": true,
+      "verified_modelling_available": false
+    }
+  ],
+  "authenticator_status_screen": true,
+  "public_login_factor_field": true,
+  "people_roles_screen": true,
+  "real_engineering_signoffs_performed": false,
+  "account_factor_changed": false,
+  "project_revisions_unchanged": true,
+  "automated_tests": {
+    "suite": 174,
+    "bootstrap": 13,
+    "chromium_stress_workflow": "PASS",
+    "runtime_npm_known_vulnerabilities": 0
+  },
+  "existing_normal_workflow": {
+    "real_2page_32_material_rows": "PASS",
+    "synthetic_3page_3_material_rows": "PASS",
+    "actual_rendered_pixels": true,
+    "native_pdf_preview": "PASS",
+    "downloaded_xlsx_opened": "PASS"
+  }
+}
