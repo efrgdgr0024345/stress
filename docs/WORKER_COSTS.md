@@ -13,7 +13,7 @@ scheduled job**, which is billed only while running and supports Dockerfile
 builds. It can poll for work, process a bounded batch and exit; the documented
 minimum schedule interval is 15 minutes, so account for queue delay. Benchmark
 **DigitalOcean Functions** for lightweight burst extraction/free allowance.
-Full OCR is not yet implemented or deployed; native dependencies, job-only app
+OCR is implemented and tested in the local isolated worker; remote dependencies, job-only app
 configuration and actual billing/capacity must be verified before provisioning.
 
 | Option | Published cost/limits | Decision |
@@ -58,5 +58,8 @@ Billing alerts should supplement application limits, not substitute for them.
 - [Scheduled jobs: billing and minimum interval](https://docs.digitalocean.com/products/app-platform/how-to/manage-jobs/)
 - [Functions pricing examples](https://www.digitalocean.com/pricing/functions)
 
-Current implementation in this change is the update mechanism. The separate
-automated engineering/OCR pipeline remains the scope in AUTOMATED_PROJECT_PIPELINE.md.
+The current implementation includes durable queued jobs, a tested local Docker
+parser/OCR adapter, optional Landlock/seccomp and an explicitly selected bounded
+cPanel pilot mode. No remote DigitalOcean worker/account has been created or
+billed. A cross-host scoped job/file transport and representative cost benchmark
+remain required before moving drawings there. See [worker setup](PROCESSING_PIPELINE.md).

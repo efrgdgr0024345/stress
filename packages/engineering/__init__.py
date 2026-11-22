@@ -127,6 +127,8 @@ def topology(nodes):
 def compute_reasons(nodes):
     for node in nodes:
         reasons = []
+        if node.get("origin")=="automation" and node.get("verification")!="reviewed":
+            reasons.append("SOURCE_PROPOSAL_REVIEW")
         if node.get("station_mm") is None or not node.get("evidence", "").strip():
             reasons.append("UNVERIFIED_DIMENSION")
         if node.get("kind") == "continuation" and len(node["instances"]) < 2:
@@ -160,7 +162,7 @@ def compute_reasons(nodes):
 def validate(project):
     compute_reasons(project["nodes"])
     project["graph"] = topology(project["nodes"])
-    issues = []
+    issues = list(project.get("automation",{}).get("issues",[]))
     orders = {}
     for node in project["nodes"]:
         key = (node["line_id"], node["route"], node["order"])
@@ -214,7 +216,16 @@ def validate(project):
                 }
             )
     for item in project["materials"]:
-        if item["observed"] != item["quantity"]:
+        unit=item.get('quantity_unit','count')
+        if item.get("quantity") is None and unit in ('count','unresolved'):
+            issues.append({"code":"UNKNOWN_SOURCE_QUANTITY","severity":"critical","material_id":item["id"],"message":f"Item {item['item_no']}: listed quantity/unit needs source review; original value retained."})
+        if item.get("origin")=="automation" and item.get("verification")!="reviewed":
+            issues.append({"code":"MATERIAL_PROPOSAL_REVIEW","severity":"critical","material_id":item["id"],"message":f"Item {item['item_no']}: verify extracted description, size and quantity against the source."})
+        if unit not in ('count','unresolved') and (item.get('quantity_value') is None or item.get('observed_quantity_value') is None or Decimal(item['quantity_value'])!=Decimal(item['observed_quantity_value'])):
+            issues.append({'code':'LENGTH_QUANTITY_RECONCILIATION','severity':'critical','material_id':item['id'],'message':f"Item {item['item_no']}: reconcile the source length quantity in {unit}; component counts are a separate observation."})
+        if unit=='unresolved':
+            issues.append({'code':'SOURCE_QUANTITY_UNIT_REVIEW','severity':'critical','material_id':item['id'],'message':f"Item {item['item_no']}: confirm the source quantity and unit; decimal lengths are not component counts."})
+        if unit=='count' and item["observed"] != item["quantity"]:
             issues.append(
                 {
                     "code": "QUANTITY_MISMATCH",

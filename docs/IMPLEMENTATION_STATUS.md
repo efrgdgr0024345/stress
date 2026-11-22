@@ -1,12 +1,13 @@
-# Implementation status — 0.3.1
+# Implementation status — 0.4.0
 
 ## Implemented review application
 
-The Python/cPanel pilot is installed at `https://easyai.com.au/stress/`.
-Operator checks verified authenticated API, administrator login and projects;
-public checks verified the CAESAR frontend and unauthenticated project denial.
-This is not completion of the automatic drawing-recognition pipeline or
-production security hardening. See [the revised automation plan](AUTOMATED_PROJECT_PIPELINE.md).
+An earlier Python/cPanel pilot is installed at `https://easyai.com.au/stress/`.
+Version 0.4.0 adds locally tested automatic evidence/OCR processing and Excel-style
+results. A GitHub release does not install itself on that account: use the
+configured updater and enable a capable processing runner. This is a bounded
+engineering-review pilot, not completion of arbitrary drawing recognition or
+production security. See [plan alignment](PLAN_ALIGNMENT.md).
 
 - macOS-inspired React interface and root `loader.php`, with each lesson displayed in a distinct coloured icon card beneath Load project. The Markdown register is version controlled and read dynamically.
 - Same-origin, authenticated project loading directly into the in-browser drawing workspace, with project URLs retained across reloads.
@@ -23,18 +24,26 @@ production security hardening. See [the revised automation plan](AUTOMATED_PROJE
 - Administrator Logs sidebar with structured request/browser/PDF/update events, filters, request correlation and privacy-conscious diagnostic downloads. See [capture limits](LOGGING.md).
 - GitHub release checking, staged code-compatible updates, private backups, failed-health rollback and administrator-triggered rollback. Automatic updates require the account-level cron runner and explicit opt-in.
 - The user-provided reviewed 1010 PDF is preserved in GitHub and exercises upload, browser rendering, saved notes and native export in disposable software tests. See [real drawing evidence](REAL_DRAWING_VALIDATION.md).
+- Authenticated asynchronous intake, private quarantine, source hashes, durable stage/page checkpoints, leases/fencing, cancellation, retries, expired-lease recovery, duplicate protection and project serialization.
+- Native text/vector evidence and Tesseract OCR for outlined/low-text pages, evidence-linked BOM/identity/graph proposals, explicit exact-dimension profile, source exclusions and provisional layout. General recognition remains bounded and unverified facts stay null.
+- Separate supervised parser with a tested no-network Docker boundary. Optional Landlock/seccomp fails closed; an explicit resource-limited same-account cPanel pilot mode is available where isolation is unsupported.
+- Automatic PDF/XLSX review publication and transactional correction outbox. Cached refresh retains reviewed objects, manual catalog decisions and deletion tombstones; stale/cancelled workers cannot publish artifacts.
+- Source revision intake preserving other active documents and unique identical pages across reorder, with changed-page edits archived for reconciliation.
+- Excel-style website results with spreadsheet tabs/search, linked drawing/material review, signed element/property editing, native export settings and responsive table scrolling.
+- Real editable, numeric XLSX with exact decimal text and literal user strings; CSV tables; gated CAESAR II 15.1 straight-pipe CII candidate based on the vendor's documented contract. Actual CAESAR application qualification is pending.
+- Intake authentication before body parsing, body/rate/aggregate job/page limits and active-content rejection. Updates wait for the separate drawing runner before replacing code.
 
 ## Deliberate review boundaries
 
-- Physical dimensions and route definitions are engineer-entered. General OCR/vector-to-pipe recognition, dimension-constraint solving and automatic validated component placement are not implemented.
+- Engineering acceptance is explicit. Automatic exact station proposals are limited to the documented native semantic profile. General vector/OCR-to-pipe recognition, signed geometry constraints and validated component-specific placement are not complete.
 - Main/branch order is explicit, with branches referring to a main-run tee. Arbitrary loops, branch-on-branch networks, signed XYZ constraints and shared namespaces across different lines need richer engineering contracts.
 - Shared continuation linking is an explicit user assertion. Automatic candidate finding, per-axis discrepancy calculations and independent continuation approval are pending.
-- Layout is manually reviewed. Wrapping and bounds checks prevent truncated native tables/notes, but there is no complete source-collision solver or guarantee that arbitrary manually placed graphics avoid drawing data.
+- Source-aware provisional layout avoids extracted exclusions where supported. Wrapping/bounds checks prevent truncated native tables/notes. Complete leader/collision qualification remains open and layout requires review.
 - The catalog mapper is general and reviewable, not an assertion that the missing canonical workbooks have been imported. Historical 1010 numeric acceptance gates remain unrun.
 - Release remains engineering-review draft. Final engineering approval, verified-for-modelling gates, separate lead/dataset workflows, MFA and external editor qualification are not claimed.
 - Standard PDF annotations support broad compatibility. The browser editor is the primary working environment; individual third-party readers may differ in their annotation editing features.
-- SQLite/local files and synchronous exports are local adapters. Enterprise PostgreSQL/S3/queue infrastructure, isolated workers, malware scanning, rate limits, retention/restore drills and operational monitoring remain production work.
-- ZIP drawing upload, proprietary CAESAR model-file export and the end-to-end automated extraction/job pipeline are not implemented.
+- SQLite/local files are pilot adapters. Jobs and local isolated parsing are implemented; remote scoped worker transport, PostgreSQL/S3 infrastructure, malware scanning, retention/restore drills and production monitoring remain open.
+- ZIP drawing-pack upload, full native CAESAR component export, independent final approvals and external annotation re-import are not implemented. The first native export profile blocks unsupported components.
 
 ## Reference assets
 

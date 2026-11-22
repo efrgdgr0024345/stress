@@ -234,7 +234,7 @@ def schedule_lines(materials):
             return record.get(key) if record.get(key) is not None else "N/A"
 
         lines.append(
-            f"{item['item_no']}  {item['family'].upper()}  {item['size']}  QTY {item['quantity']} | L: {value('length_mm')} mm | W: {value('weight_n')} N"
+            f"{item['item_no']}  {item['family'].upper()}  {item['size']}  QTY {item['quantity'] if item.get('quantity') is not None else 'N/A'} | L: {value('length_mm')} mm | W: {value('weight_n')} N"
         )
         if match:
             lines.append(

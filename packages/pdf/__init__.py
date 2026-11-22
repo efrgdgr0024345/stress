@@ -39,6 +39,7 @@ def inspect_pdf(path):
                     "native_text_chars":len(text.strip()),
                     "vector_paths":vector_paths,
                     "image_count":image_count,
+                    "content_hash":content_hash(page),
                     "format": "Vector / text" if text.strip() and vector_paths else "Searchable text" if text.strip() else "Vector / outlined-text review" if vector_paths else "Raster / OCR review" if image_count else "No searchable content / review",
                 }
             )
@@ -365,6 +366,8 @@ def export_bundle(project, source_path, output_path):
             ]
         )
     with zipfile.ZipFile(output_path, "w", zipfile.ZIP_DEFLATED) as archive:
+        from packages.workbooks import workbook
+        archive.writestr("engineering-workbook.xlsx",workbook(project))
         archive.writestr("annotated-review.pdf", pdf_bytes)
         archive.writestr("nodes.csv", csv_file.getvalue())
         for filename, value in [
@@ -387,6 +390,7 @@ def export_bundle(project, source_path, output_path):
                     "source_content_unchanged": True,
                     "native_annotations": len(manifest),
                     "structural_check": "passed",
+                    "workbook_reopen_check":"passed",
                     "desktop_editor_roundtrip": "not tested",
                     "release": "ENGINEERING_REVIEW_DRAFT",
                 },

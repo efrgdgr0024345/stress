@@ -70,6 +70,8 @@ def initialize():
         CREATE TABLE IF NOT EXISTS catalog_versions (id TEXT PRIMARY KEY, tenant TEXT, catalog_id TEXT, seq INTEGER, created TEXT, data TEXT, UNIQUE(catalog_id,seq));
         PRAGMA user_version=2;
         """)
+        from services.api.pipeline import schema as pipeline_schema
+        pipeline_schema(conn)
         if LOCAL_DEMO:
             conn.execute(
                 "INSERT OR IGNORE INTO users VALUES (?,?,?,?,?,?)",
@@ -323,7 +325,7 @@ async def security_headers(request: Request, call_next):
         if origin:
             from urllib.parse import urlsplit
 
-            if urlsplit(origin).netloc != request.headers.get("host"):
+            if urlsplit(origin).netloc != request.headers.get("host") or urlsplit(origin).scheme != request.url.scheme:
                 return Response(
                     "Cross-origin writes are not permitted.", status_code=403
                 )
@@ -391,6 +393,8 @@ def change(project_id, version, actor, action, update):
             (project_id, project["version"], json.dumps(project)),
         )
         audit(conn, project_id, actor["name"], action)
+        if project.get("automation",{}).get("run_id"):
+            conn.execute("INSERT OR IGNORE INTO pipeline_outbox VALUES (?,?,?,?)",(project_id,project["version"],actor["id"],time.time()))
     project["issues"] = validate(project)
     diag.emit(DATA,"project.change.completed",revision=project["version"],sheets=len(project["sheets"]),nodes=len(project["nodes"]),materials=len(project["materials"]),issues=len(project["issues"]))
     return project
@@ -650,7 +654,8 @@ def source_file(project_id: str, source_id: str, actor=Depends(user)):
         row = conn.execute(
             "SELECT * FROM sources WHERE id=? AND project_id=?", (source_id, project_id)
         ).fetchone()
-    if not row or source_id not in {s["source_id"] for s in project["sheets"]}:
+    permitted={s["source_id"] for s in project["sheets"]}|{s["source_id"] for s in project.get("source_history",[])}
+    if not row or source_id not in permitted:
         raise HTTPException(404, "Source not found.")
     return FileResponse(
         DATA / "sources" / f"{source_id}.pdf",
@@ -668,6 +673,7 @@ class SheetPatch(Version):
     line_id: str = Field(min_length=1, max_length=150)
     axis: tuple[float, float] | None = None
     table: tuple[float, float] | None = None
+    confirm_identity:bool=False
 
 
 def sheet_for(project, sheet_id):
@@ -683,6 +689,7 @@ def patch_sheet(
 ):
     def update(p):
         sheet = sheet_for(p, sheet_id)
+        if body.confirm_identity and (not body.printed_id.strip() or not body.line_id.strip()):raise HTTPException(422,"Confirm the printed sheet identity and full line ID before marking the register reviewed.")
         for key in ("axis", "table"):
             point = getattr(body, key)
             if point and not (
@@ -693,7 +700,8 @@ def patch_sheet(
                     422,
                     "Place the annotation inside the page with at least 50 pt clearance.",
                 )
-        sheet.update(body.model_dump(exclude={"version"}))
+        sheet.update(body.model_dump(exclude={"version","confirm_identity"}))
+        if body.confirm_identity:sheet["identity_verified"]=True
         p["layout_reviewed"] = False
 
     return change(
@@ -780,6 +788,7 @@ def apply_node(project, body, node_id=None):
     }
     if node:
         node.update(data)
+        node["verification"]="reviewed"
     else:
         project["nodes"].append({**data, "id": uid(), "number": None})
     if body.route != "main":
@@ -820,6 +829,7 @@ def delete_node(project_id: str, node_id: str, version: int, actor=Depends(edito
     def update(p):
         if not any(n["id"] == node_id for n in p["nodes"]):
             raise HTTPException(404, "Point not found.")
+        p.setdefault("automation_tombstones",{}).setdefault("node_ids",[]).append(node_id)
         if any(n.get("takeoff_id") == node_id for n in p["nodes"]):
             raise HTTPException(
                 422, "Reassign dependent branches before deleting their shared tee."
@@ -855,16 +865,42 @@ class MaterialInput(Version):
     )
     description: str = Field(min_length=1, max_length=1000)
     size: str = Field(max_length=100)
-    quantity: int = Field(ge=0, le=100000)
+    quantity: int | None = Field(default=None, ge=0, le=100000)
     observed: int = Field(ge=0, le=100000)
     evidence: str = Field(default="", max_length=3000)
+    quantity_value:str|None=Field(default=None,max_length=100)
+    quantity_unit:str=Field(default="count",pattern=r"^(count|m|mm|ft|in|unresolved)$")
+    observed_quantity_value:str|None=Field(default=None,max_length=100)
+
+
+def material_values(body):
+    from decimal import Decimal,InvalidOperation
+    data=body.model_dump(exclude={"version"})
+    for key in ('quantity_value','observed_quantity_value'):
+        value=data[key]
+        if value is None or not value.strip():data[key]=None;continue
+        try:number=Decimal(value)
+        except InvalidOperation:raise HTTPException(422,"Source and reconciled quantities must be numeric values in the selected unit.")
+        if not number.is_finite() or not 0<=number<=Decimal('1000000000'):raise HTTPException(422,"Quantity must be finite and nonnegative.")
+        data[key]=str(number)
+    if data['quantity_unit']=='count':
+        if data['quantity_value'] is None and data['quantity'] is not None:data['quantity_value']=str(data['quantity'])
+        if data['quantity_value'] is not None:
+            value=Decimal(data['quantity_value'])
+            if value!=value.to_integral_value():raise HTTPException(422,"A component count must be a whole number; select the source length unit for length quantities.")
+            if data['quantity'] is not None and data['quantity']!=int(value):raise HTTPException(422,"Listed count and source count disagree.")
+            data['quantity']=int(value)
+    elif data['quantity_unit']!='unresolved':
+        data['quantity']=None
+        if len(data['evidence'].strip())<10:raise HTTPException(422,"A source quantity unit needs drawing/engineering evidence.")
+    return data
 
 
 @app.post("/api/v1/projects/{project_id}/materials")
 def add_material(project_id: str, body: MaterialInput, actor=Depends(editor)):
     def update(p):
         sheet_for(p, body.sheet_id)
-        p["materials"].append({**body.model_dump(exclude={"version"}), "id": uid()})
+        p["materials"].append({**material_values(body), "id": uid()})
         p["materials_reviewed"] = False
 
     return change(
@@ -886,7 +922,10 @@ def patch_material(
             for key in ("family", "size", "description")
         ):
             item.pop("catalog_match", None)
-        item.update(body.model_dump(exclude={"version"}))
+            item.pop("spec_proposal",None)
+            item["auto_match_disabled"]=True
+        item.update(material_values(body))
+        item["verification"]="reviewed"
         p["materials_reviewed"] = False
 
     return change(
@@ -941,58 +980,21 @@ def history(project_id: str, actor=Depends(user)):
 @app.post("/api/v1/projects/{project_id}/exports")
 def export(project_id: str, body: Version, actor=Depends(editor)):
     diag.emit(DATA,"pdf.export.requested","DEBUG",revision=body.version)
-    with LOCK, db() as conn:
+    with db() as conn:
         project = project_read(project_id, actor, conn)
-        if project["version"] != body.version:
-            raise HTTPException(409, "Project has changed. Reload before exporting.")
-        if not project["sheets"]:
-            raise HTTPException(
-                422, "Add a source PDF before exporting a review bundle."
-            )
-        existing = conn.execute(
-            "SELECT * FROM artifacts WHERE project_id=? AND revision=?",
-            (project_id, body.version),
-        ).fetchone()
-        if existing:
-            diag.emit(DATA,"pdf.export.cache_hit",artifact_id=existing["id"],revision=body.version)
-            return dict(existing)
-        project["issues"] = validate(project)
-        artifact_id = uid()
-        path = DATA / "exports" / f"{artifact_id}.zip"
-        try:
-            with diag.stage(DATA,"pdf.export",revision=body.version):
-                count = export_bundle(
-                    project, lambda sid: DATA / "sources" / f"{sid}.pdf", path
-                )
-        except ValueError as exc:
-            path.unlink(missing_ok=True)
-            raise HTTPException(422, str(exc))
-        except Exception:
-            path.unlink(missing_ok=True)
-            raise HTTPException(
-                422,
-                "PDF export integrity check failed; source preserved. Review annotation positions.",
-            )
-        record = {
-            "id": artifact_id,
-            "project_id": project_id,
-            "revision": body.version,
-            "filename": f"caesar-review-r{body.version}.zip",
-            "created": now(),
-            "count": count,
-        }
-        conn.execute(
-            "INSERT INTO artifacts VALUES (?,?,?,?,?,?)", tuple(record.values())
-        )
-        audit(
-            conn,
-            project_id,
-            actor["name"],
-            "Exported engineering review draft",
-            f"{count} native annotations; source streams unchanged",
-        )
-    diag.emit(DATA,"pdf.export.published",artifact_id=artifact_id,annotations=count,revision=body.version)
-    return record
+    if project["version"] != body.version:
+        raise HTTPException(409, "Project has changed. Reload before exporting.")
+    if not project["sheets"]:
+        raise HTTPException(422, "Add a source PDF before exporting a review bundle.")
+    from services.api.pipeline import publish_export
+    try:
+        with diag.stage(DATA,"pdf.export",revision=body.version):
+            return publish_export(sys.modules[__name__],project,actor)
+    except RuntimeError as exc:
+        if str(exc)=="PROJECT_CHANGED":raise HTTPException(409,"Project changed while exporting. Regenerate from the latest revision.")
+        raise
+    except ValueError as exc:
+        raise HTTPException(422,str(exc))
 
 
 @app.get("/api/v1/projects/{project_id}/artifacts/{artifact_id}/download")
@@ -1091,6 +1093,15 @@ install(sys.modules[__name__])
 
 from services.api.updates import install as install_updates
 install_updates(sys.modules[__name__])
+
+from services.api.pipeline import install as install_pipeline
+install_pipeline(sys.modules[__name__])
+
+from services.api.results import install as install_results
+install_results(sys.modules[__name__])
+
+from services.api.intake_guard import install as install_intake_guard
+install_intake_guard(sys.modules[__name__])
 
 diag.install(sys.modules[__name__])
 

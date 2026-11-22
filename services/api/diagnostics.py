@@ -197,7 +197,7 @@ def install(api):
         kind:Literal["navigation","api","error","rejection","console","resource","action"]
         action:Literal["none","load_project","upload_pdf","export_bundle","save_node","save_annotation","form_invalid","check_updates","install_update","rollback_update"]="none"
         client_at:float=Field(default=0,ge=0,le=4000000000000,allow_inf_nan=False)
-        view:Literal["projects","workspace","sheets","materials","validation","activity","catalogs","logs","login","unknown"]="unknown"
+        view:Literal["projects","workspace","sheets","materials","validation","activity","catalogs","logs","processing","results","login","unknown"]="unknown"
         request_id:str=Field(default="",pattern=r"^(?:[a-f0-9]{32})?$",max_length=32)
         status:int=Field(default=0,ge=0,le=599)
         duration_ms:float=Field(default=0,ge=0,le=3600000,allow_inf_nan=False)

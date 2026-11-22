@@ -1,5 +1,6 @@
 import { appPath } from "./paths";
 import { browserEvent } from "./diagnostics";
+import type { Automation } from "./pipeline";
 export type Point = [number, number];
 export interface Sheet {
   id: string;
@@ -14,6 +15,9 @@ export interface Sheet {
   line_id: string;
   format: string;
   text: string;
+  ocr_text?: string;
+  identity_verified?: boolean;
+  line_id_proposal?: string;
   axis: Point | null;
   table: Point | null;
 }
@@ -31,6 +35,8 @@ export interface PipeNode {
   order: number;
   kind: string;
   station_mm: string | null;
+  proposed_station_mm?: string | null;
+  proposed_dimension_input?: string;
   dimension_input?: string;
   evidence: string;
   reasons: string[];
@@ -44,7 +50,10 @@ export interface Material {
   family: string;
   description: string;
   size: string;
-  quantity: number;
+  quantity: number | null;
+  quantity_value?: string | null;
+  quantity_unit?: string;
+  observed_quantity_value?: string | null;
   observed: number;
   evidence: string;
   catalog_match?: {
@@ -79,6 +88,14 @@ export interface Issue {
   material_id?: string;
 }
 export interface Project {
+  automation?: Automation;
+  analysis_model?: {
+    ambient_temperature_c?: string;
+    piping_code_id?: number;
+    vertical_axis?: string;
+    local_origin_confirmed?: boolean;
+    origin_point_id?: string;
+  };
   id: string;
   title: string;
   line_id: string;
@@ -134,28 +151,44 @@ export async function api<T>(
   path: string,
   options: RequestInit = {},
 ): Promise<T> {
-  const start=performance.now();
-  let response:Response;
-  try{response = await fetch(appPath(`api/v1${path}`), {
-    ...options,
-    headers: {
-      ...(options.body instanceof FormData
-        ? {}
-        : { "Content-Type": "application/json" }),
-      ...options.headers,
-    },
-  });}catch(error){
-    if(!path.startsWith("/system/logs"))browserEvent({kind:"api",status:0,duration_ms:performance.now()-start});
+  const start = performance.now();
+  let response: Response;
+  try {
+    response = await fetch(appPath(`api/v1${path}`), {
+      ...options,
+      headers: {
+        ...(options.body instanceof FormData
+          ? {}
+          : { "Content-Type": "application/json" }),
+        ...options.headers,
+      },
+    });
+  } catch (error) {
+    if (!path.startsWith("/system/logs"))
+      browserEvent({
+        kind: "api",
+        status: 0,
+        duration_ms: performance.now() - start,
+      });
     throw error;
   }
-  if(!path.startsWith("/system/logs"))browserEvent({kind:"api",status:response.status,duration_ms:performance.now()-start,request_id:response.headers.get("X-Request-ID")||""});
+  if (!path.startsWith("/system/logs"))
+    browserEvent({
+      kind: "api",
+      status: response.status,
+      duration_ms: performance.now() - start,
+      request_id: response.headers.get("X-Request-ID") || "",
+    });
   if (!response.ok) {
     const value = await response
       .json()
       .catch(() => ({ detail: response.statusText }));
     throw new Error(
       typeof value.detail === "string"
-        ? value.detail+(response.status>=500?` Request ID: ${response.headers.get("X-Request-ID")||"unavailable"}`:"")
+        ? value.detail +
+            (response.status >= 500
+              ? ` Request ID: ${response.headers.get("X-Request-ID") || "unavailable"}`
+              : "")
         : JSON.stringify(value.detail),
     );
   }

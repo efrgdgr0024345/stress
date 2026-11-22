@@ -40,10 +40,15 @@ The old heuristic described every page without extracted text as raster/OCR.
 Inspection now reports vector paths, image counts and searchable-character
 counts, and identifies the second page as **Vector/outlined-text review**.
 
-This correction avoids a false classification. It does not implement OCR or
-pipe/label recognition. Source text on page 2 explicitly shows that none is
-searchable. Automatic BOM extraction, dimension solving, routing and placement
-remain pending in the [automation backlog](AUTOMATION_BACKLOG.md).
+Version 0.4.0 now rasterizes bounded regions for Tesseract OCR inside the isolated
+parser and retains OCR word boxes, confidence and source hashes separately from
+native text. The real browser workflow runs unattended intake, OCR, material
+proposals and PDF/Excel review publication. Source text shows the OCR evidence
+on page 2 while retaining the fact that native engineering text is absent.
+Extracted material rows are unreviewed proposals, not authoritative quantities.
+Physical points remain absent until the engineering route/dimensions are proved;
+general component/dimension recognition remains unfinished in the
+[automation backlog](AUTOMATION_BACKLOG.md).
 
 The browser test also exposed an export requirement for engineering nodes in
 both the browser and API, even for a notes-only review. Export now requires source sheets, so notes can be
@@ -56,12 +61,20 @@ objects and independent browser rendering do not certify every PDF editor.
 
 ## Try it on the hosting account
 
-After installing release 0.3.1 through **System updates**, download the PDF from
+After installing release 0.4.0 through **System updates** and enabling the
+[processing runner](PROCESSING_PIPELINE.md), download the PDF from
 GitHub, sign in at `https://easyai.com.au/stress/`, choose **New project**, enter
 the title/full line ID and select that PDF. Open both sheets, add a review note,
 save, export and preview. Open **Logs** to inspect the recorded upload/export
 phases; download diagnostics if an error occurs. Keep test work labelled as
 software validation and engineering unverified.
+
+Open **Excel results → Components** to inspect OCR-derived rows and source
+quantities, then download the editable workbook. Unknown lengths, counts and
+weights remain blank or unresolved. Reproducible example outputs are retained
+in [examples/1010-review](../examples/1010-review/README.md), clearly labelled
+engineering unverified. They are actual system exports, not handwritten sample
+workbooks or a fabricated native stress model.
 
 The local browser test exercises the built application at `/stress`. An actual
 hosted upload/export still needs the operator's authenticated browser; repository

@@ -1,10 +1,10 @@
 # CAESAR ISO — Engineering review workspace
 
-A working browser-based piping-isometric review system built from the attached engineering plan. The website displays the original drawings and lets an engineer edit physical points, bubbles, leaders, drawing notes and shapes, reconcile materials, match approved catalog records, recover earlier revisions, and preview or download native annotated PDFs.
+A browser-based piping-isometric processing and engineering-review system built from the attached plan. Uploads run through a durable evidence/OCR pipeline to a native PDF review draft and an editable Excel workbook. The website displays original drawings and spreadsheet results, with evidence-linked corrections, controlled catalog matches, history and downloadable exports. Unproved physical facts stay unknown; automatic completion does not confer engineering approval.
 
 The interface uses a consistent macOS-inspired appearance. The root [loader.php](loader.php) opens projects directly in the drawing workspace and displays every entry in [LESSONS_LEARNED.md](LESSONS_LEARNED.md) immediately beneath its **Load project** section. Both files are maintained in GitHub. Editing the Markdown register updates the displayed lessons without rebuilding the frontend.
 
-Screenshots from the synthetic test project: [macOS-style loader and lessons](docs/screenshots/loader.png) · [in-site generated PDF preview](docs/screenshots/export-preview.png).
+Screenshots: [macOS-style loader and lessons](docs/screenshots/loader.png) · [Excel-style results](docs/screenshots/excel-results.png) · [automatic project flow](docs/screenshots/pipeline-flow.png) · [real 1010 drawing](docs/screenshots/1010-real-drawing.png).
 
 ## Start the website
 
@@ -12,10 +12,11 @@ Requires Node.js 24 and Python 3.12. Run these commands from the repository:
 
 ```bash
 ./scripts/setup.sh
+docker build -f worker.Dockerfile -t caesar-worker:local .
 ./scripts/start.sh
 ```
 
-Setup creates an isolated `.venv`, installs pinned Python requirements and the npm lockfile, builds the site, and runs the API/domain tests. Start serves the API, the built website and `/loader.php` on **port 3000**. Open the environment's browser/preview at that port. Choose **Enter local workspace** to use the local demonstration account. `PORT` and `BIND_HOST` override startup binding.
+Setup creates an isolated `.venv`, installs pinned Python requirements and the npm lockfile, builds the site, and runs the API/domain tests. The optional Docker image enables the tested isolated OCR parser; build it before running the full OCR/browser tests. Start runs separate web and pipeline processes and serves the site and `/loader.php` on **port 3000**. Open the environment's browser/preview at that port. Choose **Enter local workspace** for the local demonstration account. `PORT` and `BIND_HOST` override startup binding. Missing isolation pauses jobs with an explicit worker issue; see [worker modes and no-root cPanel setup](docs/PROCESSING_PIPELINE.md).
 
 The loader is a portable HTML/PHP view: it can be served by this application without a PHP interpreter, or by a PHP-capable host that routes `/api/v1` to the running CAESAR API. GitHub stores source files; it does not execute the application. A standalone copy can display the adjacent Markdown lessons file, but needs the API to load private project drawings.
 
@@ -36,18 +37,23 @@ credentials and saves an account-private file with mode 600.
 
 For frontend development, run `npm run api` (port 8010) and `npm run dev` (Vite on port 5173) in separate terminals. Vite proxies authenticated API requests. Workspace dates use Australia/Perth; override `VITE_WORKSPACE_TIMEZONE` at build time for another workspace timezone.
 
-Alternatively, `docker compose up --build` starts the application on **127.0.0.1:3000** with retained private data in a named volume. The Linux Compose configuration supplies the host CA bundle as a temporary build secret; set `CAESAR_CA_BUNDLE` if its location differs. TLS verification remains enabled and the bundle is not copied into image layers.
+Alternatively, `docker compose up --build` starts the web and separate no-network pipeline services on **127.0.0.1:3000**, with retained private data in a named volume. The parser uses Landlock/seccomp when supported by the host. For a trusted development pilot without that support, explicitly select `CAESAR_PIPELINE_ALLOW_BOUNDED=1 docker compose up --build`; this permits resource-limited parsing inside the worker container without a per-job filesystem boundary. The Linux Compose configuration supplies the host CA bundle as a temporary build secret; set `CAESAR_CA_BUNDLE` if its location differs. TLS verification remains enabled and the bundle is not copied into image layers.
 
 ## Daily engineering workflow
 
-1. Create a project with its full line ID. Upload PDFs (30 MB / 100 pages per source, 200 pages per project). Confirm printed sheet identities in Drawing register. The original source bytes and SHA-256 are preserved.
+1. Create a project with its full line ID and select a PDF (30 MiB / 100 pages per source, 200 active pages per project). **Project flow** tracks registration, evidence/OCR, proposals and review publication. Confirm printed identities in Drawing register. Source bytes and SHA-256 are preserved.
 2. Open Drawing workspace. Every page is rendered inside the website with zoom, pan, page switching and an editable overlay. **Add point** places a provisional marker; assign main/branch order and component type explicitly. Branches reference an existing main-run tee.
 3. Enter engineering stations with explicit units, for example `1200 mm`, `2 1/8 in` or `3' 2"`, and source evidence. Unknown stations stay null and blue. Drag graphic bubbles/anchors separately: paper coordinates never establish a physical dimension.
 4. Use **Drawing annotations** for editable text, rectangles, circles and lines. Click an object on the drawing to edit its text, colour or position. These graphic notes do not change physical stations.
 5. Reconcile materials with the original drawing. Add, correct or remove inventory rows. Match flange/valve specifications against an approved catalog dataset; see the controlled catalog workflow below.
 6. Place axes and schedules in clear areas, inspect all sheets, and review exceptions. The website shows source-derived numbers and quality labels; unsupported values remain N/A.
-7. Generate a review bundle and use **Preview generated PDF** to inspect the actual native PDF inside the website. Download the ZIP when ready.
+7. Open **Excel results** for formatted node/element/support/component/exception/source tables. Enter source-backed signed geometry and properties through an element row. Export editable **XLSX**, **CSV tables**, or a gated **CAESAR II 15.1 neutral CII** straight-pipe candidate. See [output contracts](docs/CAESAR_FORMATS.md).
 8. Inspect history, compare revisions, download a model snapshot, or restore an earlier revision as a new draft. Existing snapshots and earlier exports are retained.
+
+The worker publishes an initial review bundle automatically. Corrections create
+a durable refresh from cached evidence without overwriting reviewed objects.
+Use **Preview generated PDF** inside the site; **Upload revision** replaces one
+source while preserving other documents and archiving changed-page edits.
 
 The synthetic two-sheet training project is clearly labelled and is not the missing legacy 1010 drawing. Its sample stations are not real engineering evidence. The system does not infer physical lengths from NOT-TO-SCALE graphics.
 
@@ -65,7 +71,7 @@ Catalog source quality and actual manufacturer confirmation are separate. Even a
 
 ## Exports and compatibility
 
-ZIP bundles contain the annotated PDF, node CSV, complete project JSON, material schedule, catalog provenance snapshots, exception report, numbering map, native annotation manifest and structural QA report. Each added label, circle, leader, text note, shape, axis primitive, schedule row and border is a native PDF annotation. Original page content streams are compared after serialization. Text and tables that do not fit their boxes fail export rather than disappearing silently.
+ZIP bundles contain the annotated PDF, editable engineering workbook, node CSV, complete project JSON, material schedule, catalog provenance snapshots, exception report, numbering map, native annotation manifest and structural QA report. Each added label, circle, leader, text note, shape, axis primitive, schedule row and border is a native PDF annotation. Original page content streams are compared after serialization. Text and tables that do not fit their boxes fail export rather than disappearing silently.
 
 The website is the primary drawing editor. Exports use standard annotation types for broad PDF-editor compatibility. Reader/editor capabilities vary; universal editing support across every PDF application cannot be guaranteed. Automated checks exercise native object editing/reopening and actual generated-PDF rendering in the browser. No Adobe-only dependency is imposed.
 
@@ -87,8 +93,8 @@ Private data lives in ignored `.local/` by default; `CAESAR_DATA_DIR` changes th
 
 Local mode (`CAESAR_LOCAL_DEMO=1`, default) supplies a local administrator account without a password. Keep it private. For authenticated mode use `CAESAR_LOCAL_DEMO=0`, `CAESAR_ADMIN_EMAIL`, and a secure `CAESAR_ADMIN_PASSWORD` of at least 12 characters; `CAESAR_SECURE_COOKIE=1` requires HTTPS for cookies. Sessions are opaque, HttpOnly, SameSite=Strict and expire after 12 hours. Every project/artifact/catalog operation checks server-side permissions and tenant scope. The lessons register is deliberately public documentation.
 
-This is a local/manual engineering-review system, not a full stress solver or a completed enterprise SaaS. Remaining production work includes OIDC/MFA and team administration, independent approvals, isolated no-network parser workers, malware scanning, durable jobs, production database/object storage, managed backups, monitoring and external-editor qualification. PDF parsing has resource limits and active-content rejection, which are not a malware sandbox.
+This pilot automates evidence extraction and review drafts; it is not a stress solver or a completed enterprise SaaS. Durable jobs, intake quotas/rates, and the local isolated parser are implemented. Remaining work includes general component/geometry recognition, independent engineering approval, OIDC/MFA/team administration, remote worker transport, malware scanning, production database/object storage, managed backups, monitoring and external-editor/CAESAR qualification. Bounded same-account hosting mode is not a filesystem sandbox.
 
-Only the planning PDF was supplied. The v1.2 generator, original 1010 source/review fixtures, 13 legacy tests and canonical flange/valve workbooks remain absent. Their numerical and 48/49-node regression gates are unrun. See [implementation status](docs/IMPLEMENTATION_STATUS.md) and [architecture](docs/ARCHITECTURE.md).
+The planning PDF and reviewed 1010 PDF were supplied. The v1.2 generator, original/golden 1010 source fixture, 13 legacy tests and canonical flange/valve workbooks remain absent. Their numerical and 48/49-node regression gates are unrun. See [implementation status](docs/IMPLEMENTATION_STATUS.md) and [architecture](docs/ARCHITECTURE.md).
 
 Resolve PyMuPDF's AGPL/commercial licensing before a proprietary hosted release. The PDF adapter remains isolated for replacement. No production deployment or environment publication is performed by the setup scripts.

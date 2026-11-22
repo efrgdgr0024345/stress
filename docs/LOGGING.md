@@ -103,3 +103,14 @@ existing updater preserves the diagnostic store outside the code directory;
 rolling code back does not delete logs. If the hosting site has not yet installed
 0.3.0's updater, use the newly pinned terminal installer once. GitHub publication
 alone does not modify that hosting account.
+
+## Processing jobs
+
+Version 0.4.0 emits stage start/completion/failure, run/lease/attempt identifiers,
+timings, page and exception counts, isolation capability, cancellation/retry,
+cached correction and artifact-publication events. The Project flow view shows
+the durable run state and source exceptions; Logs correlates server requests
+with worker events. Source text/word evidence remains in authenticated project
+evidence downloads rather than raw diagnostic messages. Per-page OCR output
+and every drawing pixel are not copied into the log database. The existing
+seven-day/20,000-row limits still apply.

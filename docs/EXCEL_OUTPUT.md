@@ -27,10 +27,12 @@ strings without rounding away engineering evidence.
 
 The workbook schema is `caesar-engineering-workbook-1`. This is a working Excel
 file and an engineering data handoff, **not a claim that arbitrary `.xlsx` files
-are accepted by CAESAR II**. Direct import is the user's new expanded requirement
-(OOS-005). It needs the actual CAESAR II version, supported import method/template,
-field/unit/code mappings and a successful round trip in that application.
-Those details have been requested; no proprietary/neutral format is guessed.
+are accepted by CAESAR II**. The user selected two or three useful output types:
+the website provides this workbook, UTF-8 CSV tables in a ZIP, and a gated native
+CAESAR II 15.1 `.cii` import candidate. See [formats and vendor sources](CAESAR_FORMATS.md).
+Direct import is expanded requirement OOS-005. The first native profile supports
+straight pipe/endpoints with complete, explicit engineering input; it does not
+claim full drawing-to-CAESAR conversion or application round-trip qualification.
 
 Before an import-ready claim, qualify at least: all active elements represented;
 correct signed deltas/units; actual pipe OD/wall/material and load properties;
@@ -44,3 +46,12 @@ The web/API protects current project revisions. Changing cells in a downloaded
 workbook does not silently overwrite website data or run software on a Windows
 or Mac computer. An import connector/round-trip edit contract requires its own
 qualified mapping; the exported file contains no executable installer or macro.
+
+In the website, **Nodes**, **CAESAR input**, **Supports**, **Components**,
+**Exceptions** and **Sources** are live views of the same server-side table
+projection used for XLSX/CSV. Element rows open an evidence-backed editor;
+**CAESAR export settings** records the code ID, ambient temperature, vertical
+axis and explicitly acknowledged local origin. Native export remains disabled
+while required inputs/components are unresolved. Wide tables scroll inside
+their panel on small screens. Unknown counts and pipe lengths are separate:
+44.9 m of pipe must not become 44 or 45 component instances.

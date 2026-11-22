@@ -1,4 +1,5 @@
 import hashlib
+import fcntl
 import json
 from pathlib import Path
 import sqlite3
@@ -43,6 +44,17 @@ class UpdateApiTests(unittest.TestCase):
         finally:main.LOCAL_DEMO=previous
 
 class ReleaseTests(unittest.TestCase):
+    def test_update_waits_without_swapping_code_while_drawing_worker_is_busy(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root,public,data,directory,config,release=self.fixture(Path(temporary))
+            worker=data/'pipeline';worker.mkdir()
+            u.write(directory/'state.json',{'status':'queued','action':'install'})
+            with (worker/'runner.lock').open('a') as running:
+                fcntl.flock(running,fcntl.LOCK_EX|fcntl.LOCK_NB)
+                with patch.object(u,'activate') as activate:u.run(directory)
+                activate.assert_not_called()
+            self.assertEqual(u.read(directory/'state.json')['status'],'queued')
+            self.assertEqual((root/'marker').read_text(),'old code')
     def test_hash_and_traversal_rejected(self):
         import io,zipfile
         with tempfile.TemporaryDirectory() as temporary:

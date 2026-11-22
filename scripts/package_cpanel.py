@@ -12,8 +12,8 @@ def build():
     if not (ROOT / "dist/index.html").is_file():
         raise SystemExit("Build the website first: npm ci && npm run build")
     paths = [ROOT / name for name in (
-        "loader.php", "LESSONS_LEARNED.md", "README.md", "RELEASE.json", "requirements.txt", "scripts/run_updates.py", "scripts/enable_updates.py",
-        "requirements-cpanel.txt", "passenger_wsgi.py", "docs/CPANEL.md", "scripts/check_host.py", "scripts/configure_cpanel.py",
+        "loader.php", "LESSONS_LEARNED.md", "README.md", "RELEASE.json", "requirements.txt", "scripts/run_updates.py", "scripts/enable_updates.py", "scripts/run_pipeline.py", "scripts/enable_pipeline.py",
+        "requirements-cpanel.txt", "passenger_wsgi.py", "docs/CPANEL.md", "docs/PROCESSING_PIPELINE.md", "docs/CAESAR_FORMATS.md", "docs/EXCEL_OUTPUT.md", "docs/LOGGING.md", "scripts/check_host.py", "scripts/configure_cpanel.py",
     )]
     for directory in ("services", "packages"):
         paths.extend((ROOT / directory).rglob("*.py"))

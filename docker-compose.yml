@@ -17,6 +17,34 @@ services:
     cap_drop:
       - ALL
     mem_limit: 1g
+  pipeline:
+    build:
+      context: .
+      dockerfile: worker.Dockerfile
+      secrets:
+        - proxy_ca
+    entrypoint: ["python", "scripts/run_pipeline.py", "--watch"]
+    environment:
+      CAESAR_LOCAL_DEMO: "1"
+      CAESAR_DATA_DIR: /app/data
+      CAESAR_PIPELINE_ALLOW_BOUNDED: ${CAESAR_PIPELINE_ALLOW_BOUNDED:-0}
+    volumes:
+      - caesar-data:/app/data
+    depends_on:
+      caesar:
+        condition: service_healthy
+    network_mode: none
+    read_only: true
+    tmpfs:
+      - /tmp:rw,nosuid,nodev,noexec,size=128m
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    mem_limit: 2g
+    cpus: 1
+    pids_limit: 64
 volumes:
   caesar-data:
 secrets:

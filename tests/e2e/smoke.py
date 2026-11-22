@@ -19,6 +19,7 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 from catalog_workflow import exercise_catalogs
 from real_drawing import exercise_real_drawing
+from pipeline_workflow import exercise_pipeline
 
 Path("/tmp/caesar-screens").mkdir(exist_ok=True)
 
@@ -52,6 +53,7 @@ def run():
                 stdout=log,
                 stderr=log,
             )
+            worker = None
             try:
                 for _ in range(100):
                     try:
@@ -61,6 +63,7 @@ def run():
                         time.sleep(0.1)
                 else:
                     raise RuntimeError("Test server did not become ready.")
+                worker=subprocess.Popen([sys.executable,'scripts/run_pipeline.py','--watch','--data-dir',str(Path(tmp)/'data')],cwd=ROOT,env={**os.environ,'CAESAR_DATA_DIR':str(Path(tmp)/'data'),'CAESAR_LOCAL_DEMO':'1'},stdout=log,stderr=log)
                 with sync_playwright() as playwright:
                     browser = playwright.chromium.launch(
                         executable_path=os.environ.get(
@@ -284,6 +287,7 @@ def run():
                     page.get_by_role(
                         "button", name="Create project", exact=True
                     ).click()
+                    expect(page.locator('.pipeline-banner')).to_contain_text('Review draft ready',timeout=120000)
                     try:
                         expect(page.locator(".drawing-overlay")).to_be_visible(
                             timeout=15000
@@ -326,6 +330,7 @@ def run():
                     assert abs(float(visible.get_attribute("cy")) - anchor[0]) < 0.01
                     page.reload()
                     expect(page.locator(".node-glyph")).to_have_count(1)
+                    exercise_pipeline(page,context,base,tmp)
                     exercise_real_drawing(page, context, base, tmp)
                     # A mobile viewport must not introduce document-level horizontal scrolling.
                     page.set_viewport_size({"width": 390, "height": 844})
@@ -350,6 +355,9 @@ def run():
                         "PASS: project loader and all lessons, in-browser drawing/notes, node editing, catalog mapping/approval/exact matching, native PDF preview/download, rotated CropBox upload, persistence, and mobile layout; no browser errors."
                     )
             finally:
+                if worker:
+                    worker.terminate()
+                    worker.wait(timeout=30)
                 process.terminate()
                 process.wait(timeout=10)
 

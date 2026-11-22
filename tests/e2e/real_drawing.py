@@ -1,8 +1,11 @@
 """Browser regression using the user's reviewed PDF, with temporary projects."""
 import hashlib
+import json
+import os
 from collections import Counter
 from pathlib import Path
 import zipfile
+import time
 
 import fitz
 from playwright.sync_api import expect
@@ -37,6 +40,7 @@ def exercise_real_drawing(page, context, base, directory):
     page.locator(".upload-zone input").set_input_files(SOURCE)
     page.get_by_role("button", name="Create project", exact=True).click()
     expect(page.locator(".drawing-overlay")).to_be_visible(timeout=20000)
+    expect(page.locator('.pipeline-banner')).to_contain_text('Review draft ready',timeout=180000)
     page.get_by_label("Active sheet").select_option("0")
     first_source=wait_for_drawing(page,".paper canvas")
     expect(page.get_by_label("Active sheet").locator("option")).to_have_count(2)
@@ -44,7 +48,8 @@ def exercise_real_drawing(page, context, base, directory):
     expect(page.get_by_label("Active sheet")).to_have_value("1")
     wait_for_drawing(page,".paper canvas",first_source)
     page.get_by_role("button", name="Source text", exact=True).click()
-    expect(page.locator(".source-text")).to_contain_text("No searchable text")
+    expect(page.locator(".source-text")).to_be_visible()
+    assert len(page.locator('.source-text').inner_text())>100
     page.get_by_label("Previous sheet", exact=True).click()
     page.get_by_label("Drawing annotations", exact=True).click()
     page.get_by_label("Note text", exact=True).fill("SOFTWARE TEST ONLY - engineering unverified")
@@ -54,6 +59,14 @@ def exercise_real_drawing(page, context, base, directory):
     page.get_by_label("Left / start X (PDF points)", exact=True).fill("50")
     page.get_by_role("button", name="Save annotation", exact=True).click()
     expect(page.get_by_role("dialog")).to_have_count(0)
+    project = next(p for p in context.request.get(base + "/api/v1/projects").json()
+                   if p["title"] == "1010 real drawing software test")
+    for _ in range(100):
+        status=context.request.get(base+f"/api/v1/projects/{project['id']}/pipeline").json()['runs'][0]
+        if status['state']=='DONE' and status['revision']>=project['version']:break
+        if status['state'] in ('FAILED','CANCELLED'):raise AssertionError(status)
+        time.sleep(.2)
+    else:raise AssertionError('Updated real drawing draft did not complete')
     page.reload()
     expect(page.locator(".free-annotation")).to_have_count(1)
     wait_for_drawing(page,".paper canvas")
@@ -71,6 +84,16 @@ def exercise_real_drawing(page, context, base, directory):
         page.get_by_role("button", name="Download review bundle (.zip)").click()
     bundle = Path(directory) / "1010-real-review.zip"
     download.value.save_as(bundle)
+    evidence_dir=os.environ.get('CAESAR_TEST_ARTIFACTS_DIR')
+    if evidence_dir:
+        output=Path(evidence_dir);output.mkdir(parents=True,exist_ok=True)
+        with zipfile.ZipFile(bundle) as archive:
+            (output/'1010-engineering-review.xlsx').write_bytes(archive.read('engineering-workbook.xlsx'))
+        csv=context.request.get(base+f"/api/v1/projects/{project['id']}/results/csv")
+        assert csv.status==200
+        (output/'1010-csv-tables.zip').write_bytes(csv.body())
+        results=context.request.get(base+f"/api/v1/projects/{project['id']}/results").json()
+        (output/'validation.json').write_text(json.dumps({'format':'caesar-real-file-validation-1','release':'0.4.0','source_sha256':hashlib.sha256(SOURCE.read_bytes()).hexdigest(),'pages':len(project['sheets']),'material_proposals':len(project['materials']),'engineering_points':len(project['nodes']),'coverage':project.get('automation',{}).get('coverage'),'native_export':results['native'],'engineering_verified':False,'workbook_reopened':True},indent=2)+'\n')
     with zipfile.ZipFile(bundle) as archive:
         pdf = next(n for n in archive.namelist() if n.endswith(".pdf"))
         with fitz.open(SOURCE) as source, fitz.open(stream=archive.read(pdf), filetype="pdf") as output:

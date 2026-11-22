@@ -1,0 +1,31 @@
+{
+  "format": "caesar-real-file-validation-1",
+  "release": "0.4.0",
+  "source_sha256": "7b97d44bef3d544c4c98ed0667c29607ce58fa4a401dd2463f66010a9615bb59",
+  "pages": 2,
+  "material_proposals": 32,
+  "engineering_points": 0,
+  "coverage": {
+    "pages": 2,
+    "material_rows": 32,
+    "proposed_points": 0,
+    "accepted_points": 0,
+    "ocr_pages": 2
+  },
+  "native_export": {
+    "profile": "caesar-15.1-straight-pipe-v1",
+    "target": "CAESAR II 15.1",
+    "available": false,
+    "qualified_application_roundtrip": false,
+    "missing": [
+      "A reviewed connected pipe route is required.",
+      "Declare the current first main point as the local model origin; surveyed coordinates are not invented.",
+      "A finite ambient temperature from -273.15 to 2000 Celsius is required.",
+      "The explicit CAESAR piping code ID is required.",
+      "Select the vertical model axis."
+    ],
+    "status": "IMPORT_CANDIDATE_ONLY"
+  },
+  "engineering_verified": false,
+  "workbook_reopened": true
+}

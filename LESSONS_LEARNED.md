@@ -123,3 +123,43 @@ Use the existing entry format: a unique `LESSON-###` heading, category, status, 
 - Lesson: Both the browser and API blocked notes-only PDF export until a physical node existed. The real drawing regression exposed this unnecessary requirement.
 - Action: Enable review export when source sheets exist. Keep empty or unverified engineering models explicit, and test upload, notes and export without adding fabricated points.
 - Evidence: `tests/e2e/real_drawing.py` exports the actual reviewed 1010 PDF with saved notes and zero engineering nodes.
+
+## LESSON-016 — Automatic proposals must survive rollback as unverified
+
+- Category: Engineering integrity
+- Status: Adopted
+- Lesson: A new application's review flag may be invisible to an older release after rollback. Storing a proposed station as an accepted numeric station could then make it look verified.
+- Action: Keep canonical stations null until acceptance and store proposed values separately. Generate explicit review exceptions and retain original evidence through cached refreshes.
+- Evidence: Pipeline and workbook regressions check blank accepted stations and separate source proposals.
+
+## LESSON-017 — Worker completion must be tied to a current lease and revision
+
+- Category: Automation
+- Status: Adopted
+- Lesson: A timed-out, cancelled or duplicate worker can finish later and overwrite newer engineer edits unless publication proves ownership.
+- Action: Use durable leases, fencing tokens, revision checks, unique artifact keys and a transactional correction outbox. Wait for active drawing work before swapping application code.
+- Evidence: Expired-lease, cancellation-during-export, retained-edit and updater-worker-lock regressions.
+
+## LESSON-018 — Pipe length is not a component count
+
+- Category: Source quantities
+- Status: Adopted
+- Lesson: A material row such as 44.9 m of pipe must not be rounded to 44 or 45 instances. OCR without a proved unit cannot settle that distinction.
+- Action: Retain raw source quantities, separate count and length units, and leave unresolved counts blank. Require evidence when correcting quantities.
+- Evidence: `test_pipe_length_quantity_is_not_coerced_to_component_count`; the website Components sheet and exported workbook retain source values separately.
+
+## LESSON-019 — A working Excel file is different from a native CAESAR model
+
+- Category: Interchange
+- Status: Adopted
+- Lesson: Renaming a spreadsheet or guessing a neutral format cannot establish direct CAESAR compatibility.
+- Action: Provide editable XLSX and CSV, implement the published versioned CII contract only for supported complete inputs, block unsupported components and keep actual application import qualification visible.
+- Evidence: `docs/CAESAR_FORMATS.md`; independent fixed-field tests; conditional native export controls in Excel results.
+
+## LESSON-020 — A readiness gate must count every active element
+
+- Category: Validation
+- Status: Adopted
+- Lesson: Checking only entered element rows can report completion when other active model edges have no data.
+- Action: Derive expected elements from the full topology, compare all required fields and test partial coverage explicitly. Use the same server-side table projection for website, Excel and CSV outputs.
+- Evidence: The one-of-three element regression remains incomplete; browser tests inspect the actual numeric workbook and CSV downloads.

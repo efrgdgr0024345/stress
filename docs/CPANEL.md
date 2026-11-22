@@ -6,6 +6,12 @@ The package includes the built React website; Node.js is not needed on the host.
 Root or sudo access is not required: dependencies install in the account's
 Python application virtual environment. Enabling Passenger itself is the
 hosting provider's responsibility.
+For automatic intake/OCR, the account also needs a scheduled processing runner.
+See [processing setup](PROCESSING_PIPELINE.md). A working Passenger frontend
+does not prove worker isolation or Tesseract availability. Existing installations
+can install release 0.4.0 through **System updates**, then use **Project flow →
+Enable processing**. The existing five-minute updater cron also advances jobs;
+the dedicated one-minute schedule reduces queue delay. No new VM is needed.
 The WSGI entry point creates its ASGI event loop lazily in each serving worker;
 it does not start adapter threads before the hosting server forks workers.
 PHP-only hosting cannot run the FastAPI API. Ask your provider about Python

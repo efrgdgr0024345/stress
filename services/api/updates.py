@@ -47,6 +47,18 @@ def read(path, default=None):
     return json.loads(path.read_text()) if path.exists() else (default or {})
 
 
+@contextmanager
+def pipeline_guard(directory):
+    """Never replace parser code while a separate pipeline runner is using it."""
+    worker=directory.parent/'pipeline';worker.mkdir(parents=True,exist_ok=True,mode=0o700)
+    with (worker/'runner.lock').open('a') as stream:
+        try:fcntl.flock(stream,fcntl.LOCK_EX|fcntl.LOCK_NB)
+        except BlockingIOError:
+            yield False
+            return
+        yield True
+
+
 def fetch(url, limit=32*1024*1024):
     with urlopen(Request(url, headers={"User-Agent":"CAESAR-updater", "Accept":"application/vnd.github+json"}), timeout=20) as response:
         data = response.read(limit + 1)
@@ -239,7 +251,11 @@ def rollback(directory, config):
 
 
 def run(directory):
-    with lock(directory):
+    with lock(directory),pipeline_guard(directory) as idle:
+        if not idle:
+            write(directory/'heartbeat.json',{'at':time.time()})
+            diag.emit(directory.parent,'update.waiting_for_pipeline',source='updater')
+            return
         config = read(directory/"config.json")
         if not config:
             raise ValueError("Updater is not configured")

@@ -402,6 +402,7 @@ def install(api):
             if not material:
                 raise HTTPException(404, "Material not found.")
             material.pop("catalog_match", None)
+            material["auto_match_disabled"]=True
             p["materials_reviewed"] = False
             p["layout_reviewed"] = False
 
@@ -416,6 +417,7 @@ def install(api):
         def update(p):
             if not any(m["id"] == material_id for m in p["materials"]):
                 raise HTTPException(404, "Material not found.")
+            p.setdefault("automation_tombstones",{}).setdefault("material_ids",[]).append(material_id)
             p["materials"] = [m for m in p["materials"] if m["id"] != material_id]
             p["materials_reviewed"] = False
             p["layout_reviewed"] = False

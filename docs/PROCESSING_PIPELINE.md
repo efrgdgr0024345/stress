@@ -23,6 +23,11 @@ compatibility path; the website uses `/intake`.
 6. Preview the PDF or export the Excel workbook/review ZIP. A finished job is an
    engineering-review draft, never automatic engineering approval.
 
+The Results page also exports CSV tables and a conditional native CAESAR II
+15.1 straight-pipe `.cii` candidate. Missing geometry/properties and unsupported
+components block the native file; [the format contract](CAESAR_FORMATS.md)
+records application qualification still required.
+
 **Upload revision** explicitly replaces one active PDF. Other documents remain
 active. Unique unchanged pages retain IDs based on identical content streams;
 changed pages receive new identities and archive previous points/notes for

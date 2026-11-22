@@ -53,8 +53,9 @@ type Draft = Omit<PipeNode, "id" | "number" | "reasons" | "support_gap_mm"> & {
   id?: string;
   number?: number;
   dimension: string;
+  _version?: number;
 };
-type Mode = "select" | "pan" | "add" | "link" | "axis" | "table";
+type Mode = "select" | "pan" | "add" | "link" | "axis" | "table" | "route";
 export function DrawingEditor({
   project,
   sheet,
@@ -65,6 +66,7 @@ export function DrawingEditor({
   mutation,
   busy,
   notify,
+  evidenceRegion,
 }: {
   project: Project;
   sheet: Sheet;
@@ -75,6 +77,7 @@ export function DrawingEditor({
   mutation: Mutation;
   busy: boolean;
   notify: (m: string, e?: boolean) => void;
+  evidenceRegion?: number[] | null;
 }) {
   const [pdfPage, setPdfPage] = useState<pdfjs.PDFPageProxy | null>(null),
     [error, setError] = useState(""),
@@ -89,6 +92,15 @@ export function DrawingEditor({
     [nodeQuery, setNodeQuery] = useState(""),
     [inspectorTab, setInspectorTab] = useState<"point" | "source">("point"),
     [linkId, setLinkId] = useState("");
+  const [routeStart, setRouteStart] = useState<number | null>(null);
+  const previousSelection = useRef(selected);
+  useEffect(() => {
+    setRouteStart(null);
+    setMode("select");
+  }, [sheet.id]);
+  const sourceGraph = project.automation?.graph_proposals?.find(
+    (g) => g.sheet_id === sheet.id,
+  );
   const [notesOpen, setNotesOpen] = useState(false),
     [editingNote, setEditingNote] = useState<DrawingNote | undefined>();
   const [scheduleLines, setScheduleLines] = useState<string[]>([]);
@@ -162,10 +174,13 @@ export function DrawingEditor({
     return () => task.cancel();
   }, [pdfPage, scale]);
   useEffect(() => {
+    if (dirty && previousSelection.current === selected) return;
+    previousSelection.current = selected;
     const node = project.nodes.find((n) => n.id === selected);
     if (node) {
       setDraft({
         ...structuredClone(node),
+        _version: project.version,
         dimension:
           node.dimension_input ||
           (node.station_mm === null ? "" : `${node.station_mm} mm`),
@@ -220,11 +235,12 @@ export function DrawingEditor({
     setDirty(true);
   };
   const clickDrawing = async (e: React.PointerEvent) => {
-    if (drag.current || mode === "pan") return;
+    if (drag.current || mode === "pan" || mode === "route") return;
     const anchor = clamp(eventPoint(e));
     if (mode === "add") {
       onSelect(null);
       setDraft({
+        _version: project.version,
         line_id: sheet.line_id,
         route: "main",
         order:
@@ -346,7 +362,7 @@ export function DrawingEditor({
   const save = async () => {
     if (!draft) return;
     const body = {
-      version: project.version,
+      version: draft._version ?? project.version,
       line_id: draft.line_id,
       route: draft.route,
       takeoff_id: draft.takeoff_id || null,
@@ -533,8 +549,26 @@ export function DrawingEditor({
               <Hand size={17} />
             </button>
             <span className="toolbar-divider" />
+            {!!sourceGraph?.vertices.length && (
+              <button
+                className={`tool ${mode === "route" ? "chosen" : ""}`}
+                aria-label="Choose source route"
+                title="Select main route start and end from source linework"
+                disabled={busy || dirty}
+                onClick={() => {
+                  setMode(mode === "route" ? "select" : "route");
+                  setRouteStart(null);
+                  notify(
+                    "Choose the main route start, then its end. Proposed stations remain unverified.",
+                  );
+                }}
+              >
+                <Route size={17} />
+              </button>
+            )}
             <button
               className={`button compact ${mode === "add" ? "primary" : "secondary"}`}
+              disabled={busy}
               onClick={() => {
                 if (dirty && !confirm("Discard unsaved point changes?")) return;
                 onSelect(null);
@@ -551,6 +585,7 @@ export function DrawingEditor({
               <button
                 className="tool"
                 aria-label="Drawing annotations"
+                disabled={busy}
                 title="Edit drawing notes and graphic objects"
                 onClick={() => {
                   setEditingNote(undefined);
@@ -562,6 +597,7 @@ export function DrawingEditor({
               <button
                 className="tool"
                 aria-label="Layout tools"
+                disabled={busy}
                 title="Place axis or schedule"
                 onClick={() => setMode(mode === "axis" ? "table" : "axis")}
               >
@@ -670,6 +706,90 @@ export function DrawingEditor({
               }}
               onPointerCancel={() => (drag.current = null)}
             >
+              {mode === "route" && sourceGraph && (
+                <g className="source-route-candidates">
+                  {sourceGraph.edges.map(([a, b], i) => {
+                    const p = map(sourceGraph.vertices[a]),
+                      q = map(sourceGraph.vertices[b]);
+                    return (
+                      <line
+                        key={i}
+                        x1={p[0]}
+                        y1={p[1]}
+                        x2={q[0]}
+                        y2={q[1]}
+                        stroke="#35a1d8"
+                        strokeWidth={3}
+                        strokeDasharray="6 4"
+                        pointerEvents="none"
+                      />
+                    );
+                  })}
+                  {sourceGraph.vertices.map((vertex, i) => {
+                    const [x, y] = map(vertex);
+                    return (
+                      <circle
+                        key={i}
+                        className="source-route-vertex"
+                        data-vertex={i}
+                        cx={x}
+                        cy={y}
+                        r={7}
+                        fill={routeStart === i ? "#ffc14f" : "#fff"}
+                        stroke="#198bdd"
+                        strokeWidth={2}
+                        style={{ cursor: "pointer" }}
+                        onPointerDown={async (e) => {
+                          e.stopPropagation();
+                          if (routeStart === null) {
+                            setRouteStart(i);
+                            notify("Start chosen. Select the main route end.");
+                          } else {
+                            const p = await mutation("/pipeline/route", {
+                              version: project.version,
+                              sheet_id: sheet.id,
+                              start: routeStart,
+                              end: i,
+                            });
+                            if (p) {
+                              setMode("select");
+                              setRouteStart(null);
+                              notify(
+                                "Main and simple branches proposed. Review physical evidence; the draft refreshes automatically.",
+                              );
+                            }
+                          }
+                        }}
+                      >
+                        <title>
+                          {routeStart === null
+                            ? "Choose main route start"
+                            : "Choose main route end"}
+                        </title>
+                      </circle>
+                    );
+                  })}
+                </g>
+              )}
+              {evidenceRegion && evidenceRegion.length === 4 && (
+                <polygon
+                  points={[
+                    [evidenceRegion[0], evidenceRegion[1]],
+                    [evidenceRegion[2], evidenceRegion[1]],
+                    [evidenceRegion[2], evidenceRegion[3]],
+                    [evidenceRegion[0], evidenceRegion[3]],
+                  ]
+                    .map((p) => map(p as Point).join(","))
+                    .join(" ")}
+                  fill="#ffc35522"
+                  stroke="#d9992d"
+                  strokeWidth={2}
+                  strokeDasharray="6 4"
+                  pointerEvents="none"
+                >
+                  <title>Selected source evidence</title>
+                </polygon>
+              )}
               {showRoutes &&
                 project.graph?.edges.map((edge) => {
                   const a = displayNodes
@@ -902,6 +1022,34 @@ export function DrawingEditor({
         </div>
       </div>
       <aside className="inspector">
+        {dirty &&
+          draft?._version !== undefined &&
+          draft._version !== project.version && (
+            <div className="notice amber">
+              <span>
+                The project updated. Your unsaved values are retained.
+                <button
+                  className="text-button"
+                  onClick={() => {
+                    if (current)
+                      setDraft({
+                        ...structuredClone(current),
+                        _version: project.version,
+                        dimension:
+                          current.dimension_input ||
+                          (current.station_mm === null
+                            ? ""
+                            : `${current.station_mm} mm`),
+                      });
+                    else setDraft(null);
+                    setDirty(false);
+                  }}
+                >
+                  Discard edits and reload
+                </button>
+              </span>
+            </div>
+          )}
         <div className="inspector-tabs">
           <button
             className={inspectorTab === "point" ? "selected" : ""}
@@ -924,12 +1072,15 @@ export function DrawingEditor({
               verification. Stroke lettering and raster content may not appear.
             </p>
             <pre className="source-text">
-              {sheet.text ||
+              {sheet.ocr_text ||
+                sheet.text ||
                 "No searchable text was found. Review the original page manually."}
             </pre>
             <a
               className="button secondary full compact"
-              href={appPath(`api/v1/projects/${project.id}/sources/${sheet.source_id}`)}
+              href={appPath(
+                `api/v1/projects/${project.id}/sources/${sheet.source_id}`,
+              )}
             >
               <ArrowDownToLine size={14} />
               Download original
@@ -1077,6 +1228,28 @@ export function DrawingEditor({
                 />
                 <small>Explicit units required. Blank = unverified.</small>
               </label>
+              {draft.proposed_station_mm !== undefined &&
+                draft.proposed_station_mm !== null && (
+                  <div className="notice">
+                    <span>
+                      Extracted source proposal: {draft.proposed_station_mm} mm.
+                      Confirm its dimension chain before using it.
+                      <button
+                        className="text-button"
+                        disabled={busy}
+                        onClick={() =>
+                          patch({
+                            dimension:
+                              draft.proposed_dimension_input ||
+                              `${draft.proposed_station_mm} mm`,
+                          })
+                        }
+                      >
+                        Use source proposal
+                      </button>
+                    </span>
+                  </div>
+                )}
               <label className="form-field">
                 Dimension source / evidence
                 <textarea

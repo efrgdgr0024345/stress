@@ -42,11 +42,16 @@ A journal enables recovery on the next cron tick after a terminated/crashed
 activation. A missing cron service, disk failure or host outage can prevent that
 recovery; keep the private backup and operator access. The update panel reports
 failed/interrupted state. No claim is made that rollback recovers arbitrary
-filesystem failures. SQLite snapshots are retained for operator recovery but
+filesystem failures. The updater takes the separate pipeline runner's lock;
+an active drawing job defers installation to the next cron tick, so parser code
+is not replaced while in use. A long-lived local development worker should be
+stopped for a code update; cPanel runners are bounded and release the lock.
+SQLite snapshots are retained for operator recovery but
 are **not** automatically restored over newer project edits. This is why schema
 and dependency changes are excluded from automatic updates.
 
 Retain backups until the updated system is verified, then remove older private
 backups according to your retention/storage budget. Monitor free disk space.
 The existing engineering/security pilot limitations remain; an updater does
-not complete PDF sandboxing, login rate limiting or the automation pipeline.
+not establish final engineering approval, provider OS visibility or production
+security. See [current worker protections and hosting setup](PROCESSING_PIPELINE.md).

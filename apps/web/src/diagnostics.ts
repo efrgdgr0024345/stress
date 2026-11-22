@@ -8,6 +8,8 @@ type View =
   | "activity"
   | "catalogs"
   | "logs"
+  | "processing"
+  | "results"
   | "login"
   | "unknown";
 type BrowserEvent = {
