@@ -76,7 +76,7 @@ def execute(path, mode, page=0, heartbeat=lambda: None):
                 if use_docker:
                     subprocess.run(["docker","rm","-f",container_name],capture_output=True,timeout=15)
         result = work/"result.json"
-        if result.is_symlink() or not result.is_file() or result.stat().st_size > 16*1024**2:
+        if result.is_symlink() or not result.is_file() or result.stat().st_size > (48 if mode == 'slice' else 16)*1024**2:
             raise ValueError("INVALID_WORKER_RESULT")
         value = json.loads(result.read_text())
         if isinstance(value, dict):

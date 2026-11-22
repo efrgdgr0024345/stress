@@ -14,7 +14,28 @@ if os.environ.get("CAESAR_SANDBOX_CONTAINER") != "1" and os.environ.get("CAESAR_
     restrict(Path.cwd(), Path(__file__).resolve().parents[2])
 from packages.automation.extract import extract_page
 
-if sys.argv[3] == "register":
+if sys.argv[3] == 'slice':
+    import base64, hashlib, fitz
+    from packages.pdf import content_hash
+    with fitz.open(sys.argv[1]) as source:
+        index = int(sys.argv[2])
+        if not 1 <= len(source) <= 100 or not 0 <= index < len(source):
+            raise ValueError('PDF_PAGE_LIMIT')
+        page = source[index]
+        metadata = {'width': page.cropbox.width, 'height': page.cropbox.height,
+                    'rotation': page.rotation, 'content_hash': content_hash(page)}
+        with fitz.open() as single:
+            single.insert_pdf(source, from_page=index, to_page=index, links=False, annots=True)
+            if content_hash(single[0]) != metadata['content_hash']:
+                raise ValueError('SPLIT_CONTENT_CHANGED')
+            content = single.tobytes(garbage=4, deflate=True, no_new_id=True)
+    if len(content) > 30 * 1024**2:
+        result = {'error': 'PAGE_TRANSFER_LIMIT'}
+    else:
+        result = {'page_index': index, 'source_sha256': hashlib.sha256(Path(sys.argv[1]).read_bytes()).hexdigest(),
+                  'page_sha256': hashlib.sha256(content).hexdigest(), 'pdf_base64': base64.b64encode(content).decode(),
+                  'metadata': metadata}
+elif sys.argv[3] == "register":
     import fitz
     from packages.pdf import inspect_pdf
     with fitz.open(sys.argv[1]) as document:

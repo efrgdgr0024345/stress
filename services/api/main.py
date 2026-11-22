@@ -1111,6 +1111,11 @@ install_results(sys.modules[__name__])
 from services.api.digitalocean import install as install_digitalocean
 install_digitalocean(sys.modules[__name__])
 
+from services.api.remote_pages import install as install_remote_pages
+install_remote_pages(sys.modules[__name__])
+from services.api.remote_setup import install as install_remote_setup
+install_remote_setup(sys.modules[__name__])
+
 from services.api.intake_guard import install as install_intake_guard
 install_intake_guard(sys.modules[__name__])
 

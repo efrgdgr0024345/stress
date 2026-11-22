@@ -46,6 +46,8 @@ def schema(conn):
     CREATE TABLE IF NOT EXISTS pipeline_outbox (project_id TEXT, revision INTEGER, actor TEXT, created REAL,
       PRIMARY KEY(project_id,revision));
     """)
+    from services.api.remote_pages import schema as remote_schema
+    remote_schema(conn)
 
 
 def public(row):
@@ -86,6 +88,8 @@ def enqueue(api,project,actor,source_id,sha,filename,replace=None,cached=None):
         usage=sum(json.loads(v["progress"]).get("input_bytes",0) for v in stored)
         if not cached and usage+input_bytes>500*1024**2:raise HTTPException(413,"Automatic intake storage allowance reached. Review private storage before adding drawings.")
         progress={"pages":0,"page":0,"input_bytes":0 if cached else input_bytes,"catalog_versions":pinned_catalogs(conn,actor["tenant"]),"application_release":api.BUILD_ID}
+        from services.api.remote_setup import policy as remote_policy
+        progress['processor'] = 'digitalocean' if remote_policy(api.DATA)['enabled'] else 'hosting'
         stage="compose" if cached else "register"
         if cached:
             previous=conn.execute("SELECT progress FROM pipeline_runs WHERE id=? AND project_id=?",(cached,project["id"])).fetchone()
@@ -129,11 +133,11 @@ def heartbeat(api,job):
         conn.execute("UPDATE pipeline_runs SET lease=?,updated=? WHERE id=? AND state='RUNNING' AND fence=?",(time.time()+300,time.time(),job["id"],job["fence"]))
 
 
-def advance(api,job,progress,next_stage=None,state="QUEUED",error=None):
+def advance(api,job,progress,next_stage=None,state="QUEUED",error=None,next_at=0):
     with api.db() as conn:
         conn.execute("BEGIN IMMEDIATE");fenced(conn,job)
-        conn.execute("UPDATE pipeline_runs SET progress=?,stage=?,state=?,error=?,updated=?,lease=0,attempts=0 WHERE id=?",
-                     (json.dumps(progress),next_stage or job["stage"],state,error,time.time(),job["id"]))
+        conn.execute("UPDATE pipeline_runs SET progress=?,stage=?,state=?,error=?,updated=?,lease=0,attempts=0,next_at=? WHERE id=?",
+                     (json.dumps(progress),next_stage or job["stage"],state,error,time.time(),next_at,job["id"]))
         events(conn,job["id"],job["stage"],"DONE" if state=="QUEUED" else state)
 
 
@@ -245,7 +249,40 @@ def load_pages(api,job,progress):
     return result
 
 
+def publish_page_review(api,conn,job,index,evidence):
+    """Expose source observations early; human edits win during final compose."""
+    actor=actor_for(api,job,conn)
+    p=api.project_read(job['project_id'],actor,conn)
+    sheet=next((s for s in p['sheets'] if s['source_id']==job['source_id'] and s['page_index']==index),None)
+    if not sheet:raise RuntimeError('SOURCE_ALREADY_ACTIVE')
+    found,exceptions,ledger=materials(evidence,sheet,job['sha'])
+    excluded=set(p.get('automation_tombstones',{}).get('material_ids',[]))
+    existing={m['id'] for m in p['materials']}
+    p['materials'].extend(m for m in found if m['id'] not in existing|excluded)
+    if evidence.get('ocr_used'):
+        sheet['ocr_text']='\n'.join(r['text'] for r in text_rows(evidence['words']))[:100000]
+    partial=p.setdefault('automation',{})
+    partial.setdefault('partial_pages',{})[sheet['id']]={
+        'source_sha256':job['sha'],'page_index':index,'run_id':job['id'],
+        'state':'AVAILABLE_FOR_REVIEW','material_ids':[m['id'] for m in found]}
+    partial['processing_run']=job['id']
+    partial['state']='PROCESSING'
+    partial.setdefault('issues',[])
+    partial['issues']=[i for i in partial['issues'] if i['code']!='PAGES_PENDING_PROCESSING']
+    partial['issues'].append({'code':'PAGES_PENDING_PROCESSING','severity':'critical',
+                              'message':'Drawing processing is still running. This review draft is incomplete.'})
+    existing_issues={json.dumps(i,sort_keys=True) for i in partial['issues']}
+    for issue in exceptions:
+        value={**issue,'severity':'critical','message':issue['code'].replace('_',' ').capitalize()}
+        if json.dumps(value,sort_keys=True) not in existing_issues:partial['issues'].append(value)
+    p['materials_reviewed']=False
+    commit_project(api,conn,job,p,'Made a processed drawing page available for review')
+
+
 def extract(api,job,progress):
+    if progress.get('processor') == 'digitalocean':
+        from services.api.remote_pages import step
+        return step(api, job, progress)
     i=progress["page"]
     path=api.DATA/"sources"/f"{job['source_id']}.pdf"
     if hashlib.sha256(path.read_bytes()).hexdigest()!=job["sha"]:raise ValueError("SOURCE_HASH_MISMATCH")
@@ -346,6 +383,7 @@ def compose(api,job,progress):
     dedup={json.dumps(i,sort_keys=True):i for i in issues}
     evidence_pages=[{"sheet_id":s["id"],"source_sha256":pages[s["id"]]["source_sha256"],"run_id":pages[s["id"]]["_owner_run"],"page":pages[s["id"]]["_owner_page"]} for s in working["sheets"] if s["id"] in pages]
     working["automation"]={"run_id":job["id"],"software":VERSION,"state":"REVIEW_DRAFT",
+        'processor':progress.get('processor','hosting'),'remote_transport':progress.get('remote_transport',[]),
         "application_release":api.BUILD_ID,"recognition_profile":"explicit-point-labels-v1" if proposals else "general-review-v1",
         "input_sha256":sorted({s["sha256"] for s in working["sheets"]}),
         "issues":[dict(v,severity=v.get("severity","critical"),message=v.get("message",v["code"].replace("_"," ").capitalize())) for v in dedup.values()],
@@ -455,7 +493,9 @@ def process_one(api):
         diag.emit(api.DATA,"pipeline.stage.completed",run_id=job["id"],stage=job["stage"])
     except Exception as error:
         diag.exception(api.DATA,"pipeline.stage.failed",error,run_id=job["id"],stage=job["stage"])
-        code=str(error) if str(error) in {"PROJECT_CHANGED","SOURCE_ALREADY_ACTIVE","STALE_ATTEMPT","REVISION_TARGET_CHANGED","SOURCE_HASH_MISMATCH","PARSER_ISOLATION_UNAVAILABLE","DOCUMENT_PROCESSING_FAILED","AUTHOR_PERMISSION_REVOKED"} else type(error).__name__
+        from services.api.remote_pages import RemoteFailure
+        safe_remote = isinstance(error, (RemoteFailure, WorkerUnavailable)) and re.fullmatch(r'[A-Z0-9_]{1,100}', str(error))
+        code=str(error) if safe_remote or str(error) in {"PROJECT_CHANGED","SOURCE_ALREADY_ACTIVE","STALE_ATTEMPT","REVISION_TARGET_CHANGED","SOURCE_HASH_MISMATCH","PARSER_ISOLATION_UNAVAILABLE","DOCUMENT_PROCESSING_FAILED","AUTHOR_PERMISSION_REVOKED"} else type(error).__name__
         state="SUPERSEDED" if code in ("PROJECT_CHANGED","SOURCE_ALREADY_ACTIVE","REVISION_TARGET_CHANGED") else "WAITING_WORKER" if isinstance(error,WorkerUnavailable) else "RETRY_WAIT" if isinstance(error,(OSError,TimeoutError,sqlite3.OperationalError)) and job["attempts"]<3 else "FAILED"
         with api.db() as conn:
             conn.execute("BEGIN IMMEDIATE")
@@ -594,6 +634,8 @@ def install(api):
             if not row or row["state"] not in ('FAILED','WAITING_WORKER'):raise HTTPException(409,"Only a failed or waiting job can be retried.")
             if row["revision"] is not None and p["version"]!=row["revision"] and row["stage"] in ('compose','export'):raise HTTPException(409,"The project changed. Refresh the draft using the retained extraction instead.")
             conn.execute("UPDATE pipeline_runs SET state='QUEUED',attempts=0,next_at=0,fence=fence+1,error=NULL,actor=?,updated=? WHERE id=?",(actor['id'],time.time(),run_id))
+            from services.api.remote_pages import retry as retry_remote_pages
+            retry_remote_pages(api, conn, run_id)
             events(conn,run_id,row["stage"],"RETRY_REQUESTED")
         return {"ok":True}
 

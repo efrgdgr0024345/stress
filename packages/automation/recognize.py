@@ -68,7 +68,11 @@ def specifications(text, size, category):
     if not match and "RTJWN" in upper:spec["facing"]="RTJ"
     if match:spec["facing" if category=="flange" else "end_connection"]=match[1]
     match = re.search(r"(\d+(?:\.\d+)?)\s*[\"”]?\s*BORE",upper)
-    if match:spec["api_bore"]=match[1]
+    if match:spec['pipe_bore']=match[1]
+    # A weld-neck pipe bore is not the true API flange bore. Require its own
+    # explicit label; ambiguous SIZE/OCR fractions remain review evidence.
+    match=re.search(r'\bAPI\s+(?:6A\s+)?BORE\s*[:=]?\s*(\d+(?:[ -]+\d+/\d+|/\d+|\.\d+)?)',upper)
+    if match:spec['api_bore']=re.sub(r'\s*-\s*',' ',match[1]).strip()
     return spec
 
 

@@ -67,3 +67,44 @@ class FunctionDemoTests(unittest.TestCase):
         result={'format':'caesar-function-result-1','ok':True}
         self.assertEqual(find_result({'response':{'result':{'body':result}}}),result)
         self.assertIsNone(find_result({'api_key':'SHOULD_NOT_BE_REPORTED'}))
+
+    def remote(self):
+        identity='11111111-1111-4111-8111-111111111111'
+        event=self.event()
+        root='https://easyai.com.au/stress/api/v1/worker/pages/'+identity
+        return {'source_url':root+'/source','result_url':root+'/result','lease':'s'*43,
+                'request_id':identity,'sha256':event['sha256'],'page':0}
+
+    def test_remote_transport_rejects_foreign_urls_redirects_and_missing_activation_before_fetching(self):
+        event=self.remote()
+        with patch.object(handler,'transfer') as transfer:
+            for key,value in [('source_url','https://attacker.invalid/source'),('result_url','http://127.0.0.1/result'),('lease','short')]:
+                self.assertEqual(handler.main({**event,key:value})['body']['error'],'INVALID_TRANSFER_INPUT')
+            with patch.dict(os.environ,{},clear=True):
+                self.assertEqual(handler.main(event)['body']['error'],'ACTIVATION_CONTEXT_UNAVAILABLE')
+            transfer.assert_not_called()
+        self.assertIsNone(handler.NoRedirect().redirect_request(None,None,302,'',{},'https://attacker.invalid'))
+
+    def test_remote_large_evidence_uses_private_callback_and_never_passes_lease_to_parser(self):
+        event=self.remote();seen={};uploads=[]
+        pdf=base64.b64decode(self.event()['pdf_base64'])
+        def worker(args,**kwargs):
+            seen.update(kwargs['env'])
+            # Large evidence must use the transfer path rather than the 1 MB
+            # invocation-result frame. The receiving API validates its schema.
+            words=[{'text':base64.b64encode(os.urandom(225)).decode(),'bbox':[1,2,3,4],
+                    'confidence':.9,'method':'ocr','evidence_id':'11111111-1111-4111-8111-111111111111'} for _ in range(5000)]
+            value={'evidence':{'source_sha256':event['sha256'],'page_index':0,'words':words},'parser_peak_rss_kib':123456}
+            (Path(kwargs['cwd'])/'result.json').write_text(json.dumps(value))
+            return subprocess.CompletedProcess(args,0)
+        def transfer(got,activation,body=None):
+            self.assertEqual(got,event);self.assertEqual(activation,'a'*32)
+            if body is None:return pdf
+            uploads.append(body)
+        with patch.dict(os.environ,{'__OW_ACTIVATION_ID':'a'*32,'DIGITALOCEAN_ACCESS_TOKEN':'PRIVATE_ACCOUNT_SENTINEL'}),patch.object(handler,'transfer',side_effect=transfer),patch.object(handler.subprocess,'run',side_effect=worker):
+            result=handler.main(event)['body']
+        self.assertTrue(result['ok']);self.assertEqual(result['delivery'],'callback')
+        self.assertGreater(len(uploads[0]),handler.MAX_FRAME)
+        self.assertNotIn(event['lease'],json.dumps(seen)+json.dumps(result))
+        self.assertNotIn('PRIVATE_ACCOUNT_SENTINEL',json.dumps(seen)+json.dumps(result))
+        self.assertEqual(len(json.loads(__import__('gzip').decompress(uploads[0]))['evidence']['words']),5000)

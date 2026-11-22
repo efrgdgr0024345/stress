@@ -56,6 +56,15 @@ def pipeline_guard(directory):
         except BlockingIOError:
             yield False
             return
+        database = directory.parent / 'workspace.sqlite3'
+        if database.is_file():
+            with sqlite3.connect(database, timeout=5) as conn:
+                table = conn.execute("SELECT 1 FROM sqlite_master WHERE type='table' AND name='remote_pages'").fetchone()
+                if table and conn.execute("SELECT 1 FROM remote_pages WHERE state IN ('SUBMITTING','SUBMITTED','AMBIGUOUS') AND deadline>? LIMIT 1", (time.time(),)).fetchone():
+                    # A provider may still be fetching/delivering a page while
+                    # the local cron is idle. Keep callback routes available.
+                    yield False
+                    return
         yield True
 
 

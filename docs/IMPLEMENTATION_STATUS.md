@@ -1,13 +1,16 @@
-# Implementation status — 0.4.0
+# Implementation status — 0.5.0
 
 ## Implemented review application
 
-An earlier Python/cPanel pilot is installed at `https://easyai.com.au/stress/`.
-Version 0.4.0 adds locally tested automatic evidence/OCR processing and Excel-style
-results. A GitHub release does not install itself on that account: use the
-configured updater and enable a capable processing runner. This is a bounded
-engineering-review pilot, not completion of arbitrary drawing recognition or
-production security. See [plan alignment](PLAN_ALIGNMENT.md).
+The Python/cPanel pilot is at `https://easyai.com.au/stress/`. The configured
+updater installs compatible releases and retains rollback. Check live health
+for the installed release; repository state alone does not prove deployment.
+Version 0.5.0 adds ordinary-upload DigitalOcean page processing, scoped transfers,
+early per-page review in the unchanged project UI, and bounded shared budgets.
+The canonical flange workbook is now registered privately and all 627 records
+are prepared for human dataset approval. This remains an engineering-review
+pilot; original graph/approval/security acceptance gates are still open.
+See [execution ledger](../PLAN_EXECUTION.md) and [plan alignment](PLAN_ALIGNMENT.md).
 
 - macOS-inspired React interface and root `loader.php`, with each lesson displayed in a distinct coloured icon card beneath Load project. The Markdown register is version controlled and read dynamically.
 - Same-origin, authenticated project loading directly into the in-browser drawing workspace, with project URLs retained across reloads.
@@ -42,7 +45,7 @@ production security. See [plan alignment](PLAN_ALIGNMENT.md).
 - The catalog mapper is general and reviewable, not an assertion that the missing canonical workbooks have been imported. Historical 1010 numeric acceptance gates remain unrun.
 - Release remains engineering-review draft. Final engineering approval, verified-for-modelling gates, separate lead/dataset workflows, MFA and external editor qualification are not claimed.
 - Standard PDF annotations support broad compatibility. The browser editor is the primary working environment; individual third-party readers may differ in their annotation editing features.
-- SQLite/local files are pilot adapters. Jobs and local isolated parsing are implemented; remote scoped worker transport, PostgreSQL/S3 infrastructure, malware scanning, retention/restore drills and production monitoring remain open.
+- SQLite/local files are pilot adapters. Scoped remote page transport is implemented in 0.5.0; PostgreSQL/S3, malware scanning, retention/restore drills and full production monitoring remain open. Local bounded registration/splitting is not a separate filesystem sandbox.
 - ZIP drawing-pack upload, full native CAESAR component export, independent final approvals and external annotation re-import are not implemented. The first native export profile blocks unsupported components.
 
 ## Reference assets
@@ -52,11 +55,12 @@ production security. See [plan alignment](PLAN_ALIGNMENT.md).
 outlined vectors and needs recognition beyond the current text parser. This
 reviewed drawing is not the original/golden engineering fixture listed below.
 
-The plan names files that were not attached or present:
+The flange workbook has now been supplied (627 rows in four prepared datasets).
+The remaining original reference assets are:
 
 1. `CAESAR_II_Integrated_Generator_v1_2_Valve_Database.zip`, including its original 13 tests.
 2. `1010_original.pdf`, authoritative project/annotation blueprints, flange mapping and golden outputs.
-3. `PIPE100_Flange_Weights_B16_5_B16_47_API6A_Numbers.xlsx` and `Valve_Database_Latest.xlsx`.
+3. `Valve_Database_Latest.xlsx`.
 
 Import these immutably when available. Pin hashes, retain their original tests, map the actual source schemas and add the documented numeric, 48-unique/49-display and native-object regressions. Synthetic fixtures must never be presented as real 1010 evidence.
 

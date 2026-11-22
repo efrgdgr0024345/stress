@@ -1,6 +1,7 @@
 """Reviewed workbook mappings and exact matching. No near-match substitutions."""
 
 from decimal import Decimal, InvalidOperation
+from fractions import Fraction
 import hashlib
 import json
 import re
@@ -59,6 +60,17 @@ QUALITY = ["REFERENCE_ONLY", "ESTIMATED", "MANUFACTURER_CONFIRMED"]
 
 def normal(value):
     return re.sub(r"\s+", " ", str(value or "").strip()).casefold()
+
+
+def match_value(field,value):
+    text=normal(value)
+    if field in ('nps','api_bore'):
+        number=re.sub(r'\s*(?:in|inch|inches|["″])$','',text).strip()
+        number=re.sub(r'(?<=\d)\s*-\s*(?=\d+/\d+$)',' ',number)
+        if re.fullmatch(r'\d+(?:\.\d+|/\d+|\s+\d+/\d+)?',number):
+            try:return str(sum((Fraction(p) for p in number.split()),Fraction(0)))
+            except (ValueError,ZeroDivisionError):pass
+    return text
 
 
 def numeric(value):
@@ -210,7 +222,7 @@ def exact_match(records, spec):
         record
         for record in records
         if all(
-            normal(record.get(key)) == normal(spec[key])
+            match_value(key,record.get(key)) == match_value(key,spec[key])
             for key in MATCH_FIELDS
             if normal(spec.get(key))
             and not (key == 'nps' and 'api 6a' in normal(spec.get('standard')) and not normal(record.get('nps')))

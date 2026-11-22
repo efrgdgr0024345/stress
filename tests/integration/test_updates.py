@@ -66,6 +66,17 @@ class UpdateApiTests(unittest.TestCase):
         finally:main.LOCAL_DEMO=previous
 
 class ReleaseTests(unittest.TestCase):
+    def test_update_waits_for_inflight_cloud_pages_until_the_result_is_delivered(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root,public,data,directory,config,release=self.fixture(Path(temporary))
+            with sqlite3.connect(data/'workspace.sqlite3') as conn:
+                conn.execute('CREATE TABLE remote_pages (state TEXT,deadline REAL)')
+                conn.execute("INSERT INTO remote_pages VALUES ('SUBMITTED',?)",(time.time()+240,))
+            with u.pipeline_guard(directory) as ready:self.assertFalse(ready)
+            with sqlite3.connect(data/'workspace.sqlite3') as conn:
+                conn.execute("UPDATE remote_pages SET state='RESULT_READY'")
+            with u.pipeline_guard(directory) as ready:self.assertTrue(ready)
+
     def test_update_waits_without_swapping_code_while_drawing_worker_is_busy(self):
         with tempfile.TemporaryDirectory() as temporary:
             root,public,data,directory,config,release=self.fixture(Path(temporary))

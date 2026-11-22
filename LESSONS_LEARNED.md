@@ -227,3 +227,11 @@ Use the existing entry format: a unique `LESSON-###` heading, category, status, 
 - Lesson: The supplied Numbers-compatible flange workbook omits worksheet dimension tags. Treating unknown dimensions as one column or one row silently loses valid data. API bore also cannot be stored as pipe NPS.
 - Action: Prepare all four known-schema sheets using bounded row iteration, retain cached published numbers and raw source fields, keep API bore separate from unknown pipe NPS, and expose missing facing/quality limitations. Dataset preparation never creates a human engineering approval.
 - Evidence: Release 0.4.7 prepares 627 source rows with no mapping errors, tests missing-dimension workbooks and preserves the original private source hash.
+
+## LESSON-029 — Backend page jobs must preserve the document experience
+
+- Category: Processing and review
+- Status: Adopted
+- Lesson: Processing one page per invocation still exceeds platform caps if every invocation carries the entire PDF or large evidence is returned inline. Splitting must also preserve source identity, page transforms and edits.
+- Action: Transfer true single-page files with expiring scoped grants, deliver bounded evidence by callback, limit concurrency and submissions across projects, and expose completed observations in the existing workspace. Retain accepted pages during retry and keep partial drafts visibly incomplete.
+- Evidence: Release 0.5.0 regression coverage exercises out-of-order delivery, early review/edits, original source integrity, idempotent results, cancellation, failed-page retry, expansion limits and shared budgets. Provider-local qualification remains distinct from live transport qualification.

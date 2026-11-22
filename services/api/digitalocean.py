@@ -401,7 +401,9 @@ def install(api):
     def status(actor=Depends(operator)):
         try:
             heartbeat = read(api.DATA / 'pipeline/heartbeat.json').get('at', 0)
-            return {**connection(api.DATA), 'demo': public_job(api.DATA), 'runner_ready': heartbeat > time.time() - 300}
+            from services.api.remote_setup import policy as processing_policy, status as processing_status
+            return {**connection(api.DATA), 'demo': public_job(api.DATA), 'runner_ready': heartbeat > time.time() - 300,
+                    'processing': {'policy': processing_policy(api.DATA), 'worker': processing_status(api.DATA)}}
         except ProviderError as error:
             raise HTTPException(409, str(error)) from None
 

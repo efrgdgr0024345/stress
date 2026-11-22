@@ -46,6 +46,15 @@ type Status = {
   verified_at?: number;
   demo: Demo;
   runner_ready: boolean;
+  processing?: {
+    policy: {
+      enabled: boolean;
+      concurrency: number;
+      daily_limit: number;
+      monthly_limit: number;
+    };
+    worker: { state?: string; stage?: string; error?: string };
+  };
 };
 const stages: Record<string, string> = {
   build: "Preparing the verified OCR package",
@@ -276,6 +285,65 @@ export function AdminConnections({ projects }: { projects: Project[] }) {
             )}
           </div>
         </form>
+        {status?.processing && (
+          <div className="connection-progress">
+            <label className="connection-heading">
+              <input
+                type="checkbox"
+                checked={status.processing.policy.enabled}
+                disabled={busy || !status.configured}
+                onChange={async (e) => {
+                  const enabled = e.target.checked;
+                  setBusy(true);
+                  setError("");
+                  try {
+                    await api("/system/digitalocean/processing", {
+                      method: "POST",
+                      body: JSON.stringify({
+                        enabled,
+                        concurrency: status.processing!.policy.concurrency,
+                        daily_limit: status.processing!.policy.daily_limit,
+                        monthly_limit: status.processing!.policy.monthly_limit,
+                      }),
+                    });
+                    await refresh();
+                    setNotice(
+                      enabled
+                        ? "Normal project uploads will use DigitalOcean automatically. Worker setup runs in the background."
+                        : "New project uploads will use the hosting worker. Existing jobs keep their selected processor.",
+                    );
+                  } catch (error) {
+                    setError((error as Error).message);
+                  } finally {
+                    setBusy(false);
+                  }
+                }}
+              />
+              <b>Use DigitalOcean for normal project uploads</b>
+              <span className="connection-badge">
+                {status.processing.worker.state || "Not prepared"}
+              </span>
+            </label>
+            <p className="connection-hint">
+              The project workspace stays the same. Backend tasks process up to{" "}
+              {status.processing.policy.concurrency} pages concurrently, with{" "}
+              {status.processing.policy.daily_limit} submissions/day and{" "}
+              {status.processing.policy.monthly_limit}/month including retries.
+              At the full time limit, the monthly compute cap is about US$
+              {(
+                status.processing.policy.monthly_limit *
+                240 *
+                0.0000185
+              ).toFixed(2)}{" "}
+              before shared allowance, transfer and tax.
+            </p>
+            {status.processing.worker.error && (
+              <div className="connection-alert" role="alert">
+                {explain(status.processing.worker.error)}
+              </div>
+            )}
+          </div>
+        )}
       </section>
       <section className="connection-card" aria-labelledby="test-heading">
         <h2 id="test-heading">Test the serverless worker</h2>

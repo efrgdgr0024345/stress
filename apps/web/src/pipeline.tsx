@@ -55,6 +55,8 @@ type Run = {
     ocr_pages?: number;
     artifact?: Artifact;
     isolation?: string;
+    processor?: string;
+    remote_wait?: string;
   };
 };
 type Report = {
@@ -248,6 +250,15 @@ export function ProjectPipeline({
               recently. Your upload is retained; configure the processing runner
               on the hosting account.
             </div>
+          )}
+          {active && run?.progress.processor === "digitalocean" && (
+            <p className="muted">
+              DigitalOcean is processing this drawing pack in the background.
+              Results are combined into this project.
+              {run.progress.remote_wait === "budget"
+                ? " The configured processing budget is reached; work resumes automatically when it resets."
+                : ""}
+            </p>
           )}
           {administrator &&
             (!report?.worker.recent || run.state === "WAITING_WORKER") && (

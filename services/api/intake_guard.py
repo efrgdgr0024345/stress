@@ -17,7 +17,8 @@ class IntakeGuard:
             return await self.app(scope,receive,send)
         path=scope.get("path","");headers=dict(scope.get("headers",[]))
         heavy=path.endswith(("/sources","/intake","/catalogs/import"))
-        maximum=32*1024**2 if heavy else 65536 if path.endswith("/auth/login") else 2*1024**2
+        worker_result='/api/v1/worker/pages/' in path and path.endswith('/result')
+        maximum=32*1024**2 if heavy else 16*1024**2 if worker_result else 65536 if path.endswith("/auth/login") else 2*1024**2
         async def reject(status,message):
             data=json.dumps({"detail":message}).encode()
             await send({"type":"http.response.start","status":status,"headers":[(b"content-type",b"application/json"),(b"cache-control",b"no-store")]})

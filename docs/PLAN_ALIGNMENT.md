@@ -4,7 +4,7 @@ This is a status map against original pages 9–10/milestones 0–10. The newer
 [scope-additions register](../PLAN_ADDITIONS_FOR_REVIEW.md) records changes
 outside that starting scope. Keep missing original acceptance assets visible.
 
-The next 0.4.0 implementation is undergoing release validation. “Working” below
+The 0.5.0 implementation is undergoing release validation. “Working” below
 describes local tested software, not an assertion that the hosting account has
 already installed the new release.
 
@@ -12,8 +12,8 @@ already installed the new release.
 | --- | --- | --- |
 | 0. Baseline migration | Source control, CI, source-hash-pinned reviewed 1010 PDF, domain/API/browser regressions | Legacy v1.2 ZIP, original 13 tests and authoritative original/golden 1010 assets remain unavailable |
 | 1. Domain engine | Exact unit parsing, physical/presentation separation, persistent IDs, deterministic main/branch numbering and inclusive support rule | General component ports, arbitrary network policies and all original component-specific fixture cases need authoritative coverage |
-| 2. Catalogs | Immutable workbook import/mapping/approval, exact cardinality checks and provenance; automatic proposals pin approved versions | Canonical flange/valve workbooks and numerical regression values remain unavailable; manufacturer confirmation is never inferred |
-| 3. Intake/registry/jobs | Auth before heavy multipart parsing, streaming limits/rates, private quarantine, immutable source bytes, durable jobs, fenced attempts, retries/cancel and page checkpoints | Malware scanning, production quotas/storage policies and a separately qualified remote production worker remain open |
+| 2. Catalogs | Immutable workbook import/mapping/approval; all 627 supplied canonical flange rows prepared with source limits and numeric provenance | Canonical valve workbook and complete original regression assets remain unavailable; manufacturer confirmation is never inferred |
+| 3. Intake/registry/jobs | Auth before heavy parsing, private quarantine, durable jobs; 0.5.0 adds automatic private DigitalOcean page transfers, callbacks, shared budgets, retries and early review | Actual-host qualification of normal transfers, malware scanning and complete production storage/security policies remain gates |
 | 4. Browser editing | Original PDF.js rendering, page transforms, SVG points/notes, source-region focus, graphic edits independent of stations, saved conflict handling | External editor qualification still needs actual supported-application round trips |
 | 5. Extraction/inventory | Native word boxes, vector candidates, isolated local OCR, fabrication/erection table proposals, raw quantities/units, word/row evidence and review ledger | Generic table/symbol accuracy is not established from one reviewed drawing; unknown/unlocated/low-confidence facts stay explicit |
 | 6. Graph/dimensions | Graphical candidate overlay, engineer-selected main route/simple branches, exact explicit-source constraint propagation, conflict/underdetermination preservation | General signed XYZ constraints, component-port association, automatic continuation proof and complete arbitrary-PDF topology are not implemented |

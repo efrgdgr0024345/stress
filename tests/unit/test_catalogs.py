@@ -23,6 +23,20 @@ def row(**changes):
 
 
 class CatalogRules(unittest.TestCase):
+    def test_pipe_bore_is_not_silently_used_as_api_flange_bore(self):
+        from packages.automation.recognize import specifications
+        spec=specifications('FLANGE 10000LB RTJWN 6.615" BORE API 6A TYPE 6BX SIZE 7-1.16','8','flange')
+        self.assertEqual(spec['pipe_bore'],'6.615')
+        self.assertNotIn('api_bore',spec)
+        spec=specifications('API 6A FLANGE API BORE 7-1/16 RTJWN 10000LB','8','flange')
+        self.assertEqual(spec['api_bore'],'7 1/16')
+
+    def test_equivalent_explicit_fraction_sizes_match_without_crossing_nps_and_bore_fields(self):
+        record=normalize_record(row(standard='API 6A',api_bore='7 1/16'))
+        spec={k:record[k] for k in ('family','standard','rating','nps','component_type','facing','api_bore')}
+        self.assertEqual(exact_match([record],{**spec,'api_bore':'7.0625'})['status'],'EXACT_MATCH')
+        self.assertEqual(exact_match([record],{**spec,'api_bore':'7-1/16'})['status'],'EXACT_MATCH')
+        self.assertEqual(exact_match([record],{**spec,'api_bore':'8'})['status'],'NO_EXACT_MATCH')
     def test_half_and_full_bolting_are_explicit(self):
         r = normalize_record(row())
         self.assertEqual(Decimal(r["half_weight_n"]), Decimal("140"))

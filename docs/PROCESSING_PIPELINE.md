@@ -23,6 +23,40 @@ compatibility path; the website uses `/intake`.
 6. Preview the PDF or export the Excel workbook/review ZIP. A finished job is an
    engineering-review draft, never automatic engineering approval.
 
+### DigitalOcean for ordinary project uploads (0.5.0)
+
+The hosting operator enables **Use DigitalOcean for normal project uploads** in
+the existing Admin connections card. The separate runner builds the hash-pinned
+worker and deploys a private non-web action. Thereafter ordinary uploads select
+that processor automatically; there is no per-page website workflow to manage.
+
+The original PDF is registered as one source. Only pages about to run are split
+in the supervised parser, with original content streams, CropBox and rotation
+checked. Each function receives a single-page transfer grant, never a project
+credential. Downloads up to 30 MiB and compressed evidence callbacks up to 16 MiB
+avoid the 1 MB invocation input/result caps. Accepted evidence is rebound to the
+original source SHA/page and stable word identities, with transport hashes in
+the exported automation report.
+
+At most two tasks run across all projects. Defaults allow 100 submissions/day
+and 500/month, including retries. At 1 GiB / 240 seconds per invocation this is
+about US$2.22/month maximum compute before shared allowance, transfer and tax;
+other team usage and the separate manual demo are outside that submission count.
+Budget waits resume automatically. Completed pages survive failed-page retries.
+
+Processed materials/text become available in the current project while later
+pages run. A person may annotate/review/edit then; regenerated drafts retain
+reviewed changes. Partial exports explicitly carry a processing-incomplete issue.
+Cancellation revokes transfers and fences publication. In-flight provider calls
+may finish, but cannot publish cancelled project results. No always-on server,
+paid database or storage bucket is created by this adapter.
+
+The existing hosting worker remains available for jobs selected before enabling
+the provider. Registration/splitting still uses the selected local isolation
+adapter; same-account bounded mode remains a pilot limitation. This feature does
+not supply engineering approval or complete the original graph/security gates.
+See [the transport contract](REMOTE_PROCESSING_CONTRACT.md).
+
 The Results page also exports CSV tables and a conditional native CAESAR II
 15.1 straight-pipe `.cii` candidate. Missing geometry/properties and unsupported
 components block the native file; [the format contract](CAESAR_FORMATS.md)
@@ -99,9 +133,9 @@ MIT license and the Tesseract/model sources use Apache 2.0. Downloads happen in
 the trusted setup runner, separately from document parsing. Setup probes the
 engine before an atomic publication. Failed setup retains no partial engine.
 
-DigitalOcean research still favors short scheduled container work over an idle
-VM. The local container adapter is tested; a paid remote service/cross-host API
-adapter has not been provisioned or qualified by this release.
+The separate DigitalOcean small-file demonstration was qualified live in 0.4.6.
+The 0.5.0 ordinary-upload adapter adds scoped page transfers and callbacks as
+described above; qualify its actual host and source/result paths when deploying.
 
 ## Durable contracts
 
