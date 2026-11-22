@@ -1,4 +1,5 @@
 import { appPath } from "./paths";
+import { browserEvent } from "./diagnostics";
 export type Point = [number, number];
 export interface Sheet {
   id: string;
@@ -133,7 +134,9 @@ export async function api<T>(
   path: string,
   options: RequestInit = {},
 ): Promise<T> {
-  const response = await fetch(appPath(`api/v1${path}`), {
+  const start=performance.now();
+  let response:Response;
+  try{response = await fetch(appPath(`api/v1${path}`), {
     ...options,
     headers: {
       ...(options.body instanceof FormData
@@ -141,14 +144,18 @@ export async function api<T>(
         : { "Content-Type": "application/json" }),
       ...options.headers,
     },
-  });
+  });}catch(error){
+    if(!path.startsWith("/system/logs"))browserEvent({kind:"api",status:0,duration_ms:performance.now()-start});
+    throw error;
+  }
+  if(!path.startsWith("/system/logs"))browserEvent({kind:"api",status:response.status,duration_ms:performance.now()-start,request_id:response.headers.get("X-Request-ID")||""});
   if (!response.ok) {
     const value = await response
       .json()
       .catch(() => ({ detail: response.statusText }));
     throw new Error(
       typeof value.detail === "string"
-        ? value.detail
+        ? value.detail+(response.status>=500?` Request ID: ${response.headers.get("X-Request-ID")||"unavailable"}`:"")
         : JSON.stringify(value.detail),
     );
   }

@@ -16,6 +16,7 @@ import time
 from contextlib import contextmanager
 from urllib.request import Request, urlopen
 import zipfile
+from services.api import diagnostics as diag
 
 REPO = "efrgdgr0024345/stress"
 
@@ -27,6 +28,9 @@ def write(path, value):
         with os.fdopen(descriptor, "w") as stream:
             json.dump(value, stream)
         os.replace(name, path)
+        if path.parent.name=="updates" and path.name in ("state.json","available.json","policy.json","maintenance.json","installed.json"):
+            fields={k:v for k,v in value.items() if k in ("status","action","automatic","active","version","commit")}
+            diag.emit(path.parent.parent,"update."+path.stem,source="updater",**fields)
     finally:
         Path(name).unlink(missing_ok=True)
 
@@ -151,6 +155,7 @@ def healthy(url, version, root):
 
 
 def activate(directory, config, release):
+    diag.emit(directory.parent,"update.prepare",source="updater",target_release=release["version"])
     root, public = Path(config["app_root"]), Path(config["public_dir"])
     for path in (root, public):
         if path.is_symlink() or not path.is_dir():
@@ -163,6 +168,7 @@ def activate(directory, config, release):
         stage.mkdir(mode=0o711)
         data = fetch(f"https://raw.githubusercontent.com/{REPO}/{release['commit']}/downloads/caesar-cpanel.zip")
         unpack(data, release, stage)
+        diag.emit(directory.parent,"update.package_verified",source="updater",target_release=release["version"],package_bytes=len(data))
         if (stage/"requirements.txt").read_bytes()+(stage/"requirements-cpanel.txt").read_bytes() != (root/"requirements.txt").read_bytes()+(root/"requirements-cpanel.txt").read_bytes():
             raise ValueError("Package dependencies differ")
         settings = read(root.parent/".config/caesar/caesar-system.json")
@@ -170,12 +176,14 @@ def activate(directory, config, release):
         probe = subprocess.run([sys.executable,"-c","from passenger_wsgi import application; import httpx; c=httpx.Client(transport=httpx.WSGITransport(app=application),base_url='https://probe.invalid'); assert c.get('/api/v1/health').json()['mode']=='authenticated'"], cwd=stage, env=environment, capture_output=True, timeout=45)
         if probe.returncode:
             raise ValueError("Staged application startup failed; current release untouched")
+        diag.emit(directory.parent,"update.staged_boot_passed",source="updater")
         backup = directory/"backups"/(str(int(time.time()))+"-"+secrets.token_hex(4))
         backup.mkdir(parents=True,mode=0o700)
         with sqlite3.connect(Path(config["data_dir"])/"workspace.sqlite3") as source, sqlite3.connect(backup/"database.sqlite3") as target:
             if source.execute("PRAGMA user_version").fetchone()[0] != release["schema"]:
                 raise ValueError("Database schema requires manual migration")
             source.backup(target)
+        diag.emit(directory.parent,"update.backup_completed",source="updater")
         write(directory/"maintenance.json", {"active":True})
         write(directory/"journal.json", {"backup":str(backup),"root":str(root),"public":str(public)})
         switched = False
@@ -187,10 +195,12 @@ def activate(directory, config, release):
                 os.replace(backup/"code",root)
                 raise
             switched = True
+            diag.emit(directory.parent,"update.code_activated",source="updater",target_release=release["version"])
             publish_frontend(root, public, backup/"public")
             restart(root)
             if not healthy(config["url"], release["version"], root):
                 raise ValueError("New release failed live health checks")
+            diag.emit(directory.parent,"update.health_passed",source="updater",target_release=release["version"])
             write(directory/"installed.json", {"version":release["version"],"backup":str(backup),"commit":release["commit"]})
             (directory/"journal.json").unlink(missing_ok=True)
         except BaseException:
@@ -199,6 +209,7 @@ def activate(directory, config, release):
                 os.replace(backup/"code",root)
                 restore_public(public,backup)
                 restart(root)
+                diag.emit(directory.parent,"update.automatic_rollback_completed","WARNING",source="updater")
             (directory/"journal.json").unlink(missing_ok=True)
             raise
         finally:
@@ -207,6 +218,7 @@ def activate(directory, config, release):
 
 
 def rollback(directory, config):
+    diag.emit(directory.parent,"update.rollback_requested",source="updater")
     installed = read(directory/"installed.json")
     backup = Path(installed.get("backup", ""))
     if not backup.resolve().is_relative_to((directory/"backups").resolve()) or not (backup/"code").is_dir():
@@ -266,6 +278,7 @@ def run(directory):
             else: activate(directory,config,read(directory/"available.json"))
             write(directory/"state.json", {"status":"done","action":action,"at":time.time()})
         except Exception as exc:
+            diag.exception(directory.parent,"update.failed",exc,source="updater")
             write(directory/"state.json", {"status":"failed","message":str(exc)[:250],"at":time.time()})
 
 

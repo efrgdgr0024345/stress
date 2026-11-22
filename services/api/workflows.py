@@ -271,6 +271,7 @@ def install(api):
                 "Mapped catalog dataset",
                 f'Version {seq}; {len(mapped["records"])} records; {len(mapped["errors"])} errors',
             )
+        api.diag.emit(api.DATA,"catalog.mapping.completed",catalog_id=catalog_id,dataset_id=record["id"],records=len(mapped["records"]),errors=len(mapped["errors"]),state=data["status"])
         return record
 
     @api.app.post("/api/v1/catalog-versions/{version_id}/approve")
@@ -302,6 +303,7 @@ def install(api):
                 "Approved catalog dataset",
                 body.reason,
             )
+        api.diag.emit(api.DATA,"catalog.approval.completed",dataset_id=version_id,state="APPROVED")
         return {**record, "data": data}
 
     @api.app.get("/api/v1/approved-catalogs")

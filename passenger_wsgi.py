@@ -36,8 +36,13 @@ if not os.environ.get("CAESAR_ADMIN_EMAIL", "").strip() or len(os.environ.get("C
 if not (ROOT / "dist" / "index.html").is_file():
     raise RuntimeError("Built website missing. Install the complete cPanel ZIP.")
 
-from a2wsgi import ASGIMiddleware
-from services.api.main import app, initialize
+from services.api import diagnostics as diag
+try:
+    from a2wsgi import ASGIMiddleware
+    from services.api.main import app, initialize
+except Exception as error:
+    diag.exception(data,"worker.import_failed",error)
+    raise
 
 # Hosting servers may fork workers after importing the startup file. An ASGI
 # adapter created here would start a thread that disappears in forked children.
@@ -52,6 +57,7 @@ def _after_fork():
     _adapter = None
     _adapter_pid = None
     _adapter_lock = threading.Lock()
+    diag.CONTEXT.set(None)
 
 
 os.register_at_fork(after_in_child=_after_fork)
@@ -65,7 +71,8 @@ def application(environ, start_response):
             if _adapter_pid != process:
                 # WSGI does not send ASGI lifespan events. SQLite setup is
                 # idempotent; use a new adapter/event loop for each worker.
-                initialize()
-                _adapter = ASGIMiddleware(app)
+                with diag.stage(data,"worker.initialize"):
+                    initialize()
+                    _adapter = ASGIMiddleware(app)
                 _adapter_pid = process
     return _adapter(environ, start_response)

@@ -11,7 +11,7 @@ Setup performs a clean virtual-environment dependency install, locked npm instal
 
 ## Automated coverage
 
-The API/domain/hosting suite contains **69 tests** covering the original unit, upload, authorization, revision, numbering, native-PDF and coordinate regressions, plus catalog mapping, controlled approvals, units, unknown values, bolting scopes, ambiguity rejection, source integrity, independent project manufacturer confirmation, immutable source snapshots, free annotations and revision recovery.
+The API/domain/hosting suite contains **82 tests** covering the original unit, upload, authorization, revision, numbering, native-PDF and coordinate regressions, plus catalog mapping, controlled approvals, units, unknown values, bolting scopes, ambiguity rejection, source integrity, independent project manufacturer confirmation, immutable source snapshots, free annotations and revision recovery.
 
 The cPanel package test extracts the actual downloadable ZIP, verifies its file
 hashes and absence of private/runtime directories, and uses its Passenger WSGI
@@ -87,8 +87,17 @@ The container runs as a non-root user. CI and documented commands validate build
 
 ## Unrun external gates
 
-The original 13 legacy tests, original 1010 48/49-node fixture, authoritative workbook numeric regressions, universal third-party editor coverage, actual engineer/lead sign-off, production OIDC/MFA and queue/storage/DB infrastructure, disaster-restoration drills and hosted deployment have not been established. Their required assets, credentials or operational decisions were not supplied.
+The original 13 legacy tests, original 1010 48/49-node fixture, authoritative workbook numeric regressions, universal third-party editor coverage, actual engineer/lead sign-off, production OIDC/MFA and queue/storage/DB infrastructure and disaster-restoration drills have not been established. Their required assets, credentials or operational decisions were not supplied. The existing hosting pilot has been installed, but each new release still requires actual-host verification by its operator.
 
 Publication and deployment are distinct from a source commit or a local test. No public deployment or environment publication is performed automatically.
 
 Updater tests cover admin access, queued command serialization, archive/hash rejection, failed-health restoration, interrupted-swap recovery and data-preserving manual rollback. Browser coverage opens the System updates panel and checks disabled installation before runner setup. These use simulated deployment health; actual cPanel cron/restart/update still requires operator verification.
+
+Ten diagnostic regressions check request/actor/phase correlation, safe stack frames, privacy of bodies/query/header/filename values, operator-only access, bounded/rate-limited browser intake, logging-failure isolation, row retention and updater event sanitization. Browser coverage exercises the Logs sidebar, filtering/details, actual structured console capture, JSON download/privacy and mobile layout. See [logging scope and limits](LOGGING.md).
+
+Three real-file regressions pin the user-provided reviewed 1010 PDF, classify its
+outlined vector pages, preserve original source bytes/content streams and test
+provisional nodes, native note export and correlated diagnostics. The Chromium
+workflow also uploads this actual file, renders both sheets, edits/reloads a
+note, downloads the review bundle and previews its two-page PDF inside the site.
+See [real drawing results and engineering limits](REAL_DRAWING_VALIDATION.md).

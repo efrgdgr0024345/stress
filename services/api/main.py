@@ -12,6 +12,7 @@ import sqlite3
 import subprocess
 import sys
 import threading
+import time
 from uuid import uuid4
 
 from fastapi import Depends, FastAPI, File, HTTPException, Request, Response, UploadFile
@@ -21,6 +22,7 @@ from pydantic import BaseModel, ConfigDict, Field
 
 from packages.engineering import compute_reasons, dimension_mm, renumber, validate
 from packages.pdf import create_sample, export_bundle
+from services.api import diagnostics as diag
 
 ROOT = Path(__file__).resolve().parents[2]
 BUILD_ID = json.loads((ROOT / "RELEASE.json").read_text())["version"] if (ROOT / "RELEASE.json").exists() else "0.2.0"
@@ -101,6 +103,7 @@ def initialize():
                     "default",
                 ),
             )
+    diag.emit(DATA,"worker.ready",release_id=BUILD_ID,mode="local-development" if LOCAL_DEMO else "authenticated")
 
 
 def password_hash(password, salt=None):
@@ -344,6 +347,7 @@ def user(request: Request):
         ).fetchone()
     if not row or (not LOCAL_DEMO and row["id"] == "local-engineer"):
         raise HTTPException(401, "Sign in to your workspace.")
+    diag.bind_actor(dict(row))
     return dict(row)
 
 
@@ -363,6 +367,7 @@ def project_read(project_id, actor, conn):
 
 
 def change(project_id, version, actor, action, update):
+    diag.emit(DATA,"project.change.started","DEBUG",base_revision=version)
     with LOCK, db() as conn:
         conn.execute("BEGIN IMMEDIATE")
         project = project_read(project_id, actor, conn)
@@ -387,10 +392,12 @@ def change(project_id, version, actor, action, update):
         )
         audit(conn, project_id, actor["name"], action)
     project["issues"] = validate(project)
+    diag.emit(DATA,"project.change.completed",revision=project["version"],sheets=len(project["sheets"]),nodes=len(project["nodes"]),materials=len(project["materials"]),issues=len(project["issues"]))
     return project
 
 
 def session(response, actor, request):
+    diag.bind_actor(actor)
     import time
 
     token = secrets.token_urlsafe(32)
@@ -412,6 +419,7 @@ def session(response, actor, request):
         max_age=43200,
         path=request.scope.get("root_path", "").rstrip("/") + "/",
     )
+    diag.emit(DATA,"security.login_succeeded")
     return {k: actor[k] for k in ("id", "name", "email", "role")}
 
 
@@ -461,6 +469,7 @@ def login(body: Login, response: Response, request: Request):
             password_hash(body.password, row["password"].split(":")[0]), row["password"]
         )
     ):
+        diag.emit(DATA,"security.login_failed","WARNING",reason="credentials_rejected")
         raise HTTPException(401, "Email or password is incorrect.")
     return session(response, dict(row), request)
 
@@ -540,6 +549,7 @@ def validation(project_id: str, actor=Depends(user)):
 async def upload(
     project_id: str, version: int, file: UploadFile = File(...), actor=Depends(editor)
 ):
+    diag.emit(DATA,"pdf.upload.received","DEBUG")
     with db() as conn:
         project_read(project_id, actor, conn)
     if Path(file.filename or "").suffix.lower() != ".pdf":
@@ -561,6 +571,8 @@ async def upload(
         with path.open("rb") as inp:
             if inp.read(5) != b"%PDF-":
                 raise HTTPException(415, "The file signature is not a PDF.")
+        diag.emit(DATA,"pdf.parse.started","DEBUG",source_id=source_id,input_bytes=size)
+        parser_started=time.perf_counter()
         result = subprocess.run(
             [sys.executable, "-m", "services.api.pdf_worker", str(path)],
             cwd=ROOT,
@@ -569,12 +581,14 @@ async def upload(
             timeout=25,
         )
         if result.returncode:
+            diag.emit(DATA,"pdf.parse.rejected","WARNING",source_id=source_id,exit_code=result.returncode,duration_ms=round((time.perf_counter()-parser_started)*1000,2))
             raise HTTPException(
                 422,
                 "PDF rejected: invalid, encrypted, active content, or parser resource limit. Use a plain PDF.",
             )
         pages = json.loads(result.stdout)
         sha = digest.hexdigest()
+        diag.emit(DATA,"pdf.parse.completed",source_id=source_id,pages=len(pages),input_bytes=size,sha256=sha,duration_ms=round((time.perf_counter()-parser_started)*1000,2))
         filename = Path(file.filename or "source.pdf").name[:200]
 
         def update(p):
@@ -619,6 +633,7 @@ async def upload(
                     conn.execute("DELETE FROM sources WHERE id=?", (source_id,))
                 raise
     except subprocess.TimeoutExpired:
+        diag.emit(DATA,"pdf.parse.timeout","ERROR",source_id=source_id,timeout_seconds=25)
         path.unlink(missing_ok=True)
         raise HTTPException(
             422, "PDF parser timed out. Split the drawing into smaller sources."
@@ -925,27 +940,30 @@ def history(project_id: str, actor=Depends(user)):
 
 @app.post("/api/v1/projects/{project_id}/exports")
 def export(project_id: str, body: Version, actor=Depends(editor)):
+    diag.emit(DATA,"pdf.export.requested","DEBUG",revision=body.version)
     with LOCK, db() as conn:
         project = project_read(project_id, actor, conn)
         if project["version"] != body.version:
             raise HTTPException(409, "Project has changed. Reload before exporting.")
-        if not project["nodes"] or not project["sheets"]:
+        if not project["sheets"]:
             raise HTTPException(
-                422, "Add a source PDF and at least one reviewed node before exporting."
+                422, "Add a source PDF before exporting a review bundle."
             )
         existing = conn.execute(
             "SELECT * FROM artifacts WHERE project_id=? AND revision=?",
             (project_id, body.version),
         ).fetchone()
         if existing:
+            diag.emit(DATA,"pdf.export.cache_hit",artifact_id=existing["id"],revision=body.version)
             return dict(existing)
         project["issues"] = validate(project)
         artifact_id = uid()
         path = DATA / "exports" / f"{artifact_id}.zip"
         try:
-            count = export_bundle(
-                project, lambda sid: DATA / "sources" / f"{sid}.pdf", path
-            )
+            with diag.stage(DATA,"pdf.export",revision=body.version):
+                count = export_bundle(
+                    project, lambda sid: DATA / "sources" / f"{sid}.pdf", path
+                )
         except ValueError as exc:
             path.unlink(missing_ok=True)
             raise HTTPException(422, str(exc))
@@ -973,6 +991,7 @@ def export(project_id: str, body: Version, actor=Depends(editor)):
             "Exported engineering review draft",
             f"{count} native annotations; source streams unchanged",
         )
+    diag.emit(DATA,"pdf.export.published",artifact_id=artifact_id,annotations=count,revision=body.version)
     return record
 
 
@@ -1007,6 +1026,7 @@ def catalogs(actor=Depends(user)):
 
 @app.post("/api/v1/catalogs/import")
 async def import_catalog(file: UploadFile = File(...), actor=Depends(editor)):
+    diag.emit(DATA,"catalog.import.started","DEBUG")
     if actor["role"] != "admin":
         raise HTTPException(403, "Administrator permission required.")
     if not (file.filename or "").lower().endswith(".xlsx"):
@@ -1032,7 +1052,8 @@ async def import_catalog(file: UploadFile = File(...), actor=Depends(editor)):
             for s in workbook.worksheets
         ]
         workbook.close()
-    except Exception:
+    except Exception as error:
+        diag.exception(DATA,"catalog.import.rejected",error)
         raise HTTPException(
             422, "Invalid, oversized, encrypted or macro-enabled workbook."
         )
@@ -1060,6 +1081,7 @@ async def import_catalog(file: UploadFile = File(...), actor=Depends(editor)):
                 json.dumps(record["data"]),
             ),
         )
+    diag.emit(DATA,"catalog.import.completed",catalog_id=record["id"],worksheets=len(sheets),input_bytes=len(content))
     return record
 
 
@@ -1069,6 +1091,8 @@ install(sys.modules[__name__])
 
 from services.api.updates import install as install_updates
 install_updates(sys.modules[__name__])
+
+diag.install(sys.modules[__name__])
 
 
 @app.get("/loader.php", include_in_schema=False)

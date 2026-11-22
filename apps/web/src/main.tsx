@@ -1,5 +1,7 @@
 import { APP_BASE, appPath } from "./paths";
 import { Updates } from "./updates";
+import { SystemLogs } from "./logs";
+import { startDiagnostics, navigation, browserEvent, flushDiagnostics } from "./diagnostics";
 import React, { useState, useEffect, useRef } from "react";
 import { createRoot } from "react-dom/client";
 import {
@@ -56,6 +58,7 @@ import { RevisionActions } from "./revisions";
 import { PDFPreview } from "./pdf-preview";
 import "./style.css";
 import "./macos.css";
+startDiagnostics();
 
 type Page =
   | "projects"
@@ -64,6 +67,7 @@ type Page =
   | "materials"
   | "validation"
   | "activity"
+  | "logs"
   | "catalogs";
 type Toast = { message: string; error: boolean };
 const workspaceTimeZone =
@@ -126,6 +130,7 @@ function App() {
   const [projects, setProjects] = useState<Project[]>([]),
     [project, setProject] = useState<Project | null>(null),
     [page, setPage] = useState<Page>("projects");
+  useEffect(()=>{navigation(user?page:"login");if(user)void flushDiagnostics();},[page,user?.id]);
   const [query, setQuery] = useState(""),
     [filter, setFilter] = useState("all"),
     [newOpen, setNewOpen] = useState(false),
@@ -187,11 +192,13 @@ function App() {
                 : "workspace") as Page,
             );
           else if (view === "catalogs") setPage("catalogs");
+          else if (view === "logs" && user.role === "admin" && (local || user.id === "admin")) setPage("logs");
         })
         .catch((e) => notify(e.message, true));
     }
   }, [user]);
   const openProject = async (id: string, target: Page = "workspace") => {
+    browserEvent({kind:"action",action:"load_project"});
     try {
       const p = await api<Project>(`/projects/${id}`);
       setProject(p);
@@ -228,14 +235,15 @@ function App() {
       "",
       next === "projects"
         ? APP_BASE
-        : next === "catalogs"
-          ? `${APP_BASE}?view=catalogs`
+        : next === "catalogs" || next === "logs"
+          ? `${APP_BASE}?view=${next}`
           : project
             ? `${APP_BASE}?project=${encodeURIComponent(project.id)}&view=${next}`
             : APP_BASE,
     );
   };
   const upload = async (file: File, p = project) => {
+    browserEvent({kind:"action",action:"upload_pdf"});
     if (!p) return;
     setBusy(true);
     try {
@@ -257,6 +265,7 @@ function App() {
     }
   };
   const exportProject = async () => {
+    browserEvent({kind:"action",action:"export_bundle"});
     if (!project) return;
     setBusy(true);
     try {
@@ -280,6 +289,8 @@ function App() {
       window.location.href = appPath(`api/v1/projects/${project.id}/artifacts/${artifact.id}/download`);
   };
   const mutation = async (path: string, body: unknown, method = "POST") => {
+    if(path.startsWith("/nodes"))browserEvent({kind:"action",action:"save_node"});
+    if(path.startsWith("/annotations"))browserEvent({kind:"action",action:"save_annotation"});
     if (!project) return;
     setBusy(true);
     try {
@@ -329,7 +340,7 @@ function App() {
         <div className="workspace-picker">
           <span className="company-logo">N</span>
           <span>
-            Engineering workspace<small>Local development</small>
+            Engineering workspace<small>{local?"Local development":"Authenticated workspace"}</small>
           </span>
           <ChevronDown size={15} />
         </div>
@@ -350,6 +361,7 @@ function App() {
             <Database />
             Component catalogs
           </button>
+          {user.role==="admin"&&(local||user.id==="admin")&&<button className={page==="logs"?"active":""} onClick={()=>navigate("logs")}><Activity size={18}/>Logs</button>}
         </nav>
         {project && (
           <>
@@ -408,7 +420,7 @@ function App() {
             <span className="avatar">AM</span>
             <div>
               <b>{user.name}</b>
-              <small>{label(user.role)} · Local workspace</small>
+              <small>{label(user.role)} · {local?"Local workspace":"Hosted workspace"}</small>
             </div>
             <button
               className="icon-button"
@@ -439,9 +451,10 @@ function App() {
                 ? "Projects"
                 : page === "catalogs"
                   ? "Component catalogs"
+                  : page === "logs" ? "Logs"
                   : project?.title}
             </strong>
-            {project && page !== "projects" && page !== "catalogs" && (
+            {project && page !== "projects" && page !== "catalogs" && page !== "logs" && (
               <>
                 <ChevronRight size={13} />
                 <span>{label(page)}</span>
@@ -451,7 +464,7 @@ function App() {
           <div className="top-actions">
             <span className="environment-label">
               <span className="online-dot" />
-              Local development
+              {local?"Local development":"Authenticated workspace"}
             </span>
             <button
               className="icon-button"
@@ -463,6 +476,7 @@ function App() {
             <span className="avatar small">AM</span>
           </div>
         </header>
+        {page === "logs" && <SystemLogs/>}
         {page === "projects" && (
           <div className="page-content">
             <div className="page-heading">
@@ -1235,7 +1249,7 @@ function App() {
           ) : (
             <button
               className="button primary full"
-              disabled={busy || !project.nodes.length}
+              disabled={busy || !project.sheets.length}
               onClick={exportProject}
             >
               {busy ? (

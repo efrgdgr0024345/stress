@@ -1,4 +1,4 @@
-# Implementation status — 0.2
+# Implementation status — 0.3.1
 
 ## Implemented review application
 
@@ -20,6 +20,9 @@ production security hardening. See [the revised automation plan](AUTOMATED_PROJE
 - Revision comparison, JSON snapshot download and restoration as a new draft, preserving prior snapshots and exports.
 - Server-side tenant/role checks, sessions, optimistic edit conflicts, source hashes, audit events and version-idempotent artifacts.
 - Repeatable setup/start scripts, isolated Python environment, npm lockfile, Docker/Compose, CI, API/domain tests and a real Chromium workflow with disposable storage.
+- Administrator Logs sidebar with structured request/browser/PDF/update events, filters, request correlation and privacy-conscious diagnostic downloads. See [capture limits](LOGGING.md).
+- GitHub release checking, staged code-compatible updates, private backups, failed-health rollback and administrator-triggered rollback. Automatic updates require the account-level cron runner and explicit opt-in.
+- The user-provided reviewed 1010 PDF is preserved in GitHub and exercises upload, browser rendering, saved notes and native export in disposable software tests. See [real drawing evidence](REAL_DRAWING_VALIDATION.md).
 
 ## Deliberate review boundaries
 
@@ -33,12 +36,17 @@ production security hardening. See [the revised automation plan](AUTOMATED_PROJE
 - SQLite/local files and synchronous exports are local adapters. Enterprise PostgreSQL/S3/queue infrastructure, isolated workers, malware scanning, rate limits, retention/restore drills and operational monitoring remain production work.
 - ZIP drawing upload, proprietary CAESAR model-file export and the end-to-end automated extraction/job pipeline are not implemented.
 
-## Required missing reference assets
+## Reference assets
+
+`1010 Reviewed.pdf` has now been supplied and retained at
+[`fixtures/1010/`](../fixtures/1010/README.md). Most engineering lettering is
+outlined vectors and needs recognition beyond the current text parser. This
+reviewed drawing is not the original/golden engineering fixture listed below.
 
 The plan names files that were not attached or present:
 
 1. `CAESAR_II_Integrated_Generator_v1_2_Valve_Database.zip`, including its original 13 tests.
-2. `1010_original.pdf`, reviewed project/annotation blueprints, flange mapping and golden outputs.
+2. `1010_original.pdf`, authoritative project/annotation blueprints, flange mapping and golden outputs.
 3. `PIPE100_Flange_Weights_B16_5_B16_47_API6A_Numbers.xlsx` and `Valve_Database_Latest.xlsx`.
 
 Import these immutably when available. Pin hashes, retain their original tests, map the actual source schemas and add the documented numeric, 48-unique/49-display and native-object regressions. Synthetic fixtures must never be presented as real 1010 evidence.

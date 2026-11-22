@@ -99,3 +99,27 @@ Use the existing entry format: a unique `LESSON-###` heading, category, status, 
 - Lesson: An ASGI-to-WSGI adapter created during module import starts a background event loop. After a web server forks workers, that inherited loop can have no running thread, so HTTP requests hang despite a successful standalone startup test.
 - Action: Create the adapter lazily for each serving process, reset inherited state and locks after fork, and test requests after both cold and warmed parent processes fork workers. Keep live hosting verification separate from isolated interpreter checks.
 - Evidence: The previous adapter hung in a real fork reproduction. The cold/warm worker regression exercises the corrected Passenger entry point with an alarm that detects a hung request.
+
+## LESSON-013 — Outlined vector lettering is not searchable text
+
+- Category: Drawing extraction
+- Status: Adopted
+- Lesson: The supplied reviewed 1010 PDF contains thousands of vector paths but almost no searchable engineering text. A page with no extracted characters is not necessarily a raster scan.
+- Action: Inspect vectors, images and searchable-character counts separately. Preserve the original, flag recognition gaps and test the real file without inventing node, material or dimension outputs.
+- Evidence: `fixtures/1010/README.md`; `tests/integration/test_real_1010.py`; `tests/e2e/real_drawing.py`.
+
+## LESSON-014 — Diagnostic detail needs correlation and a defined capture schema
+
+- Category: Operations
+- Status: Adopted
+- Lesson: An isolated error message cannot connect a browser action with PDF parsing, project changes and update rollback. Raw payload logging can expose credentials or engineering data.
+- Action: Use server-generated request IDs, project IDs, timed phases and safe stack coordinates. Provide searchable administrator logs and exportable structured diagnostics, with bounded retention and metadata-only browser capture.
+- Evidence: `docs/LOGGING.md`; `tests/integration/test_diagnostics.py`; Logs browser workflow and privacy checks.
+
+## LESSON-015 — Review notes must not require invented engineering points
+
+- Category: Browser workflow
+- Status: Adopted
+- Lesson: Both the browser and API blocked notes-only PDF export until a physical node existed. The real drawing regression exposed this unnecessary requirement.
+- Action: Enable review export when source sheets exist. Keep empty or unverified engineering models explicit, and test upload, notes and export without adding fabricated points.
+- Evidence: `tests/e2e/real_drawing.py` exports the actual reviewed 1010 PDF with saved notes and zero engineering nodes.

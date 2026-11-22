@@ -27,6 +27,8 @@ def inspect_pdf(path):
             if max(page.rect.width, page.rect.height) > 14400:
                 raise ValueError("Page exceeds supported PDF dimensions.")
             text = page.get_text()[:100000]
+            vector_paths=len(page.get_cdrawings())
+            image_count=len(page.get_image_info())
             result.append(
                 {
                     "page_index": i,
@@ -34,9 +36,10 @@ def inspect_pdf(path):
                     "height": page.cropbox.height,
                     "rotation": page.rotation,
                     "text": text,
-                    "format": (
-                        "Vector / text" if text.strip() else "Raster / manual review"
-                    ),
+                    "native_text_chars":len(text.strip()),
+                    "vector_paths":vector_paths,
+                    "image_count":image_count,
+                    "format": "Vector / text" if text.strip() and vector_paths else "Searchable text" if text.strip() else "Vector / outlined-text review" if vector_paths else "Raster / OCR review" if image_count else "No searchable content / review",
                 }
             )
         return result

@@ -1,12 +1,13 @@
 import { useEffect, useState } from "react";
 import { api } from "./types";
 import { Dialog } from "./ui";
+import { browserEvent } from "./diagnostics";
 type Status = {current:string;available:{version?:string};state:{status?:string;message?:string};configured:boolean;runner_ready:boolean;automatic:boolean;rollback_available:boolean};
 export function Updates({onClose}:{onClose:()=>void}) {
   const [status,setStatus]=useState<Status|null>(null),[error,setError]=useState(""),[busy,setBusy]=useState(false);
   const refresh=()=>api<Status>("/system/updates").then(setStatus).catch(e=>setError(e.message));
   useEffect(()=>{refresh(); const id=setInterval(refresh,5000);return()=>clearInterval(id);},[]);
-  const action=async(name:string)=>{setBusy(true);setError("");try{await api(`/system/updates/${name}`,{method:"POST"});await refresh();}catch(e){setError((e as Error).message);}finally{setBusy(false);}};
+  const action=async(name:string)=>{if(name==="check"||name==="install"||name==="rollback")browserEvent({kind:"action",action:name==="check"?"check_updates":name==="install"?"install_update":"rollback_update"});setBusy(true);setError("");try{await api(`/system/updates/${name}`,{method:"POST"});await refresh();}catch(e){setError((e as Error).message);}finally{setBusy(false);}};
   return <Dialog title="System updates" subtitle="Reviewed GitHub releases · Backups and rollback" onClose={onClose}>
     {error&&<p role="alert">{error}</p>}
     {status&&<>

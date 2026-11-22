@@ -14,9 +14,12 @@ import zipfile
 
 import fitz
 from playwright.sync_api import sync_playwright, expect
-from catalog_workflow import exercise_catalogs
 
 ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT))
+from catalog_workflow import exercise_catalogs
+from real_drawing import exercise_real_drawing
+
 Path("/tmp/caesar-screens").mkdir(exist_ok=True)
 
 
@@ -81,6 +84,26 @@ def run():
                         page.get_by_role("heading", name="No matching projects")
                     ).to_be_visible()
                     page.get_by_label("Search projects").fill("")
+                    page.evaluate("console.error('DIAGNOSTIC_PRIVATE_SENTINEL')")
+                    page.get_by_role("button",name="Logs",exact=True).click()
+                    expect(page.get_by_role("heading",name="Logs.",exact=True)).to_be_visible()
+                    page.get_by_label("Search logs").fill("security.login_succeeded")
+                    expect(page.locator(".diagnostic-row-main strong").first).to_have_text("security.login_succeeded")
+                    page.locator(".diagnostic-row").first.click()
+                    expect(page.get_by_role("heading",name="Event details",exact=True)).to_be_visible()
+                    page.screenshot(path="/tmp/caesar-screens/logs-desktop.png",full_page=True)
+                    with page.expect_download() as diagnostic_download:
+                        page.get_by_role("button",name="Download diagnostics",exact=True).click()
+                    diagnostic_text=Path(diagnostic_download.value.path()).read_text()
+                    diagnostic=json.loads(diagnostic_text)
+                    assert diagnostic["format"]=="caesar-diagnostics-v1"
+                    assert diagnostic["events"]
+                    assert "DIAGNOSTIC_PRIVATE_SENTINEL" not in diagnostic_text
+                    page.get_by_label("Search logs").fill("")
+                    page.get_by_label("Log source").select_option("browser")
+                    page.get_by_label("Search logs").fill("browser.console")
+                    expect(page.locator(".diagnostic-row-main strong").first).to_have_text("browser.console",timeout=15000)
+                    page.get_by_role("button",name="Projects",exact=True).click()
                     page.get_by_role("button",name="System updates",exact=True).click()
                     expect(page.get_by_role("dialog",name="System updates",exact=True)).to_be_visible()
                     expect(page.get_by_role("button",name="Check GitHub",exact=True)).to_be_visible()
@@ -152,7 +175,8 @@ def run():
                         page.get_by_text("Support within 6 in", exact=False).first
                     ).to_be_visible()
                     page.get_by_label("bubble X", exact=True).fill("480")
-                    page.get_by_role("button", name="Save point", exact=True).click()
+                    with page.expect_response(lambda r: "/nodes/" in r.url and r.request.method == "PATCH"):
+                        page.get_by_role("button", name="Save point", exact=True).click()
                     expect(
                         page.get_by_role("button", name="Save point", exact=True)
                     ).to_be_disabled()
@@ -172,7 +196,8 @@ def run():
                     expect(
                         page.get_by_role("heading", name="New physical point")
                     ).to_be_visible()
-                    page.get_by_role("button", name="Save point", exact=True).click()
+                    with page.expect_response(lambda r: r.url.endswith("/nodes") and r.request.method == "POST"):
+                        page.get_by_role("button", name="Save point", exact=True).click()
                     expect(
                         page.get_by_role("button", name="Save point", exact=True)
                     ).to_be_disabled()
@@ -277,7 +302,8 @@ def run():
                     page.get_by_label("Dimension source / evidence", exact=True).fill(
                         "E2E synthetic dimension; not engineering input"
                     )
-                    page.get_by_role("button", name="Save point", exact=True).click()
+                    with page.expect_response(lambda r: r.url.endswith("/nodes") and r.request.method == "POST"):
+                        page.get_by_role("button", name="Save point", exact=True).click()
                     expect(
                         page.get_by_role("button", name="Save point", exact=True)
                     ).to_be_disabled()
@@ -300,6 +326,7 @@ def run():
                     assert abs(float(visible.get_attribute("cy")) - anchor[0]) < 0.01
                     page.reload()
                     expect(page.locator(".node-glyph")).to_have_count(1)
+                    exercise_real_drawing(page, context, base, tmp)
                     # A mobile viewport must not introduce document-level horizontal scrolling.
                     page.set_viewport_size({"width": 390, "height": 844})
                     page.goto(base + "/")
@@ -311,6 +338,9 @@ def run():
                     )
                     page.locator(".mobile-menu").click()
                     expect(page.locator(".sidebar")).to_be_visible()
+                    page.get_by_role("button",name="Logs",exact=True).click()
+                    expect(page.get_by_role("heading",name="Logs.",exact=True)).to_be_visible()
+                    assert page.evaluate("document.documentElement.scrollWidth<=window.innerWidth")
                     screenshot = Path("/tmp/caesar-screens")
                     screenshot.mkdir(exist_ok=True)
                     page.screenshot(path=str(screenshot / "mobile.png"), full_page=True)
