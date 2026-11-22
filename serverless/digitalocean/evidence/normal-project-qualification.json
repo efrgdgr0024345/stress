@@ -1,0 +1,95 @@
+{
+  "format": "caesar-normal-project-live-qualification-1",
+  "processing_release": "0.5.0",
+  "browser_release": "0.5.1",
+  "tests": [
+    {
+      "fixture": "real-reviewed-1010",
+      "source_sha256": "7b97d44bef3d544c4c98ed0667c29607ce58fa4a401dd2463f66010a9615bb59",
+      "source_bytes": 589154,
+      "pages": 2,
+      "material_proposals": 32,
+      "node_proposals": 0,
+      "callbacks": 2,
+      "inline_recoveries": 0,
+      "transport": [
+        {
+          "page_index": 0,
+          "source_sha256": "7b97d44bef3d544c4c98ed0667c29607ce58fa4a401dd2463f66010a9615bb59",
+          "transport_sha256": "fd968fb4ef10714b87d9fc80ea97e74d4cc0960d38b0f4424e2d1d351b487089",
+          "transfer_bytes": 244542,
+          "callback_received": true,
+          "activation_id": "c4f91b1c014d4633b91b1c014d8633a9"
+        },
+        {
+          "page_index": 1,
+          "source_sha256": "7b97d44bef3d544c4c98ed0667c29607ce58fa4a401dd2463f66010a9615bb59",
+          "transport_sha256": "711e2dd68a195e87963b193e71ca1debfc85ae31bdd5a6617f63a7b794e70068",
+          "transfer_bytes": 344483,
+          "callback_received": true,
+          "activation_id": "da0003ea82b549698003ea82b50969e5"
+        }
+      ],
+      "workbook_opened": true,
+      "native_pdf_source_streams_unchanged": true,
+      "engineering_verified": false,
+      "passed": true
+    },
+    {
+      "fixture": "synthetic-large-transport",
+      "source_sha256": "60c2240a7f237c49bd85eb0c78468fd8502c252ddbc8fb55f37896e6f5688274",
+      "source_bytes": 1447727,
+      "pages": 3,
+      "material_proposals": 3,
+      "node_proposals": 6,
+      "callbacks": 3,
+      "inline_recoveries": 0,
+      "transport": [
+        {
+          "page_index": 0,
+          "source_sha256": "60c2240a7f237c49bd85eb0c78468fd8502c252ddbc8fb55f37896e6f5688274",
+          "transport_sha256": "e33ff19081f37e8ed183eebe321aef84ac10bc5e25278cd2b6d4e36ef0c8ad22",
+          "transfer_bytes": 1445975,
+          "callback_received": true,
+          "activation_id": "4bfda3237d8d498fbda3237d8db98f05"
+        },
+        {
+          "page_index": 1,
+          "source_sha256": "60c2240a7f237c49bd85eb0c78468fd8502c252ddbc8fb55f37896e6f5688274",
+          "transport_sha256": "cf197f39868046852e08ef8f4cd94fd9e91132378cf9be995bb9f6c7570a9e71",
+          "transfer_bytes": 1445975,
+          "callback_received": true,
+          "activation_id": "263772ff074344d8b772ff074314d880"
+        },
+        {
+          "page_index": 2,
+          "source_sha256": "60c2240a7f237c49bd85eb0c78468fd8502c252ddbc8fb55f37896e6f5688274",
+          "transport_sha256": "7f1a62555c04da81d83a0800f8a8261ba7430eba1f6dc0e76bf03bd5c3c1211e",
+          "transfer_bytes": 1445976,
+          "callback_received": true,
+          "activation_id": "d67dfd355e2244e6bdfd355e2264e64f"
+        }
+      ],
+      "workbook_opened": true,
+      "native_pdf_source_streams_unchanged": true,
+      "engineering_verified": false,
+      "passed": true
+    }
+  ],
+  "ordinary_upload_route_used": true,
+  "page_jobs_hidden_from_user_workflow": true,
+  "source_and_generated_pdf_pixels_verified_in_live_browser": true,
+  "preview_page_navigation_verified": true,
+  "live_pdf_worker_mime": "application/javascript",
+  "excel_browser_download_reopened": true,
+  "canonical_flange_catalog": {
+    "source_sha256": "84cc71a66c2f47a3e70f27adf7c286cd346fdf722d5dfcf50158085d2e2d356a",
+    "records": 627,
+    "datasets": 4,
+    "status": "PENDING_HUMAN_APPROVAL"
+  },
+  "credentials_included": false,
+  "engineering_verified": false,
+  "passed": true,
+  "scope": "Normal automatic processing and exports of one real two-page drawing and one synthetic three-page file whose individual pages exceed the old inline cap. This does not qualify the remaining original engineering, external-editor, CAESAR application or production security gates."
+}
