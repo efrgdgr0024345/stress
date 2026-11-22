@@ -43,6 +43,10 @@ def execute(path, mode, page=0, heartbeat=lambda: None):
                        str(page), mode, str(work/"result.json")]
             environment = {"PATH": os.environ.get("PATH", "/usr/bin:/bin"), "PYTHONPATH":str(ROOT),
                            "HOME":str(work), "TMPDIR":str(work), "OMP_THREAD_LIMIT":"1"}
+            ocr_home=Path(path).resolve().parent.parent/'pipeline/ocr'
+            if (ocr_home/'manifest.json').is_file():
+                environment['CAESAR_OCR_HOME']=str(ocr_home)
+                environment['PYTHONPATH']+=os.pathsep+str(ocr_home/'runtime')
             if pilot:
                 environment["CAESAR_BOUNDED_PILOT"] = "1"
             isolation = "bounded-pilot" if pilot else "landlock-seccomp"

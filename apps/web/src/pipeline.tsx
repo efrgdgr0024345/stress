@@ -58,6 +58,7 @@ type Run = {
   };
 };
 type Report = {
+  ocr_setup?: { state?: string; error?: string };
   runs: Run[];
   worker: { recent: boolean; at: number | null; executor: string };
 };
@@ -175,7 +176,9 @@ export function ProjectPipeline({
             {active
               ? "Preparing your drawing review"
               : run?.state === "DONE"
-                ? "Review draft ready"
+                ? automation?.issues.some((i) => i.code === "OCR_UNAVAILABLE")
+                  ? "Draft ready — OCR setup needed"
+                  : "Review draft ready"
                 : "Drawing processing needs attention"}
           </strong>
           <small>
@@ -305,6 +308,73 @@ export function ProjectPipeline({
                   stages.
                 </small>
               </span>
+            </div>
+          )}
+          {administrator && (
+            <div className="pipeline-card" style={{ marginBottom: 20 }}>
+              <h3>Drawing text recognition</h3>
+              <p>
+                Install the optional OCR engine on this hosting account to read
+                scanned or outlined lettering. This is a one-time download of
+                about 10 MB and needs no root access or new server.
+              </p>
+              <p>
+                {report?.ocr_setup?.state
+                  ? `OCR setup: ${report.ocr_setup.state}`
+                  : "A system OCR engine or the optional account engine is required."}
+                {report?.ocr_setup?.error &&
+                  ` · ${report.ocr_setup.error.replaceAll("_", " ")}`}
+              </p>
+              <button
+                className="button secondary"
+                disabled={
+                  busy ||
+                  ["queued", "running", "ready"].includes(
+                    report?.ocr_setup?.state || "",
+                  )
+                }
+                onClick={async () => {
+                  setBusy(true);
+                  try {
+                    await api("/system/pipeline/ocr", {
+                      method: "POST",
+                      body: "{}",
+                    });
+                    setError("");
+                  } catch (e) {
+                    setError((e as Error).message);
+                  } finally {
+                    setBusy(false);
+                  }
+                }}
+              >
+                Install OCR
+              </button>
+              {report?.ocr_setup?.state === "ready" && (
+                <button
+                  className="button secondary"
+                  disabled={busy}
+                  onClick={async () => {
+                    setBusy(true);
+                    try {
+                      await api(`/projects/${project.id}/pipeline/rerun`, {
+                        method: "POST",
+                        body: JSON.stringify({
+                          version: project.version,
+                          reextract: true,
+                        }),
+                      });
+                      setError("");
+                    } catch (e) {
+                      setError((e as Error).message);
+                    } finally {
+                      setBusy(false);
+                    }
+                  }}
+                >
+                  Read drawing text again
+                </button>
+              )}
             </div>
           )}
           {run && ["FAILED", "WAITING_WORKER"].includes(run.state) && (

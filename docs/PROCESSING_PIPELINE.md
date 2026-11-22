@@ -76,6 +76,29 @@ Allow the next cron tick, then check Project flow and Logs. A missing OCR binary
 or unavailable isolation is a capability gap, not a successful OCR deployment.
 GitHub publication alone does not authenticate to or change the hosting account.
 
+### Optional OCR on shared hosting (0.4.3)
+
+If the draft reports `OCR_UNAVAILABLE`, open **Project flow → Install OCR** as
+the hosting administrator. The separate account runner downloads and verifies
+an optional Tesseract runtime and English model (about 10 MB compressed) into
+private data storage. No root, VM, pip install or website virtualenv modification
+is required. Setup states are queued/running/ready/failed. Only the fixed,
+hash-pinned CPython 3.12 Linux wheels for x86_64/aarch64 and glibc 2.27+ qualify;
+unsupported accounts show an explicit failure rather than compiling packages.
+
+Once ready, choose **Read drawing text again**. This reruns extraction, rather
+than reusing the previous no-OCR evidence, and retains existing sheet identities
+and reviewed edits. OCR words retain their confidence and original-page boxes.
+The optional runtime does not change the selected parser isolation mode.
+
+The runtime is tesserocr 2.9.2 with bundled Tesseract/Leptonica, delivered from
+PyPI with pinned wheel SHA-256 values. The English model is pinned to
+tesseract-ocr/tessdata_fast commit `87416418657359cb625c412a48b6e1d6d41c29bd`.
+Wheel license files are retained in private runtime storage; tesserocr uses the
+MIT license and the Tesseract/model sources use Apache 2.0. Downloads happen in
+the trusted setup runner, separately from document parsing. Setup probes the
+engine before an atomic publication. Failed setup retains no partial engine.
+
 DigitalOcean research still favors short scheduled container work over an idle
 VM. The local container adapter is tested; a paid remote service/cross-host API
 adapter has not been provisioned or qualified by this release.

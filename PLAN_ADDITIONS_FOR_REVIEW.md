@@ -27,6 +27,13 @@ node rules, independent approval, canonical dataset regression, tenant isolation
 backup restoration, licensing and native-object QA are **not new scope**. They
 must not be relabelled as optional additions when unfinished.
 
+OOS-010: The shared-hosting adapter now optionally installs a hash-pinned binary
+OCR runtime in account-private storage through the separate runner (0.4.3).
+This deployment choice extends the original infrastructure scope; OCR itself
+remains an original-plan requirement. It requires no paid service or root and
+does not relax the selected isolation mode. See processing setup for platforms,
+licenses, failure behavior and the explicit re-extraction action.
+
 See [original-plan alignment](docs/PLAN_ALIGNMENT.md),
 [working pipeline/setup](docs/PROCESSING_PIPELINE.md) and
 [Excel output contract](docs/EXCEL_OUTPUT.md).

@@ -41,6 +41,8 @@ with (directory/"runner.lock").open("a") as lock:
             if policy_value.get("mode")=="bounded_pilot":os.environ["CAESAR_PIPELINE_ALLOW_BOUNDED"]="1"
             else:os.environ.pop("CAESAR_PIPELINE_ALLOW_BOUNDED",None)
         write(directory/"heartbeat.json",{"at":time.time(),"executor":"separate-process","software":pipeline.VERSION})
+        from services.api.ocr_setup import run_pending
+        if run_pending(api.DATA):continue
         worked=pipeline.process_one(api)
         if not worked:
             if not args.watch:break

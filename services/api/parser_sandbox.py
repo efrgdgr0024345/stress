@@ -34,6 +34,8 @@ def restrict(work, code):
         str(Path(code)/"services"), str(Path(code)/"packages"), "/etc/fonts",
         "/etc/ld.so.cache", "/dev/urandom", "/dev/random") if Path(p).exists()}
     locations[str(Path(work).resolve())] = handled & ~(1 | 64 | 512 | 1024 | 2048)
+    if os.environ.get('CAESAR_OCR_HOME'):
+        locations[str(Path(os.environ['CAESAR_OCR_HOME']).resolve())]=readonly
     locations["/dev/null"] = (1 << 1) | (1 << 2) | (1 << 14)
     try:
         for path, access in locations.items():

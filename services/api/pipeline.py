@@ -179,7 +179,7 @@ def register(api,job,progress):
         if replace and p["version"]!=job["base_revision"]:raise RuntimeError("PROJECT_CHANGED")
         old=[s for s in p["sheets"] if s["source_id"]==replace] if replace else []
         if replace and not old:raise RuntimeError("REVISION_TARGET_CHANGED")
-        if any(s["sha256"]==job["sha"] for s in p["sheets"]):
+        if any(s["sha256"]==job["sha"] and s['source_id']!=replace for s in p["sheets"]):
             raise RuntimeError("SOURCE_ALREADY_ACTIVE")
         if len(p["sheets"])-len(old)+len(pages)>200:raise ValueError("PROJECT_PAGE_LIMIT")
         matches={}
@@ -472,6 +472,9 @@ def install(api):
         return actor
     class WorkerPolicy(BaseModel):
         mode:str=Field(pattern=r"^(isolated|bounded_pilot)$")
+    class RerunInput(BaseModel):
+        version:int=Field(ge=1)
+        reextract:bool=False
     class RouteSelection(BaseModel):
         version:int=Field(ge=1)
         sheet_id:str
@@ -515,6 +518,13 @@ def install(api):
         with api.db() as conn:conn.execute("UPDATE pipeline_runs SET next_at=0 WHERE state='WAITING_WORKER'")
         return result
 
+    @api.app.post('/api/v1/system/pipeline/ocr')
+    def setup_ocr(actor=Depends(operator)):
+        from services.api.ocr_setup import queue
+        value=queue(api.DATA)
+        diag.emit(api.DATA,'pipeline.ocr_setup.requested',actor_id=actor['id'],state=value['state'])
+        return value
+
     @api.app.post("/api/v1/projects/{project_id}/intake",status_code=202)
     async def intake(project_id:str,request:Request,version:int=Query(ge=1),replace_source_id:str|None=None,actor=Depends(api.editor)):
         with api.db() as conn:
@@ -554,7 +564,8 @@ def install(api):
             rows=conn.execute("SELECT * FROM pipeline_runs WHERE project_id=? ORDER BY created DESC LIMIT 20",(project_id,)).fetchall()
             last=api.DATA/"pipeline/heartbeat.json"
             runner=json.loads(last.read_text()) if last.exists() else {}
-        return {"runs":[public(row) for row in rows],"worker":{"recent":runner.get("at",0)>time.time()-180,"at":runner.get("at"),"executor":runner.get("executor","not-configured")}}
+        from services.api.ocr_setup import status
+        return {"runs":[public(row) for row in rows],"worker":{"recent":runner.get("at",0)>time.time()-180,"at":runner.get("at"),"executor":runner.get("executor","not-configured")},'ocr_setup':status(api.DATA)}
 
     @api.app.get("/api/v1/projects/{project_id}/pipeline/{run_id}")
     def detail(project_id:str,run_id:str,actor=Depends(api.user)):
@@ -599,10 +610,10 @@ def install(api):
         return json.loads(path.read_text())
 
     @api.app.post("/api/v1/projects/{project_id}/pipeline/rerun")
-    def rerun(project_id:str,body:api.Version,actor=Depends(api.editor)):
+    def rerun(project_id:str,body:RerunInput,actor=Depends(api.editor)):
         with api.db() as conn:
             p=api.project_read(project_id,actor,conn)
             if p["version"]!=body.version:raise HTTPException(409,"Project changed. Reload first.")
             row=conn.execute("SELECT * FROM pipeline_runs WHERE project_id=? AND stage IN ('compose','export') ORDER BY created DESC LIMIT 1",(project_id,)).fetchone()
         if not row:raise HTTPException(409,"No completed extraction is available to reuse.")
-        return enqueue(api,p,actor,row["source_id"],row["sha"],row["filename"],cached=row["id"])
+        return enqueue(api,p,actor,row["source_id"],row["sha"],row["filename"],cached=None if body.reextract else row["id"])

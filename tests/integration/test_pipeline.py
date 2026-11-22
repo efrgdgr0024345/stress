@@ -177,3 +177,27 @@ class PipelineTests(unittest.TestCase):
         with self.assertRaisesRegex(RuntimeError,'STALE'):pipeline.export(main,attempt,json.loads(attempt['progress']))
         with main.db() as conn:self.assertEqual(conn.execute('SELECT COUNT(*) FROM artifacts WHERE project_id=?',(p['id'],)).fetchone()[0],0)
         self.assertEqual(list((main.DATA/'exports').glob('*.zip')),[])
+
+    def test_identical_legacy_pdf_can_enter_automatic_revision_processing(self):
+        p=self.create();raw=drawing()
+        r=self.client.post(f"/api/v1/projects/{p['id']}/sources?version=1",files={'file':('legacy.pdf',raw,'application/pdf')})
+        self.assertEqual(r.status_code,200);p=r.json();source=p['sheets'][0]['source_id']
+        self.intake(p,raw,replace=source)
+        self.assertEqual(self.drain(p)[0]['state'],'DONE')
+        current=self.current(p);self.assertEqual(len(current['sheets']),2);self.assertEqual(len(current['materials']),2)
+
+    def test_explicit_reextraction_runs_parser_again_and_keeps_sheet_identities(self):
+        p=self.create();self.intake(p);self.drain(p);p=self.current(p)
+        ids=[s['id'] for s in p['sheets']]
+        response=self.client.post(f"/api/v1/projects/{p['id']}/pipeline/rerun",json={'version':p['version'],'reextract':True})
+        self.assertEqual(response.status_code,200,response.text)
+        with patch.object(pipeline,'execute',side_effect=native_executor) as execute:
+            for _ in range(20):
+                if not pipeline.process_one(main):break
+        self.assertEqual(sum(c.args[1]=='ocr' for c in execute.call_args_list),2)
+        self.assertEqual([s['id'] for s in self.current(p)['sheets']],ids)
+
+    def test_optional_ocr_setup_requires_hosting_operator(self):
+        self.assertEqual(self.client.post('/api/v1/system/pipeline/ocr',json={}).json()['state'],'queued')
+        with main.db() as conn:conn.execute("UPDATE users SET role='viewer' WHERE id='local-engineer'")
+        self.assertEqual(self.client.post('/api/v1/system/pipeline/ocr',json={}).status_code,403)

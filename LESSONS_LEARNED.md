@@ -179,3 +179,11 @@ Use the existing entry format: a unique `LESSON-###` heading, category, status, 
 - Lesson: The updater successfully started a new API, but maintenance mode blocked its frontend check and caused rollback of an otherwise available release.
 - Action: Permit read-only public frontend and asset requests during maintenance while keeping project requests blocked. Test the real health-check function against the maintenance-enabled application, including subdirectory hosting.
 - Evidence: Release 0.4.2 regression covers both application mounts and proves project actions still return 503.
+
+## LESSON-023 — A completed draft can still lack OCR
+
+- Category: Drawing extraction
+- Status: Adopted
+- Lesson: The live cPanel worker completed the pipeline but had no OCR engine, producing a legitimate review draft with zero material proposals. Completion alone did not establish successful text recognition.
+- Action: Display OCR availability and coverage, provide an operator-triggered account-local engine setup, preserve OCR confidence, and explicitly re-extract after installation instead of reusing empty evidence.
+- Evidence: The live reviewed-1010 test reported OCR_UNAVAILABLE on both pages. Release 0.4.3 adds hash-checked optional runtime setup, setup failure/path tests and extraction refresh regression coverage.

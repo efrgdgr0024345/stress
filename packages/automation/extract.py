@@ -2,6 +2,7 @@
 import csv
 import hashlib
 import io
+import os
 import math
 from pathlib import Path
 import shutil
@@ -50,7 +51,12 @@ def extract_page(path, index, ocr=True):
                         if len(exclusions)<20000:exclusions.append(list(box))
         used_ocr = False
         if ocr and len(" ".join(w["text"] for w in words)) < 200:
-            if not shutil.which("tesseract"):
+            native_ocr=shutil.which('tesseract')
+            portable=None
+            if not native_ocr and os.environ.get('CAESAR_OCR_HOME'):
+                import tesserocr
+                portable=tesserocr
+            if not native_ocr and portable is None:
                 issues.append("OCR_UNAVAILABLE")
             else:
                 # A whole-page pass plus a higher-resolution right-table pass.
@@ -65,11 +71,16 @@ def extract_page(path, index, ocr=True):
                     with tempfile.TemporaryDirectory(prefix="ocr-", dir=Path.cwd()) as directory:
                         png = Path(directory) / "page.png"
                         image.save(png)
-                        result = subprocess.run(["tesseract", str(png), "stdout", "-l", "eng",
-                                                 "--psm", segmentation, "tsv"], capture_output=True,
-                                                timeout=100, check=True)
+                        if native_ocr:
+                            result = subprocess.run([native_ocr, str(png), "stdout", "-l", "eng",
+                                                     "--psm", segmentation, "tsv"], capture_output=True,
+                                                    timeout=100, check=True)
+                            tsv=result.stdout.decode('utf8','replace')
+                        else:
+                            with portable.PyTessBaseAPI(path=str(Path(os.environ['CAESAR_OCR_HOME'])/'tessdata'),lang='eng',psm=int(segmentation)) as engine:
+                                engine.SetImageFile(str(png));tsv='level\tpage_num\tblock_num\tpar_num\tline_num\tword_num\tleft\ttop\twidth\theight\tconf\ttext\n'+engine.GetTSVText(0)
                     used_ocr = True
-                    for row in csv.DictReader(io.StringIO(result.stdout.decode("utf8", "replace")), delimiter="\t", quoting=csv.QUOTE_NONE):
+                    for row in csv.DictReader(io.StringIO(tsv), delimiter="\t", quoting=csv.QUOTE_NONE):
                         text = (row.get("text") or "").strip()[:300]
                         if not text or len(words) >= 30000:
                             continue
