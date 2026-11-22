@@ -1,0 +1,3 @@
+Deploy the private, bounded CAESAR Functions demo after local qualification.
+Requested by the account owner on 22 November 2026.
+Uses DIGITALOCEAN_ACCESS_TOKEN from GitHub Actions secrets only.

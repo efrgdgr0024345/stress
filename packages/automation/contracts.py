@@ -39,4 +39,4 @@ class PageEvidence(BaseModel):
     extractor_version:Literal["evidence-pipeline-1"]
     pdf_library_version:str=Field(max_length=40)
     content_hash:list[Annotated[str,Field(pattern=r"^[a-f0-9]{64}$")]]=Field(max_length=50000)
-    isolation:Literal["container-no-network","landlock-seccomp","bounded-pilot"]
+    isolation:Literal["container-no-network","landlock-seccomp","bounded-pilot","provider-function"]

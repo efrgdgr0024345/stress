@@ -195,6 +195,8 @@ class PipelineTests(unittest.TestCase):
             for _ in range(20):
                 if not pipeline.process_one(main):break
         self.assertEqual(sum(c.args[1]=='ocr' for c in execute.call_args_list),2)
+        latest=self.client.get(f"/api/v1/projects/{p['id']}/pipeline").json()['runs'][0]
+        self.assertEqual(latest['state'],'DONE',latest)
         self.assertEqual([s['id'] for s in self.current(p)['sheets']],ids)
 
     def test_optional_ocr_setup_requires_hosting_operator(self):

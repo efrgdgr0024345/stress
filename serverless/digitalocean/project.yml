@@ -1,0 +1,10 @@
+packages:
+  - name: caesar
+    functions:
+      - name: extract
+        runtime: python:3.12
+        web: false
+        limits:
+          memory: 1024
+          timeout: 240000
+          logs: 64

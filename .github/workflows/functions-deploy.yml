@@ -1,0 +1,56 @@
+name: Deploy private Functions demo
+on:
+  push:
+    branches: [main]
+    paths: ['serverless/digitalocean/deploy-request.txt']
+  workflow_dispatch:
+    inputs:
+      region:
+        description: DigitalOcean Functions region
+        required: true
+        default: syd1
+        type: choice
+        options: [syd1, sgp1, nyc3, fra1]
+permissions:
+  contents: read
+concurrency:
+  group: digitalocean-functions-demo-deployment
+  cancel-in-progress: false
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Require secure account connection
+        env:
+          DIGITALOCEAN_ACCESS_TOKEN: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
+        run: |
+          if [ -z "$DIGITALOCEAN_ACCESS_TOKEN" ]; then
+            echo 'Add the DIGITALOCEAN_ACCESS_TOKEN repository secret before deployment.'
+            exit 1
+          fi
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+      - run: pip install -r requirements.txt
+      - run: python -m unittest tests.unit.test_functions_demo -v
+      - run: python scripts/build_functions_demo.py .local/functions-demo
+      - run: python scripts/qualify_functions_demo.py .local/functions-demo --report .local/functions-demo/qualification.json
+      - uses: digitalocean/action-doctl@v2
+        with:
+          token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
+      - name: Deploy private worker and invoke real PDF test
+        env:
+          DIGITALOCEAN_ACCESS_TOKEN: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
+          FUNCTION_REGION: ${{ inputs.region || 'syd1' }}
+        run: python scripts/deploy_functions_demo.py .local/functions-demo --region "$FUNCTION_REGION" --report .local/functions-demo/live-demo.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: functions-live-demo-evidence
+          retention-days: 7
+          path: |
+            .local/functions-demo/build-report.json
+            .local/functions-demo/qualification.json
+            .local/functions-demo/live-demo.json

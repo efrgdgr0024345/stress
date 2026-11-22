@@ -168,6 +168,7 @@ def register(api,job,progress):
         own=[s for s in p["sheets"] if s["source_id"]==job["source_id"]]
         if own:
             progress.update(pages=len(own),page=0,sheets=[s["id"] for s in own],revision=p["version"])
+            conn.execute('UPDATE pipeline_runs SET revision=?,updated=? WHERE id=?',(p['version'],time.time(),job['id']))
             resumed=True
         else:resumed=False
     if resumed:

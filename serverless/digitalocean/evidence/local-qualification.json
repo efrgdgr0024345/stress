@@ -1,0 +1,51 @@
+{
+  "format": "caesar-functions-qualification-1",
+  "build": {
+    "format": "caesar-functions-build-1",
+    "runtime": "python:3.12",
+    "architecture": "x86_64",
+    "zip_bytes": 31487443,
+    "limit_bytes": 48000000,
+    "zip_sha256": "538bb44004cd75c7f6107a1b15cc02e2a68267fbd665104663f02b543fc17b7d",
+    "dependency_sha256": {
+      "PyMuPDF": "69dfc78f206a96e5b3ac22741263ebab945fdf51f0dbe7c5757c3511b23d9d72",
+      "tesserocr": "7108fa533940151b3da31ec859426157746797a7b2d7890718ff0a1aa7d6675b",
+      "eng": "7d4322bd2a7749724879683fc3912cb542f19906c83bcc1a52132556427170b2"
+    },
+    "production_transport": false
+  },
+  "limits": {
+    "memory_mib": 1024,
+    "cpus": 1,
+    "network": "none",
+    "swap": false
+  },
+  "source_sha256": "7b97d44bef3d544c4c98ed0667c29607ce58fa4a401dd2463f66010a9615bb59",
+  "request_bytes": 785647,
+  "pages": [
+    {
+      "page": 1,
+      "words": 506,
+      "material_proposals": 13,
+      "response_bytes": 132143,
+      "handler_elapsed_ms": 6064,
+      "wall_seconds": 8.363,
+      "parser_peak_rss_kib": 294704,
+      "low_confidence_words": 10
+    },
+    {
+      "page": 2,
+      "words": 691,
+      "material_proposals": 19,
+      "response_bytes": 174447,
+      "handler_elapsed_ms": 7264,
+      "wall_seconds": 11.586,
+      "parser_peak_rss_kib": 302268,
+      "low_confidence_words": 13
+    }
+  ],
+  "digitalocean_live_tested": false,
+  "engineering_verified": false,
+  "material_proposals": 32,
+  "passed": true
+}

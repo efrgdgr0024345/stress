@@ -140,3 +140,16 @@ workflows at `/` and `/stress/`, worker image build and Compose configuration.
 The reviewed 1010 workflow produced two OCR pages and 32 unverified material
 proposals, with no invented physical points. Actual workbook/CSV outputs are
 retained under `examples/1010-review/`.
+
+## Release 0.4.4: Functions demo and extraction recovery
+
+130 automated tests passed locally. The exact private Functions demo ZIP also
+passed the included real PDF under a 1 GiB/no-swap, one-CPU, no-network Docker
+profile: 13 and 19 unreviewed material proposals, with preserved word confidence
+and source identity. Package size is below the conservative 48 MB limit.
+`serverless/digitalocean/evidence/local-qualification.json` records the measured
+size, hashes, elapsed times and parser peak RSS. It explicitly does not claim a
+live DigitalOcean test. The deployment workflow requires a secure token and
+performs its own provider smoke test before publishing a live result report.
+The re-extraction regression now requires completion, catching the missing
+publication checkpoint exposed by the real cPanel run.

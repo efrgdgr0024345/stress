@@ -79,6 +79,12 @@ Exports are **engineering review drafts**, not verified-for-modelling approvals.
 
 ## Validation
 
+GitHub Actions can also build and qualify the [private serverless OCR prototype](serverless/digitalocean/README.md)
+against DigitalOcean Functions' package/input limits and a 1 GiB Docker profile.
+It is not yet the website's production worker. See [what GitHub and serverless can do](docs/GITHUB_AND_SERVERLESS.md)
+for the differences between code tests, a provider smoke test, live deployment
+and engineering validation.
+
 ```bash
 npm run build
 .venv/bin/python -m unittest discover -s tests -v

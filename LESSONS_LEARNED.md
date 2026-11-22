@@ -187,3 +187,19 @@ Use the existing entry format: a unique `LESSON-###` heading, category, status, 
 - Lesson: The live cPanel worker completed the pipeline but had no OCR engine, producing a legitimate review draft with zero material proposals. Completion alone did not establish successful text recognition.
 - Action: Display OCR availability and coverage, provide an operator-triggered account-local engine setup, preserve OCR confidence, and explicitly re-extract after installation instead of reusing empty evidence.
 - Evidence: The live reviewed-1010 test reported OCR_UNAVAILABLE on both pages. Release 0.4.3 adds hash-checked optional runtime setup, setup failure/path tests and extraction refresh regression coverage.
+
+## LESSON-024 — Re-extraction needs a current publication checkpoint
+
+- Category: Automation
+- Status: Adopted
+- Lesson: Re-reading an already registered source retained its sheets but left the new run's expected project revision unset. OCR completed, then publication was rejected as a stale revision even though the project had not changed.
+- Action: Record the current revision when registration resumes an active source. Require the re-extraction regression to reach DONE and produce an artifact, rather than merely checking parser calls and retained sheet IDs.
+- Evidence: The cPanel OCR test retained both pages' evidence and published it through a cached refresh; release 0.4.4 fixes the initial checkpoint and strengthens its regression.
+
+## LESSON-025 — A local function profile is not a provider deployment
+
+- Category: Serverless validation
+- Status: Adopted
+- Lesson: A function can fit package and memory limits locally without proving the provider runtime, account permissions, cold starts or actual billing.
+- Action: Separate local ZIP/container qualification from an authenticated provider smoke test. Preserve source hashes, confidence and explicit execution profiles; never label a provider function as the local no-network sandbox.
+- Evidence: The Functions demo records local qualification separately from live provider results and keeps private website transport outside its small-file demo scope.

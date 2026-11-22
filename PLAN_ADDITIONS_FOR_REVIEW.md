@@ -34,6 +34,15 @@ remains an original-plan requirement. It requires no paid service or root and
 does not relax the selected isolation mode. See processing setup for platforms,
 licenses, failure behavior and the explicit re-extraction action.
 
+OOS-011: A private DigitalOcean Functions demonstration and GitHub qualification/
+deployment workflows were requested after the initial plan. The bounded demo
+accepts an inline PDF up to 700,000 bytes and processes one page per invocation.
+It qualifies package size, memory, OCR evidence and software proposal counts;
+it does not implement the full private-file/lease/tenant transport for normal
+website uploads. Live provider qualification requires a secure account binding.
+See `serverless/digitalocean/README.md`. Original engineering and security gates
+remain required, and no provider deployment is claimed from local tests alone.
+
 See [original-plan alignment](docs/PLAN_ALIGNMENT.md),
 [working pipeline/setup](docs/PROCESSING_PIPELINE.md) and
 [Excel output contract](docs/EXCEL_OUTPUT.md).

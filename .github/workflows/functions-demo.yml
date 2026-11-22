@@ -1,0 +1,47 @@
+name: Qualify serverless OCR demo
+on:
+  push:
+    paths:
+      - 'serverless/**'
+      - 'scripts/*functions*'
+      - 'packages/automation/**'
+      - 'services/api/ocr_setup.py'
+      - 'tests/unit/test_functions_demo.py'
+      - '.github/workflows/functions-demo.yml'
+  pull_request:
+    paths:
+      - 'serverless/**'
+      - 'scripts/*functions*'
+      - 'packages/automation/**'
+      - 'services/api/ocr_setup.py'
+      - 'tests/unit/test_functions_demo.py'
+      - '.github/workflows/functions-demo.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: functions-demo-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  qualify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+      - run: pip install -r requirements.txt
+      - run: python -m unittest tests.unit.test_functions_demo -v
+      - name: Build pinned function package
+        run: python scripts/build_functions_demo.py .local/functions-demo
+      - name: Test real PDF within function resource limits
+        run: python scripts/qualify_functions_demo.py .local/functions-demo --report .local/functions-demo/qualification.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: functions-demo-evidence
+          retention-days: 7
+          path: |
+            .local/functions-demo/build-report.json
+            .local/functions-demo/qualification.json
