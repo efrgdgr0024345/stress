@@ -1,0 +1,17 @@
+{
+  "release": "0.5.3",
+  "checked_at_utc": "2026-11-22T13:32:41.401190+00:00",
+  "fixture": "CLEARLY_LABELLED_SYNTHETIC_SOFTWARE_TEST",
+  "project_id": "ac4070a9-024c-409a-b620-60c6f879dba6",
+  "scope_count": 4,
+  "section_signoffs": "PASS",
+  "independent_mfa_review_issue": "PASS",
+  "sealed_packet_checksum": "PASS",
+  "source_original_unchanged": "PASS",
+  "element_property_change_invalidates_geometry": "PASS",
+  "previous_issue_bytes_preserved": "PASS",
+  "new_edits_create_draft": "PASS",
+  "real_engineering_records_signed": false,
+  "actual_caesar_desktop_qualification": false,
+  "test_accounts_disabled": true
+}
