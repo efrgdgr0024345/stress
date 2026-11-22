@@ -1,6 +1,10 @@
 # Automation implementation backlog
 
-Status: proposed work; no ticket below is marked implemented by this document.
+Status: implementation in progress. The original ticket acceptance contracts
+below remain the target; a bounded pilot now implements parts of AUTO-001–015
+and AUTO-016/019. See [current evidence](PLAN_ALIGNMENT.md) and
+[scope additions](../PLAN_ADDITIONS_FOR_REVIEW.md). No whole ticket is declared
+complete merely because one supported profile works.
 Read [the full pipeline plan](AUTOMATED_PROJECT_PIPELINE.md) for original-PDF
 page references, invariants, security and release contracts. Preserve existing
 manual editing, catalog snapshots, numbering and native export through adapters.

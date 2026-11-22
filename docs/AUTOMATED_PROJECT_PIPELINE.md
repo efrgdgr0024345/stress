@@ -2,8 +2,11 @@
 
 Revised 22 November 2026 (Australia/Sydney).
 
-**Status: proposed implementation plan, not implemented automation.** The deployed
-application is the manual engineering-review foundation. This document changes
+**Status: implementation in progress; bounded pilot now implemented.** See
+[plan alignment](PLAN_ALIGNMENT.md) for completed software paths and remaining
+original gates, [processing setup](PROCESSING_PIPELINE.md), and
+[additions outside original scope](../PLAN_ADDITIONS_FOR_REVIEW.md). The deployed
+hosting version still requires operator update/verification. This document changes
 the build target to automatic preparation of a complete, traceable review issue,
 with engineer intervention for exceptions and approval rather than routine data
 entry at every stage. No live application or hosting settings are changed by
@@ -421,6 +424,8 @@ alter bytes, generate and QA that final candidate before binding approval and
 publishing it atomically. A cached draft cannot satisfy an approved-issue request,
 and approval of one artifact never authorizes silently publishing another.
 
-This plan is complete as a design revision. The extraction, graph, job and
-revision-reconciliation automation described above is the next development
-scope; writing this document does not implement it or complete security hardening.
+The implemented pilot covers durable intake/jobs, native/OCR evidence, bounded
+proposals, conservative layout, draft PDF/Excel output, correction refresh and
+exact unchanged-page revision matching. The broader graph/component/release and
+operational requirements above remain the target; see PLAN_ALIGNMENT.md rather
+than treating the entire design as completed or all features as still proposed.
