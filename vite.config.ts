@@ -9,6 +9,12 @@ export default defineConfig({
     emptyOutDir: true,
     rollupOptions: {
       output: {
+        // Some shared hosts serve .mjs as application/octet-stream. Workers
+        // remain ES modules, but use .js so the web server supplies JS MIME.
+        assetFileNames: (asset) =>
+          asset.names.some((name) => name.endsWith(".mjs"))
+            ? "assets/[name]-[hash].js"
+            : "assets/[name]-[hash][extname]",
         manualChunks: { pdf: ["pdfjs-dist"], react: ["react", "react-dom"] },
       },
     },

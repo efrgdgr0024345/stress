@@ -15,6 +15,12 @@ ROOT = Path(__file__).resolve().parents[2]
 
 
 class CpanelPackageTests(unittest.TestCase):
+    def test_pdf_worker_uses_a_host_portable_javascript_asset_extension(self):
+        workers=list((ROOT/'dist/assets').glob('pdf.worker*.js'))
+        self.assertEqual(len(workers),1,'Build the worker as .js; shared hosts may serve .mjs with a non-script MIME type.')
+        self.assertFalse(list((ROOT/'dist/assets').glob('pdf.worker*.mjs')))
+        self.assertGreater(workers[0].stat().st_size,100000)
+
     def test_worker_requests_complete_after_cold_and_warm_parent_forks(self):
         with tempfile.TemporaryDirectory() as temp:
             env = {**os.environ, "CAESAR_DATA_DIR": str(Path(temp) / "data"),

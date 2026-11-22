@@ -235,3 +235,11 @@ Use the existing entry format: a unique `LESSON-###` heading, category, status, 
 - Lesson: Processing one page per invocation still exceeds platform caps if every invocation carries the entire PDF or large evidence is returned inline. Splitting must also preserve source identity, page transforms and edits.
 - Action: Transfer true single-page files with expiring scoped grants, deliver bounded evidence by callback, limit concurrency and submissions across projects, and expose completed observations in the existing workspace. Retain accepted pages during retry and keep partial drafts visibly incomplete.
 - Evidence: Release 0.5.0 regression coverage exercises out-of-order delivery, early review/edits, original source integrity, idempotent results, cancellation, failed-page retry, expansion limits and shared budgets. Provider-local qualification remains distinct from live transport qualification.
+
+## LESSON-030 — Verify live asset MIME and rendered pixels
+
+- Category: Hosting and browser verification
+- Status: Adopted
+- Lesson: The hosting server served the PDF worker's .mjs asset as application/octet-stream. Browsers refused the module despite successful HTTP status, healthy APIs and an existing canvas element. The local server used the correct JavaScript MIME and did not expose the problem.
+- Action: Build the ES-module worker with a portable .js asset name. Validate its live MIME type, actual rendered page pixels and preview-page navigation instead of treating a visible placeholder canvas as successful rendering.
+- Evidence: The 0.5.0 live browser loop exposed the worker import failure. Release 0.5.1 changes the asset contract and strengthens the packaged-worker regression; live rendering is checked separately from API/export success.
