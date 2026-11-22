@@ -1,0 +1,78 @@
+{
+  "format": "caesar-final-live-validation-1",
+  "installed_release": "0.6.1",
+  "processing": {
+    "release": "0.6.0",
+    "checked_at_utc": "2026-11-22T14:29:23.544275+00:00",
+    "latest_user_attachment_sha256": "7b97d44bef3d544c4c98ed0667c29607ce58fa4a401dd2463f66010a9615bb59",
+    "project_id": "1282c863-4b0b-4ba1-9afd-91622e43fe6a",
+    "pages": 2,
+    "material_proposals": 32,
+    "physical_node_proposals": 0,
+    "component_occurrences": 37,
+    "unlocated_port_requirements": 56,
+    "digitalocean_callbacks": 2,
+    "inline_recoveries": 0,
+    "source_unchanged": true,
+    "pdf_original_streams_unchanged": true,
+    "xlsx_reopened": true,
+    "csv_tables_verified": true,
+    "review_bundle_traceability_verified": true,
+    "engineering_verified": false,
+    "remaining_source_facts_reported": true
+  },
+  "browser": {
+    "release": "0.6.1",
+    "physical_model_live_browser": "PASS",
+    "actual_downloaded_model_xlsx_opened": true,
+    "latest_original_pdf_rendered_both_pages": true,
+    "native_pdf_preview_rendered": true,
+    "whole_project_workflow_unchanged": true,
+    "browser_errors": 0
+  },
+  "clean_workspace": {
+    "release": "0.6.1",
+    "cleared": {
+      "projects": 10,
+      "source_files": 10,
+      "exports": 6,
+      "approved_issues": 1,
+      "processing_runs": 7,
+      "temporary_accounts": 2,
+      "processing_demonstrations": 1
+    },
+    "private_backup_created": true,
+    "checks": {
+      "empty_projects": true,
+      "administrator_session_retained": true,
+      "temporary_accounts_removed": true,
+      "flange_library_retained": true,
+      "provider_connected": true,
+      "normal_processor_ready": true,
+      "prototype_test_data_cleared": true,
+      "release_installed": true,
+      "automatic_updates_retained": true
+    }
+  },
+  "reference_library": {
+    "source_preview_available": true,
+    "dataset_versions": 4,
+    "rows": 627
+  },
+  "verification": {
+    "local_automated_tests": 199,
+    "local_bootstrap_tests": 13,
+    "github_validation": "success",
+    "github_check_url": "https://github.com/efrgdgr0024345/stress/actions/runs/45032980850/job/137240448416",
+    "chromium_stress_workflow": "PASS",
+    "post_reset_empty_workspace_browser": "PASS"
+  },
+  "original_plan_complete": false,
+  "remaining_original_gates": [
+    "legacy v1.2 generator and original/golden fixtures",
+    "canonical valve workbook",
+    "general automatic point/station/COD/continuation inference",
+    "actual CAESAR and supported PDF-editor round trips",
+    "production malware/encryption/licensing/disaster-recovery qualification"
+  ]
+}
