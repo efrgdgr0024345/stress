@@ -1,4 +1,4 @@
-# Implementation status — 0.5.2
+# Implementation status — 0.6.0
 
 ## Implemented review application
 
@@ -13,8 +13,8 @@ pilot; original graph/security/application qualification gates are still open.
 Normal cloud processing and actual PDF rendering passed live tests on the real
 two-page source and a larger synthetic three-page file in releases 0.5.0–0.5.1.
 Release 0.5.2 adds scoped reviews, independent sealed engineering-review issues,
-workspace people/roles and authenticator setup. These new controls are tested
-with disposable accounts; live release verification is recorded separately.
+workspace people/roles and authenticator setup. These controls passed actual hosting tests with clearly labelled synthetic accounts and a synthetic source in 0.5.3; evidence is version controlled.
+Version 0.6.0 adds physical interface requirements, reviewed source-port mappings, signed XYZ constraints, shared model spreadsheets and an owner-only recoverable project reset. Its live verification is recorded separately.
 See [execution ledger](../PLAN_EXECUTION.md) and [plan alignment](PLAN_ALIGNMENT.md).
 
 - macOS-inspired React interface and root `loader.php`, with each lesson displayed in a distinct coloured icon card beneath Load project. The Markdown register is version controlled and read dynamically.
@@ -44,8 +44,8 @@ See [execution ledger](../PLAN_EXECUTION.md) and [plan alignment](PLAN_ALIGNMENT
 
 ## Deliberate review boundaries
 
-- Engineering acceptance is explicit. Automatic exact station proposals are limited to the documented native semantic profile. General vector/OCR-to-pipe recognition, signed geometry constraints and validated component-specific placement are not complete.
-- Main/branch order is explicit, with branches referring to a main-run tee. Arbitrary loops, branch-on-branch networks, signed XYZ constraints and shared namespaces across different lines need richer engineering contracts.
+- Engineering acceptance is explicit. Automatic exact station proposals are limited to the documented native semantic profile. General vector/OCR-to-pipe recognition and complete automatic component-specific station/COD proof are not complete. Signed XYZ constraints and reviewed source-port rules are implemented.
+- Main/branch order is explicit, with branches referring to a main-run tee. Arbitrary loops, branch-on-branch networks and shared namespaces across different lines need richer engineering contracts. The axis solver reports inconsistent cycles and underdetermined axes.
 - Shared continuation linking is an explicit user assertion. Automatic candidate finding, per-axis discrepancy calculations and independent continuation approval are pending.
 - Source-aware provisional layout avoids extracted exclusions where supported. Wrapping/bounds checks prevent truncated native tables/notes. Complete leader/collision qualification remains open and layout requires review.
 - The catalog mapper is general and reviewable, not an assertion that the missing canonical workbooks have been imported. Historical 1010 numeric acceptance gates remain unrun.

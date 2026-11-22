@@ -29,6 +29,11 @@ def numbers(lines):
 
 
 class NeutralTests(unittest.TestCase):
+    def test_y_up_target_rotates_canonical_east_north_up_without_reflection(self):
+        p=model();p['analysis_model']['vertical_axis']='Y'
+        values=numbers(sections(neutral_file(p))['ELEMENTS'][:9])
+        self.assertEqual(values[3],-2)
+        self.assertEqual(values[4],0)
     def test_fixed_fields_counts_units_and_geometry_follow_official_contract(self):
         p=model();check=assess(p);self.assertTrue(check['available'],check);self.assertFalse(check['qualified_application_roundtrip'])
         s=sections(neutral_file(p));self.assertEqual(len(s['VERSION']),61)

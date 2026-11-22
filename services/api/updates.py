@@ -50,24 +50,31 @@ def read(path, default=None):
 def required_security_contract(data):
     """Older code must not bypass MFA, disabled accounts or reviewer roles."""
     data=Path(data)
+    minimum=0
     for path in (data/'security/mfa').glob('*.json'):
         if path.is_symlink():raise ValueError('Private account security storage requires operator attention')
-        if read(path).get('enabled'):return 1
+        if read(path).get('enabled'):minimum=1
     database=data/'workspace.sqlite3'
     if database.is_file():
         with sqlite3.connect(database) as conn:
             tables={r[0] for r in conn.execute("SELECT name FROM sqlite_master WHERE type='table'")}
+            if 'projects' in tables:
+                columns={r[1] for r in conn.execute('PRAGMA table_info(projects)')}
+                if 'data' in columns:
+                    for row in conn.execute('SELECT data FROM projects'):
+                        p=json.loads(row[0]);model=p.get('physical_model',{})
+                        if model.get('components') or model.get('constraints') or any(e.get('geometry_origin')=='constraint-solution' for e in p.get('analysis_model',{}).get('elements',[])):return 2
             if 'users' in tables and conn.execute("SELECT 1 FROM users WHERE role='reviewer' LIMIT 1").fetchone():return 1
             if 'account_state' in tables and conn.execute('SELECT 1 FROM account_state WHERE enabled=0 LIMIT 1').fetchone():return 1
             if 'mfa_accounts' in tables and conn.execute('SELECT 1 FROM mfa_accounts WHERE enabled=1 LIMIT 1').fetchone():return 1
             for table in ('review_signoffs','project_approvals','review_qualifications'):
                 if table in tables and conn.execute('SELECT 1 FROM '+table+' LIMIT 1').fetchone():return 1
-    return 0
+    return minimum
 
 
 def security_compatible(data,code):
     if read(Path(code)/'RELEASE.json').get('security_contract',0)<required_security_contract(data):
-        raise ValueError('That release predates enabled account/review security. Retain this code or use a security-compatible rollback release.')
+        raise ValueError('That release predates account/review security or model safeguards now in use. Retain this code or use a compatible rollback release.')
 
 
 @contextmanager
@@ -246,7 +253,7 @@ def activate(directory, config, release):
             if not healthy(config["url"], release["version"], root):
                 raise ValueError("New release failed live health checks")
             diag.emit(directory.parent,"update.health_passed",source="updater",target_release=release["version"])
-            write(directory/"installed.json", {"version":release["version"],"backup":str(backup),"commit":release["commit"]})
+            write(directory/"installed.json", {"version":release["version"],"backup":str(backup),"commit":release["commit"],'package_sha256':release['package_sha256']})
             (directory/"journal.json").unlink(missing_ok=True)
         except BaseException:
             if switched:
@@ -270,6 +277,7 @@ def rollback(directory, config):
         raise ValueError("No retained rollback release")
     root, public = Path(config["app_root"]), Path(config["public_dir"])
     security_compatible(config['data_dir'],backup/'code')
+    reverted_version=read(root/'RELEASE.json').get('version')
     write(directory/"maintenance.json", {"active":True})
     write(directory/"journal.json", {"backup":str(backup),"root":str(root),"public":str(public)})
     try:
@@ -278,6 +286,9 @@ def rollback(directory, config):
         restore_public(public,backup)
         restart(root)
         write(directory/"installed.json", {"version":read(root/"RELEASE.json").get("version","previous")})
+        policy=read(directory/'policy.json')
+        policy.update(held_package_sha256=installed.get('package_sha256'),held_version=None if installed.get('package_sha256') else reverted_version)
+        write(directory/'policy.json',policy)
         (directory/"journal.json").unlink(missing_ok=True)
     finally:
         if not (directory/"journal.json").exists():
@@ -318,6 +329,11 @@ def run(directory):
         action = state.get("action") if state.get("status") == "queued" else None
         if not action and read(directory/"policy.json").get("automatic"):
             release = check(directory)
+            policy=read(directory/'policy.json')
+            if (release.get('package_sha256') in (state.get('failed_package_sha256'),policy.get('held_package_sha256')) or
+                release.get('version')==policy.get('held_version')):
+                diag.emit(directory.parent,'update.release_held',source='updater',target_release=release['version'])
+                return
             if release["version"] != read(Path(config["app_root"])/"RELEASE.json").get("version"):
                 action = "install"
         if not action:
@@ -329,7 +345,8 @@ def run(directory):
             write(directory/"state.json", {"status":"done","action":action,"at":time.time()})
         except Exception as exc:
             diag.exception(directory.parent,"update.failed",exc,source="updater")
-            write(directory/"state.json", {"status":"failed","message":str(exc)[:250],"at":time.time()})
+            write(directory/"state.json", {"status":"failed","message":str(exc)[:250],"at":time.time(),
+                'failed_package_sha256':read(directory/'available.json').get('package_sha256') if action=='install' else None})
 
 
 def install(api):
@@ -345,8 +362,10 @@ def install(api):
         backup=read(directory/'installed.json').get('backup');blocked=None
         if backup:
             try:security_compatible(api.DATA,Path(backup)/'code')
-            except (ValueError,OSError):blocked='The retained release predates account/review security now in use. A security-compatible rollback release is required.'
-        return {"current":api.BUILD_ID,"available":read(directory/"available.json"),"state":read(directory/"state.json"),"configured":(directory/"config.json").exists(),"runner_ready":time.time()-read(directory/"heartbeat.json").get("at",0)<900,"automatic":read(directory/"policy.json").get("automatic",False),"rollback_available":bool(backup) and not blocked,'rollback_blocked':blocked}
+            except (ValueError,OSError):blocked='The retained release predates account/review security or model safeguards now in use. A compatible rollback release is required.'
+        state=read(directory/'state.json');policy=read(directory/'policy.json')
+        hold=bool(state.get('failed_package_sha256') or policy.get('held_package_sha256') or policy.get('held_version'))
+        return {"current":api.BUILD_ID,"available":read(directory/"available.json"),"state":state,"configured":(directory/"config.json").exists(),"runner_ready":time.time()-read(directory/"heartbeat.json").get("at",0)<900,"automatic":policy.get("automatic",False),"rollback_available":bool(backup) and not blocked,'rollback_blocked':blocked,'automatic_hold':hold}
     @api.app.post("/api/v1/system/updates/check")
     def check_release(actor=Depends(admin)):
         directory = api.DATA/"updates"

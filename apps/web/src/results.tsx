@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 import { api, type Project } from "./types";
 import { appPath } from "./paths";
+import { PhysicalModelControls, type ModelSelection } from "./physical-model";
 import { Dialog } from "./ui";
 import "./results.css";
 
@@ -79,6 +80,7 @@ export function EngineeringResults({
     [editing, setEditing] = useState<Record<string, Cell> | null>(null),
     [busy, setBusy] = useState(false),
     [settingsOpen, setSettingsOpen] = useState(false);
+  const [modelSelection, setModelSelection] = useState<ModelSelection>(null);
   const firstMain = project.nodes
     .filter((n) => n.route === "main")
     .sort((a, b) => a.order - b.order)[0];
@@ -107,6 +109,10 @@ export function EngineeringResults({
         ),
     );
   const rowAction = (row: Record<string, Cell>) => {
+    if (selected === "Component ports" && row.component_id)
+      setModelSelection({ type: "component", id: String(row.component_id) });
+    if (selected === "Dimensions" && row.id)
+      setModelSelection({ type: "dimension", id: String(row.id) });
     if (selected === "CAESAR input") setEditing(row);
     if (selected === "Nodes" && row.id) onReview(String(row.id), "node");
     if (selected === "Components" && row.id)
@@ -178,6 +184,12 @@ export function EngineeringResults({
         <span className="badge amber">Engineering review</span>
       </div>
       <div className="results-workbook">
+        <PhysicalModelControls
+          project={project}
+          onUpdate={onUpdate}
+          selection={modelSelection}
+          onClear={() => setModelSelection(null)}
+        />
         <div className="results-formula-bar">
           <span>fx</span>
           <span>
@@ -213,7 +225,13 @@ export function EngineeringResults({
                   key={String(row.id ?? i)}
                   onClick={() => rowAction(row)}
                   tabIndex={
-                    ["Nodes", "Components", "CAESAR input"].includes(selected)
+                    [
+                      "Nodes",
+                      "Components",
+                      "CAESAR input",
+                      "Component ports",
+                      "Dimensions",
+                    ].includes(selected)
                       ? 0
                       : undefined
                   }

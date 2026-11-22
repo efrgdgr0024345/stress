@@ -3,6 +3,8 @@ import hashlib
 import json
 from copy import deepcopy
 from packages.engineering import validate
+from packages.physical import audit as component_audit
+from packages.physical.constraints import solve as solve_dimensions
 
 
 def digest(value):
@@ -49,17 +51,30 @@ def scopes(project, processing_sources=()):
              'table':sheet.get('table'),'graphics':graphics,'schedule':visible,
              'notes':[a for a in project.get('annotations',[]) if a['sheet_id']==sheet['id']]},observed(sheet),layout)
     lines=list(dict.fromkeys([s['line_id'] for s in project['sheets']]+[n['line_id'] for n in project['nodes']]))
+    component_state=component_audit(project);components=component_state['components']
+    dimensional_state=solve_dimensions(project)
     for line in lines:
         nodes=[{k:n.get(k) for k in ('id','line_id','route','order','takeoff_id','kind','station_mm','coordinates_mm','dimension_input','evidence','verification','component_ports')}
                for n in project['nodes'] if n['line_id']==line]
         point_ids={n['id'] for n in nodes}
+        component_ids={c['id'] for c in components if c['line_id']==line}
+        relevant_ids={cid for group in dimensional_state['evidence_groups'].values() if point_ids.intersection(group['points']) for cid in group['constraint_ids']}
+        dimensional_checks=[i for i in dimensional_state['issues'] if point_ids.intersection(i.get('point_ids',[])) or i.get('constraint_id') in relevant_ids or i['code'] in ('DIMENSION_SOLVER_LIMIT','DIMENSION_SOLUTION_STALE')]
         missing=[]
         if not nodes:missing.append('NO_PHYSICAL_NODES')
         if any(n['station_mm'] is None or not n.get('evidence') for n in nodes):missing.append('PHYSICAL_STATIONS_UNVERIFIED')
         if any(n.get('verification')=='proposed' for n in nodes):missing.append('NODE_PROPOSALS_UNREVIEWED')
+        missing.extend(i['code'] for i in component_state['issues'] if i.get('component_id') in component_ids)
+        missing.extend(i['code'] for i in dimensional_checks)
+        if any(any(v is None for v in edge['delta_mm'].values()) for edge in dimensional_state['elements'] if edge['line_id']==line):missing.append('SIGNED_XYZ_UNRESOLVED')
         add('geometry',line,'Line '+line+' · physical model',{'nodes':nodes,
               'elements':[e for e in project.get('analysis_model',{}).get('elements',[]) if e.get('from_point_id',e.get('from')) in point_ids or e.get('to_point_id',e.get('to')) in point_ids],
               'continuations':[c for c in project.get('continuations',[]) if c.get('point_id') in point_ids or c.get('line_id')==line],
+              'components':[c for c in components if c['line_id']==line],
+              'component_association_checks':[i for i in component_state['issues'] if i.get('component_id') in component_ids],
+              'dimensional_constraints':[c for c in project.get('physical_model',{}).get('constraints',[]) if c.get('from_point_id') in point_ids or c.get('to_point_id') in point_ids],
+              'dimensional_inputs':[c for c in dimensional_state['inputs'] if c['id'] in relevant_ids],
+              'dimensional_checks':dimensional_checks,
               'model_frame':{k:project.get('analysis_model',{}).get(k) for k in ('local_origin_confirmed','origin_point_id','vertical_axis','piping_code_id','ambient_temperature_c')}},
               all(observed(s) for s in project['sheets'] if s['line_id']==line),missing)
     return result

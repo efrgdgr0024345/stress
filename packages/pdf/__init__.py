@@ -368,6 +368,11 @@ def export_bundle(project, source_path, output_path):
     with zipfile.ZipFile(output_path, "w", zipfile.ZIP_DEFLATED) as archive:
         from packages.workbooks import workbook
         archive.writestr("engineering-workbook.xlsx",workbook(project))
+        if project.get('physical_model'):
+            from packages.physical import audit as physical_audit
+            from packages.physical.constraints import solve
+            archive.writestr('physical-model.json',json.dumps(physical_audit(project),indent=2))
+            archive.writestr('dimensional-solution.json',json.dumps(solve(project),indent=2))
         archive.writestr("annotated-review.pdf", pdf_bytes)
         archive.writestr("nodes.csv", csv_file.getvalue())
         for filename, value in [

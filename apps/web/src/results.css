@@ -1,6 +1,22 @@
 .results-page {
   min-width: 0;
 }
+.physical-controls {
+  padding: 16px 20px;
+  background: #f7faff;
+  border-bottom: 1px solid #e0e7f1;
+}
+.physical-controls .fine-print {
+  margin-top: 10px;
+  font-size: 11px;
+}
+.physical-port-field {
+  padding: 14px;
+  background: #f7faff;
+  border: 1px solid #e2e9f4;
+  border-radius: 12px;
+  margin: 12px 0;
+}
 .excel-download {
   background: #24865b !important;
   border-color: #24865b !important;

@@ -20,6 +20,11 @@ OPTIONAL_SECTIONS=('NODENAME','BEND','RIGID','EXPJT','RESTRANT','DISPLMNT','FORC
 def assess(project):
     model=project.get('analysis_model',{});nodes=project['nodes'];edges=topology(nodes)['edges'];by_id={n['id']:n for n in nodes};entered={e['id']:e for e in model.get('elements',[])};missing=[]
     if not edges:missing.append('A reviewed connected pipe route is required.')
+    from packages.physical import audit as physical_audit
+    if physical_audit(project)['components']:missing.append('Component ports/auxiliaries are not represented by this straight-pipe-only native profile.')
+    if project.get('physical_model') or project.get('analysis_model'):
+        from packages.physical.constraints import solve
+        if solve(project)['issues']:missing.append('Resolve all dimensional constraint conflicts, stale sources and stale accepted solutions before native export.')
     if any(n.get('station_mm') is None or n.get('verification')=='proposed' or not n.get('evidence') for n in nodes):missing.append('Accept the engineering station/evidence for every model point first.')
     unsupported=sorted({n['kind'] for n in nodes if n['kind']!='endpoint'})
     if unsupported:missing.append('This first neutral profile supports straight pipe/endpoints only; component-specific data are required for '+', '.join(unsupported)+'.')
@@ -135,7 +140,11 @@ def neutral_file(project):
         for i,edge in enumerate(edges):
             data=entered[identity(project['id'],edge['from'],edge['to'])];a,b=by_id[edge['from']],by_id[edge['to']]
             rel=[Decimal(0)]*53
-            rel[:7]=[Decimal(a['number']),Decimal(b['number']),length(data['dx_mm']),length(data['dy_mm']),length(data['dz_mm']),length(data['od_mm']),length(data['wall_mm'])]
+            dx,dy,dz=(Decimal(data[k]) for k in ('dx_mm','dy_mm','dz_mm'))
+            # Canonical axes are East/North/Up. Preserve handedness when the
+            # target uses Y-up: native X=East, Y=Up, Z=South.
+            if model['vertical_axis']=='Y':dy,dz=dz,-dy
+            rel[:7]=[Decimal(a['number']),Decimal(b['number']),length(dx),length(dy),length(dz),length(data['od_mm']),length(data['wall_mm'])]
             rel[7]=length(data['insulation_thickness_mm']);rel[8]=length(data['corrosion_mm']);rel[9]=temperature(data['temperature_c']);rel[18]=Decimal(data['pressure_mpa'])*mpa_to_psi
             rel[27]=Decimal(data['elastic_modulus_mpa'])*mpa_to_psi;rel[28]=Decimal(data['poisson_ratio']);rel[29]=Decimal(data['pipe_density_kg_m3'])*density_factor
             rel[30]=Decimal(data.get('insulation_density_kg_m3') or 0)*density_factor;rel[31]=Decimal(data['fluid_density_kg_m3'])*density_factor;rel[36]=Decimal(data['hot_modulus_mpa'])*mpa_to_psi

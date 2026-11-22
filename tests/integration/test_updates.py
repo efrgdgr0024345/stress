@@ -66,6 +66,27 @@ class UpdateApiTests(unittest.TestCase):
         finally:main.LOCAL_DEMO=previous
 
 class ReleaseTests(unittest.TestCase):
+    def test_auto_update_holds_failed_package_until_new_bytes_or_explicit_retry(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root,public,data,directory,config,release=self.fixture(Path(temporary))
+            u.write(directory/'policy.json',{'automatic':True})
+            u.write(directory/'state.json',{'status':'failed','failed_package_sha256':release['package_sha256']})
+            with patch.object(u,'check',return_value=release),patch.object(u,'activate') as activate:
+                u.run(directory);activate.assert_not_called()
+            newer={**release,'package_sha256':'b'*64,'version':'next'}
+            with patch.object(u,'check',return_value=newer),patch.object(u,'activate') as activate:
+                u.run(directory);activate.assert_called_once()
+
+    def test_manual_rollback_does_not_automatically_reinstall_the_reverted_package(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root,public,data,directory,config,release=self.fixture(Path(temporary))
+            u.write(directory/'policy.json',{'automatic':True})
+            with patch.object(u,'fetch',return_value=(ROOT/'downloads/caesar-cpanel.zip').read_bytes()),patch.object(u.subprocess,'run',return_value=subprocess.CompletedProcess([],0)),patch.object(u,'restart'),patch.object(u,'healthy',return_value=True):
+                u.activate(directory,config,release);u.rollback(directory,config)
+            self.assertTrue(u.read(directory/'policy.json')['automatic'])
+            with patch.object(u,'check',return_value=release),patch.object(u,'activate') as activate:
+                u.run(directory);activate.assert_not_called()
+
     def test_security_downgrade_cannot_bypass_mfa_disabled_accounts_or_reviews(self):
         with tempfile.TemporaryDirectory() as temporary:
             root,public,data,directory,config,release=self.fixture(Path(temporary))

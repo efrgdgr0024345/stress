@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { api, type Project } from "./types";
 import { appPath } from "./paths";
+import { WorkspaceResetCard } from "./workspace-reset";
 import "./admin.css";
 
 type Demo = {
@@ -513,6 +514,7 @@ export function AdminConnections({ projects }: { projects: Project[] }) {
           </div>
         )}
       </section>
+      <WorkspaceResetCard />
     </div>
   );
 }

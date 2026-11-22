@@ -259,3 +259,11 @@ Use the existing entry format: a unique `LESSON-###` heading, category, status, 
 - Lesson: Physical nodes and analysis elements use different endpoint field names. A review hash that filters elements by the graph-edge names can omit their signed geometry and operating properties.
 - Action: Bind each line review to its stored from_point_id/to_point_id elements and retain compatibility with explicit graph endpoints. Require a fresh geometry review when element dimensions, material or operating properties change.
 - Evidence: Release 0.5.3 exercises the real element-edit API after section sign-off and confirms that a changed operating temperature invalidates the physical review. The issue was found while auditing the next component/model phase.
+
+## LESSON-033 — Keep physical requirements, signed axes and clean testing separate
+
+- Category: Physical modelling and operations
+- Status: Adopted
+- Lesson: A material count does not locate its physical interfaces, and a relative signed chain does not establish an absolute origin. Clearing test projects must also retain the account, reference data and paid-use counters needed for the next test.
+- Action: Prepare explicit unlocated component requirements, reuse evidenced interface UUIDs, retain source units and declared tolerances, reject conflicting/stale geometry and keep unknown axes blank. Reset the active workspace only after current-state checks and a private backup, with ordinary-error rollback and worker fencing.
+- Evidence: Release 0.6.0 adds shared website/Excel physical tables plus domain/API/browser coverage for ports, exact signed constraints, immutable source evidence, retained stations, stale solutions and recoverable scoped reset. Missing engineering facts and original desktop/golden-fixture gates stay visible.

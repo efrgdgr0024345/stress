@@ -11,6 +11,7 @@ type Status = {
   automatic: boolean;
   rollback_available: boolean;
   rollback_blocked?: string;
+  automatic_hold?: boolean;
 };
 export function Updates({ onClose }: { onClose: () => void }) {
   const [status, setStatus] = useState<Status | null>(null),
@@ -77,6 +78,13 @@ export function Updates({ onClose }: { onClose: () => void }) {
           </p>
           {status.rollback_blocked && (
             <p role="status">{status.rollback_blocked}</p>
+          )}
+          {status.automatic_hold && (
+            <p>
+              A failed or reverted release is held from automatic reinstall. New
+              releases are still checked; Install update explicitly retries the
+              selected release.
+            </p>
           )}
           <div className="heading-actions">
             <button

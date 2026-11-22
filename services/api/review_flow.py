@@ -117,6 +117,8 @@ def scope_public(value):
 
 
 def commit_reviewed_data(api,conn,p,actor,action):
+    from packages.physical import prepare
+    prepare(p)
     p['version']+=1;p['updated']=api.now();p['status']='DRAFT';p.pop('review_approval',None)
     p['contributors']=sorted(set(p.get('contributors',[]))|{actor['id']})
     conn.execute('UPDATE projects SET version=?,data=? WHERE id=?',(p['version'],json.dumps(p),p['id']))

@@ -26,13 +26,17 @@ No milestone is complete solely because software tests pass.
 - [x] Use scoped, expiring page grants for files beyond the inline function cap;
   fence/cancel/retry tasks and reconcile results to original page identities.
 - [x] Expose incremental page evidence and review tasks while processing continues.
-- [ ] Implement revision-bound staged sign-offs, independent final approval,
+- [x] Implement revision-bound staged sign-offs, independent final approval,
   invalidation after edits, and immutable approved issues.
-  Release 0.5.2 implements these controls with disposable API/browser evidence;
-  live installation and verification are the next gate. Verified modelling stays
-  blocked by the actual export/profile qualification requirements.
+  Releases 0.5.2–0.5.3 passed actual hosting UI/API checks, including a clearly
+  synthetic two-account MFA approval, immutable packet and stale element review.
+  Real engineering approvals were not performed. Verified modelling stays blocked.
 - [ ] Complete typed component ports, node rules, graph/continuation review,
   dimensional constraints and unsupported-feature exception handling.
+  Release 0.6.0 adds physical interface requirements/mapping and signed XYZ
+  constraint solving, source proof, conflict/unknown handling and shared tables.
+  General symbol interpretation, automatic continuation proof, arbitrary networks
+  and complete physical station/COD proof remain original acceptance gates.
 - [ ] Qualify editable PDF layout/objects and complete engineering schedules.
 - [ ] Qualify the requested CAESAR import profiles in the actual application.
 - [ ] Complete original security, backup/restore and multi-drawing acceptance gates.
@@ -47,10 +51,10 @@ No milestone is complete solely because software tests pass.
 | 3 | Normal live transfers/quotas passed; malware scanning and production storage/security remain |
 | 4 | Actual supported desktop-editor save/edit/reopen round trips |
 | 5 | Material reconciliation and multiple unrelated drawing fixtures |
-| 6 | Reviewed graph, signed XYZ chains and independent station checks |
+| 6 | Signed XYZ chains now implemented; general graph recognition and independent station/COD proof remain |
 | 7 | Original 48 unique / 49 display node gates with original assets |
 | 8 | Complete native-object layout and editor qualification |
-| 9 | New scoped independent review/locked issue implementation needs live validation; general revision reconciliation remains |
+| 9 | Scoped independent review/locked issues passed live software tests; general revision reconciliation and verified-modelling application gates remain |
 | 10 | Security, licensing, disaster restore and production operations evidence |
 
 Original requirements stay in scope when unfinished. The later Excel/CAESAR,

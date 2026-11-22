@@ -73,6 +73,9 @@ def enqueue(api,project,actor,source_id,sha,filename,replace=None,cached=None):
     options=json.dumps({"replace_source_id":replace,"cached_from":cached,"version":VERSION},sort_keys=True)
     with api.db() as conn:
         conn.execute("BEGIN IMMEDIATE")
+        if (api.DATA/'updates/maintenance.json').exists():raise HTTPException(503,'Workspace maintenance is running. Retry shortly.')
+        current=api.project_read(project['id'],actor,conn)
+        if current['version']!=project['version']:raise HTTPException(409,'Project changed before the job was accepted. Reload and retry.')
         found=conn.execute("SELECT * FROM pipeline_runs WHERE project_id=? AND sha=? AND options=? AND base_revision=?",
                            (project["id"],sha,options,project["version"])).fetchone()
         if found:return public(found)
@@ -151,6 +154,8 @@ def actor_for(api,job,conn):
 
 def commit_project(api,conn,job,project,action,preserve_status=False):
     fenced(conn,job)
+    from packages.physical import prepare as prepare_physical
+    prepare_physical(project)
     project["numbering_map"]=renumber(project["nodes"])
     compute_reasons(project["nodes"])
     project["version"]+=1;project["updated"]=api.now()

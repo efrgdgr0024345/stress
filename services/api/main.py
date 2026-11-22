@@ -389,6 +389,7 @@ def change(project_id, version, actor, action, update):
     diag.emit(DATA,"project.change.started","DEBUG",base_revision=version)
     with LOCK, db() as conn:
         conn.execute("BEGIN IMMEDIATE")
+        if (DATA/'updates/maintenance.json').exists():raise HTTPException(503,'Workspace maintenance is running. Retry shortly.')
         who=conn.execute('SELECT role FROM users WHERE id=? AND tenant=?',(actor['id'],actor['tenant'])).fetchone()
         from services.api.account_security import active
         if not who or who['role'] not in ('admin','engineer') or not active(conn,actor['id']):
@@ -399,6 +400,8 @@ def change(project_id, version, actor, action, update):
                 409, "This project changed in another session. Reload before saving."
             )
         update(project)
+        from packages.physical import prepare as prepare_physical
+        prepare_physical(project)
         project['contributors'] = sorted(set(project.get('contributors', [])) | {actor['id']})
         compute_reasons(project["nodes"])
         project["version"] += 1
@@ -553,6 +556,8 @@ def create_project(body: ProjectCreate, actor=Depends(editor)):
         raise HTTPException(422, "Project name and full line ID are required.")
     project = empty_project(body.title.strip(), body.line_id.strip(), body.description)
     with db() as conn:
+        conn.execute('BEGIN IMMEDIATE')
+        if (DATA/'updates/maintenance.json').exists():raise HTTPException(503,'Workspace maintenance is running. Retry shortly.')
         conn.execute(
             "INSERT INTO projects VALUES (?,?,?,?)",
             (project["id"], actor["tenant"], 1, json.dumps(project)),
@@ -655,6 +660,7 @@ async def upload(
         with LOCK:
             # Source metadata is scoped by project before it can be downloaded.
             with db() as conn:
+                if (DATA/'updates/maintenance.json').exists():raise HTTPException(503,'Workspace maintenance is running. Retry shortly.')
                 conn.execute(
                     "INSERT INTO sources VALUES (?,?,?,?)",
                     (source_id, project_id, filename, sha),
@@ -1139,6 +1145,8 @@ install_pipeline(sys.modules[__name__])
 
 from services.api.results import install as install_results
 install_results(sys.modules[__name__])
+from services.api.physical_model import install as install_physical_model
+install_physical_model(sys.modules[__name__])
 
 from services.api.digitalocean import install as install_digitalocean
 install_digitalocean(sys.modules[__name__])
@@ -1152,6 +1160,8 @@ from services.api.account_security import install as install_account_security
 install_account_security(sys.modules[__name__])
 from services.api.people import install as install_people
 install_people(sys.modules[__name__])
+from services.api.workspace_reset import install as install_workspace_reset
+install_workspace_reset(sys.modules[__name__])
 from services.api.review_flow import install as install_review_flow
 install_review_flow(sys.modules[__name__])
 

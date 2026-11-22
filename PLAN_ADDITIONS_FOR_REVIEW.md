@@ -52,3 +52,11 @@ large-file production provider transport or original engineering approval gates.
 See [original-plan alignment](docs/PLAN_ALIGNMENT.md),
 [working pipeline/setup](docs/PROCESSING_PIPELINE.md) and
 [Excel output contract](docs/EXCEL_OUTPUT.md).
+
+OOS-013: On 23 November 2026 (Sydney), the user requested a clean live database
+after the remaining tests. The hosting-owner workspace reset adds a preview,
+current-state check, private recoverable snapshot and active-work fencing. It
+retains genuine logins, the reference flange library, connections/updater and
+paid-use counters while clearing project/test data. This administration workflow
+extends the starting scope; it does not replace the original disaster-recovery,
+retention or encryption requirements. See `docs/PHYSICAL_MODEL.md`.
