@@ -1,0 +1,42 @@
+{
+  "release": "0.6.2",
+  "checked_at_utc": "2026-11-23T01:08:41.756643+00:00",
+  "project_id": "a25a0cd8-e72a-4198-96c1-6283c4a4b3c0",
+  "pages": 2,
+  "materials": 32,
+  "flange_location_proposals": 13,
+  "graphical_interface_proposals": 26,
+  "manually_seeded_test_points": 2,
+  "all_physical_stations_unknown": true,
+  "component_occurrences": 37,
+  "unlocated_required_ports": 56,
+  "source_unchanged": true,
+  "digitalocean_callbacks": 2,
+  "qualified_package_matches_live": true,
+  "browser_errors": 0,
+  "rendered_both_source_pages": true,
+  "source_points_saved_separately": true,
+  "website_and_workbook_source_feature_rows": 26,
+  "engineering_verified": false,
+  "clean_workspace": {
+    "projects_remaining": 0,
+    "test_projects_cleared": 1,
+    "private_backup_created": true,
+    "administrator_retained": true,
+    "reference_dataset_versions_retained": 4,
+    "provider_retained": true,
+    "automatic_updates": true
+  },
+  "software_verification": {
+    "automated_tests": 205,
+    "final_source_binding_api_tests": 20,
+    "packaged_wsgi_checks": 3,
+    "bootstrap_and_routing_checks": 19,
+    "chromium_stress_workflow": "PASS",
+    "final_source_feature_browser": "PASS",
+    "github_validation": "success",
+    "github_function_qualification": "success",
+    "github_check_url": "https://github.com/efrgdgr0024345/stress/actions/runs/45092478840/job/137424919991"
+  },
+  "format": "caesar-flange-location-live-validation-1"
+}
