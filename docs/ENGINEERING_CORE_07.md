@@ -1,5 +1,12 @@
 # Reviewed continuation and bend geometry — 0.7.0
 
+Patch 0.7.1 addresses a live-observed PDF cancellation error during sheet/view
+changes. Source and preview downloads use an owned abortable same-origin
+request before passing the bounded file bytes to the renderer. This requires
+the complete PDF download before its first page renders. Delayed cancellation,
+reopen and visible HTTP-failure behavior are exercised in the browser; provider
+processing and engineering rules are unchanged.
+
 The drawing-pack workflow and bounded DigitalOcean page jobs are unchanged.
 This release adds pure engineering rules on hosting; it needs no extra paid
 service, always-on worker or infrastructure.

@@ -26,6 +26,7 @@ from physical_model_workflow import exercise_physical_model
 from source_features_workflow import exercise_source_features
 from continuation_workflow import exercise_continuations
 from cod_workflow import exercise_cod
+from pdf_lifecycle import exercise_pdf_lifecycle
 
 Path("/tmp/caesar-screens").mkdir(exist_ok=True)
 
@@ -343,6 +344,7 @@ def run():
                     exercise_source_features(page,context,base)
                     exercise_continuations(page,context,base)
                     exercise_cod(page,context,base)
+                    exercise_pdf_lifecycle(page,context,base)
                     exercise_reviews(page,context,base,browser)
                     # A mobile viewport must not introduce document-level horizontal scrolling.
                     page.set_viewport_size({"width": 390, "height": 844})

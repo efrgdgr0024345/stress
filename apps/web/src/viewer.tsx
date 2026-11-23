@@ -125,18 +125,36 @@ export function DrawingEditor({
     pan = useRef<{ x: number; y: number; sx: number; sy: number } | null>(null);
   useEffect(() => {
     let alive = true;
+    const controller = new AbortController();
+    let task: pdfjs.PDFDocumentLoadingTask | undefined;
     setLoading(true);
     setError("");
     setPdfPage(null);
-    const task = pdfjs.getDocument({
-      url: appPath(`api/v1/projects/${project.id}/sources/${sheet.source_id}`),
-      withCredentials: true,
-      isEvalSupported: false,
-    });
-    task.promise
-      .then((doc) => doc.getPage(sheet.page_index + 1))
+    // Own cancellation before passing bytes to PDF.js. Its streaming reader
+    // can reject an internal cancel promise when a view closes during fetch.
+    fetch(appPath(`api/v1/projects/${project.id}/sources/${sheet.source_id}`), {
+      credentials: "same-origin",
+      signal: controller.signal,
+    })
+      .then((response) => {
+        if (!response.ok)
+          throw new Error(
+            `Source PDF request failed (HTTP ${response.status}).`,
+          );
+        return response.arrayBuffer();
+      })
+      .then(async (bytes) => {
+        if (!alive) return;
+        task = pdfjs.getDocument({
+          data: new Uint8Array(bytes),
+          isEvalSupported: false,
+        });
+        const doc = await task.promise;
+        if (!alive) return;
+        return doc.getPage(sheet.page_index + 1);
+      })
       .then((p) => {
-        if (alive) {
+        if (alive && p) {
           setPdfPage(p);
           setLoading(false);
         }
@@ -149,7 +167,8 @@ export function DrawingEditor({
       });
     return () => {
       alive = false;
-      task.destroy();
+      controller.abort();
+      void task?.destroy().catch(() => undefined);
     };
   }, [project.id, sheet.id]);
   useEffect(() => {

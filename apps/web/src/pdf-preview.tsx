@@ -25,14 +25,32 @@ export function PDFPreview({
     container = useRef<HTMLDivElement>(null);
   useEffect(() => {
     let alive = true;
-    const task = pdfjs.getDocument({
-      url: appPath(`api/v1/projects/${project.id}/artifacts/${artifact.id}/pdf`),
-      withCredentials: true,
-      isEvalSupported: false,
-    });
-    task.promise
+    const controller = new AbortController();
+    let task: pdfjs.PDFDocumentLoadingTask | undefined;
+    fetch(
+      appPath(`api/v1/projects/${project.id}/artifacts/${artifact.id}/pdf`),
+      {
+        credentials: "same-origin",
+        signal: controller.signal,
+      },
+    )
+      .then((response) => {
+        if (!response.ok)
+          throw new Error(
+            `Review PDF request failed (HTTP ${response.status}).`,
+          );
+        return response.arrayBuffer();
+      })
+      .then((bytes) => {
+        if (!alive) return;
+        task = pdfjs.getDocument({
+          data: new Uint8Array(bytes),
+          isEvalSupported: false,
+        });
+        return task.promise;
+      })
       .then((value) => {
-        if (alive) setDoc(value);
+        if (alive && value) setDoc(value);
       })
       .catch((e) => {
         if (alive) {
@@ -42,7 +60,8 @@ export function PDFPreview({
       });
     return () => {
       alive = false;
-      task.destroy();
+      controller.abort();
+      void task?.destroy().catch(() => undefined);
     };
   }, [artifact.id]);
   useEffect(() => {

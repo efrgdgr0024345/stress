@@ -291,3 +291,11 @@ Use the existing entry format: a unique `LESSON-###` heading, category, status, 
 - Lesson: A bend table reused a coordinate-list variable for one coordinate dictionary. The website showed the new values, but XLSX generation failed only after the complete acceptance workflow.
 - Action: Keep table-building values separate and exercise source review, COD acceptance, signed-vector acceptance and the actual downloaded workbook together. Check numeric cells and blank unknowns rather than only the HTTP status or displayed table.
 - Evidence: Release 0.7.0 includes API and Chromium regressions for the complete workflow. Library PDF round trips separately check editable native objects and source content streams without claiming desktop-editor qualification.
+
+## LESSON-037 — Exercise PDF cancellation under hosting latency
+
+- Category: Browser reliability
+- Status: Adopted
+- Lesson: Live sheet/view changes exposed an unhandled PDF worker-termination error during streaming cleanup even though the engineering controls and Excel downloads passed. Fast local navigation did not expose it.
+- Action: Own the authenticated, abortable PDF download before passing bounded file bytes to the renderer. Cancel obsolete loads and observe teardown promises. Test delayed source/preview cancellation, reopen and genuine HTTP failures; keep actual download errors visible.
+- Evidence: Release 0.7.1 adds this focused browser lifecycle regression to the full workflow. It preserves the drawing pack interface and existing provider processing.
