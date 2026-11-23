@@ -1,5 +1,14 @@
 # User-supplied reviewed 1010 drawing
 
+**Original golden regression: BLOCKED.** See the [asset inventory and restoration
+contract](../../docs/GOLDEN_1010_RESTORE.md) and [trusted-pin manifest](golden-manifest.json).
+The original generator, original PDF, three JSON blueprints, golden output PDFs
+and canonical valve workbook remain missing. Their expected SHA-256 values have
+not been supplied. The separate CI golden gate deliberately fails until the
+required source evidence and actual regression outputs are available.
+The [current CII checklist](../../docs/CII_READINESS_CHECKLIST.md) records native
+download requirements and the next bend → tee → rigid/support milestones.
+
 [Download 1010 Reviewed.pdf](1010%20Reviewed.pdf) and upload it through **New
 project** in the website. Suggested line identity, to be checked by the engineer:
 `8-PG-JE3LN2-1010-FUTURE`.

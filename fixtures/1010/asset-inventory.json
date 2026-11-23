@@ -1,0 +1,95 @@
+{
+  "format": "caesar-1010-asset-audit-1",
+  "status": "BLOCKED",
+  "assets": [
+    {
+      "role": "legacy_generator",
+      "path": "CAESAR_II_Integrated_Generator_v1_2_Valve_Database.zip",
+      "expected_sha256": null,
+      "actual_sha256": null,
+      "ready": false,
+      "issues": [
+        "TRUSTED_SHA256_NOT_SUPPLIED",
+        "TRUSTED_HASH_SOURCE_NOT_SUPPLIED",
+        "FILE_MISSING"
+      ]
+    },
+    {
+      "role": "original_pdf",
+      "path": "1010_original.pdf",
+      "expected_sha256": null,
+      "actual_sha256": null,
+      "ready": false,
+      "issues": [
+        "TRUSTED_SHA256_NOT_SUPPLIED",
+        "TRUSTED_HASH_SOURCE_NOT_SUPPLIED",
+        "FILE_MISSING"
+      ]
+    },
+    {
+      "role": "review_project",
+      "path": "1010_review_project.json",
+      "expected_sha256": null,
+      "actual_sha256": null,
+      "ready": false,
+      "issues": [
+        "TRUSTED_SHA256_NOT_SUPPLIED",
+        "TRUSTED_HASH_SOURCE_NOT_SUPPLIED",
+        "FILE_MISSING"
+      ]
+    },
+    {
+      "role": "annotation_blueprint",
+      "path": "1010_annotation_blueprint.json",
+      "expected_sha256": null,
+      "actual_sha256": null,
+      "ready": false,
+      "issues": [
+        "TRUSTED_SHA256_NOT_SUPPLIED",
+        "TRUSTED_HASH_SOURCE_NOT_SUPPLIED",
+        "FILE_MISSING"
+      ]
+    },
+    {
+      "role": "flange_specs",
+      "path": "1010_flange_specs.json",
+      "expected_sha256": null,
+      "actual_sha256": null,
+      "ready": false,
+      "issues": [
+        "TRUSTED_SHA256_NOT_SUPPLIED",
+        "TRUSTED_HASH_SOURCE_NOT_SUPPLIED",
+        "FILE_MISSING"
+      ]
+    },
+    {
+      "role": "golden_pdf",
+      "path": null,
+      "expected_sha256": null,
+      "actual_sha256": null,
+      "ready": false,
+      "issues": [
+        "TRUSTED_SHA256_NOT_SUPPLIED",
+        "TRUSTED_HASH_SOURCE_NOT_SUPPLIED",
+        "Authoritative filename not supplied"
+      ]
+    },
+    {
+      "role": "valve_workbook",
+      "path": "Valve_Database_Latest.xlsx",
+      "expected_sha256": null,
+      "actual_sha256": null,
+      "ready": false,
+      "issues": [
+        "TRUSTED_SHA256_NOT_SUPPLIED",
+        "TRUSTED_HASH_SOURCE_NOT_SUPPLIED",
+        "FILE_MISSING"
+      ]
+    }
+  ],
+  "original_legacy_test_count": 13,
+  "legacy_test_root": null,
+  "legacy_tests_restored": false,
+  "engineering_verified": false,
+  "reviewed_pdf_is_a_separate_software_fixture": true
+}

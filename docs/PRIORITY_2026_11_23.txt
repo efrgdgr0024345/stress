@@ -1,0 +1,97 @@
+Critical missing pieces (must close these first)
+Legacy 1010 golden assets (blocking regression)
+
+Still absent from the repo:
+CAESAR_II_Integrated_Generator_v1_2_Valve_Database.zip (the 13 original tests)
+Original 1010_original.pdf + reviewed blueprints (1010_review_project.json, 1010_annotation_blueprint.json, 1010_flange_specs.json)
+Golden output PDFs / node counts
+Valve_Database_Latest.xlsx (canonical valve workbook)
+Action: Import immutably under fixtures/1010/, pin SHA-256, restore the 13 legacy tests, add the 48-unique / 49-display node gate, and the native annotation count check. Do not stretch the current synthetic or “1010 Reviewed.pdf” as a substitute.
+Full component node rules from the plan
+
+Current code has basic points + main/branch. Still missing the precise placement rules:
+Flange: face and opposite black-dot on centreline
+Tee: single node at main × branch centreline intersection (belongs to main series)
+Elbow: theoretical COD from dimension chain only (never paper angle or scale)
+Valve / inline instrument: process ends; share interface with adjacent flange
+Single-ended instrument (PIT): only one process end
+Continuation: same physical_point_id + same node number on every sheet
+Unlocated required feature → blue provisional or exception, never invented station
+
+Continuation matching engine
+
+Explicit user assertion exists. Still missing:
+Automatic candidate search across sheets (CONT. ON / CONT. FROM / matchline)
+Per-axis delta calculation (≥1 inch → blue MATCH TO BE CONFIRMED)
+Unified physical ID when proved identical
+Rejection path when size/topology/coords impossible
+
+Dimension / constraint engine
+
+Signed XYZ and source-port mappings exist. Still missing:
+Full constraint graph from mixed ft-in-fraction / E/N/S/EL chains
+Along-route (not Euclidean) support distance for the 6-inch rule
+Elbow COD solver that only fires when the chain is fully constrained
+Fail-or-ask behaviour when constraints conflict (never silent move)
+
+Complete CAESAR neutral profile
+
+Straight-pipe .cii candidate exists and is correctly gated. Still required:
+Bends, tees, valves-as-rigids, flanges, supports, reducers
+Auxiliary records (SIFs, restraint codes, rigid weights)
+Real CAESAR II 15.1 import + round-trip qualification (node count, coordinates, properties)
+Keep qualified_application_roundtrip: false until that test passes
+
+Editable PDF collision + multi-object QA
+
+Native objects and stream integrity are implemented. Still open:
+Leader/collision solver that never covers original dimensions / NORTH / materials
+Full target-editor round-trip (save → close → reopen → edit → save) on every annotation type
+Axis triad (X/Y/Z + Mx/My/Mz) placement rules next to NORTH without overlap
+Per-sheet flange/valve schedule boxes as independent editable objects
+
+Production hardening still open
+PostgreSQL + S3 (or equivalent) instead of SQLite/local files
+Malware scanning on upload
+OIDC/MFA for approvers (MFA scaffolding exists; full flow not closed)
+Backup/restore drills, retention policy, monitoring
+PyMuPDF commercial licence decision before any proprietary SaaS claim
+
+What to implement next (ordered for the long-running LLM)Phase A – Restore the golden fixture (do this before any new feature)
+Place the missing zip + original PDF + valve workbook under fixtures/1010/ with hashes.
+Re-enable / port the 13 legacy unit tests.
+Add assertions: 48 unique physical points, 49 displayed labels (Node 170 repeated), main 10–370, branches 400/500/600 series, correct flange/valve counts, native annotation presence.
+Fail CI if any of these are missing or mismatched.
+Phase B – Harden the engineering core (packages/engineering)
+Implement the full component node-placement table (flange face + black-dot, tee intersection, elbow COD, support merge rules).
+Add continuation matcher + axis-delta logic.
+Complete the dimension constraint solver; all stations remain null until evidence is accepted.
+Unit tests for every rule in the plan’s section 5–7, including the historic 2-inch / 0.5-inch / 2-1/8-inch support cases.
+Phase C – Close the export loop
+Extend the CII writer to the next component set (bends → tees → rigids/supports).
+Keep the readiness gate: any unsupported or null required field blocks the file.
+Produce a real CAESAR import test report (even if run offline) and store it as evidence.
+Guarantee XLSX/CSV always emit the complete element list derived from topology (LESSON-020).
+Phase D – PDF annotation completeness
+Collision solver + axis triad rules.
+Automated reopen/edit tests for every native object type on both 1010 sheets.
+Manifest that records /NM, physical_point_id, sheet, role for every added object.
+Phase E – Only after A–D are green
+General vector/OCR component recognition improvements (keep proposals provisional).
+Production DB/object storage and security items.
+Any claim of “verified-for-modelling”.
+Non-negotiable invariants (enforce in code + tests)
+Physical station ≠ PDF XY. Never derive length from pixels or paper scale.
+Unknown weight/length/station = null / N/A / blue. Never 0.
+Catalog match ≠ project manufacturer confirmation.
+Renumbering never changes physical_point_id, station, evidence, or colour reason.
+Original PDF content streams must be byte-identical after export.
+Synthetic fixtures stay clearly labelled; they never satisfy the 1010 gates.
+All outputs remain “engineering review draft” until an explicit lead-engineer approval gate is implemented and passed.
+Immediate concrete tasks for the next agent
+Inventory fixtures/1010/ and list every missing file + its expected SHA.
+Port or re-create the 13 legacy tests so CI fails without the golden package.
+Add the component-node-placement unit tests (even if the implementation is still stubs).
+Document the exact current CII readiness checklist and the first three component types to add after straight pipe.
+Do not expand OCR, UI chrome, or hosting features until the above four items are green.
+This is the minimal set that turns the current pilot into a system that can actually support the PDF → reviewed Excel / CII → CAESAR workflow without inventing geometry or weights.

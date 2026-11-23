@@ -1,0 +1,26 @@
+name: Original 1010 acceptance (required evidence)
+on: [push, pull_request, workflow_dispatch]
+permissions:
+  contents: read
+jobs:
+  original-1010-golden:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+      - run: pip install -r requirements.txt
+      - name: Inventory original assets and unknown trusted hashes
+        run: python scripts/audit_1010_golden.py --report .local/1010-asset-audit.json
+      - name: Enforce the thirteen new plan acceptance checks
+        run: python -m unittest discover -s acceptance/1010 -v
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: original-1010-blockers
+          path: .local/1010-asset-audit.json
