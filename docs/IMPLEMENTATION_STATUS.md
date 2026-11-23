@@ -1,4 +1,4 @@
-# Implementation status — 0.7.0
+# Implementation status — 0.7.1
 
 ## Implemented review application
 
@@ -20,7 +20,11 @@ See [execution ledger](../PLAN_EXECUTION.md) and [plan alignment](PLAN_ALIGNMENT
 Version 0.7.0 adds local continuation reference candidates, signed discrepancy
 checks, reviewed shared physical identity and exact COD proposals/acceptance
 from four proved leg points. All share website/Excel tables and source-change
-invalidation. See [engineering-core scope](ENGINEERING_CORE_07.md).
+invalidation. Patch 0.7.1 fixes PDF load cancellation during navigation.
+Latest authenticated live checks and clean-workspace evidence are recorded in
+[LIVE_VALIDATION.md](../LIVE_VALIDATION.md). On the real source, three continuation
+references remain unresolved, all 56 required ports are unlocated and zero
+physical nodes are proved. See [engineering-core scope](ENGINEERING_CORE_07.md).
 
 - macOS-inspired React interface and root `loader.php`, with each lesson displayed in a distinct coloured icon card beneath Load project. The Markdown register is version controlled and read dynamically.
 - Same-origin, authenticated project loading directly into the in-browser drawing workspace, with project URLs retained across reloads.

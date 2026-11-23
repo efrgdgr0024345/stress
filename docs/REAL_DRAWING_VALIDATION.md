@@ -63,7 +63,7 @@ objects and independent browser rendering do not certify every PDF editor.
 
 ## Try it on the hosting account
 
-After installing release 0.4.0 through **System updates** and enabling the
+For a fresh installation, use the current reviewed release through **System updates** and enable the
 [processing runner](PROCESSING_PIPELINE.md), download the PDF from
 GitHub, sign in at `https://easyai.com.au/stress/`, choose **New project**, enter
 the title/full line ID and select that PDF. Open both sheets, add a review note,
@@ -78,7 +78,8 @@ in [examples/1010-review](../examples/1010-review/README.md), clearly labelled
 engineering unverified. They are actual system exports, not handwritten sample
 workbooks or a fabricated native stress model.
 
-The local browser test exercises the built application at `/stress`. An actual
-hosted upload/export still needs the operator's authenticated browser; repository
-publication alone cannot perform it. No production projects are created by an
-update or by these tests.
+The local browser test exercises the built application at `/stress`. Actual
+authenticated hosting upload/export and both-page rendering have also passed;
+see the current [live validation](../LIVE_VALIDATION.md). Repository publication
+alone is not deployment evidence. Updates insert no projects. Live tests create
+explicit software-QA fixtures and clear their exact IDs after verification.
