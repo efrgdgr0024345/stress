@@ -23,8 +23,8 @@ from urllib.error import HTTPError, URLError
 from urllib.request import build_opener, HTTPCookieProcessor, HTTPRedirectHandler, urlopen
 import zipfile
 
-BUNDLE_URL = "https://raw.githubusercontent.com/efrgdgr0024345/stress/7eeb185a31f22821988c5196f4bdb0372ec6f900/downloads/caesar-cpanel.zip"
-BUNDLE_SHA256 = "61fc055e07865a5ad69c83c79d6bd7c21d6edb539772a3a9626cda01b80528b0"
+BUNDLE_URL = "https://raw.githubusercontent.com/efrgdgr0024345/stress/3b0f65371f849b8ca51d8d54f6bec2e605e80eba/downloads/caesar-cpanel.zip"
+BUNDLE_SHA256 = "08d40642c8edda42d993f172ebf684a77a7f3defe012d5c4c80d79dc948f285c"
 APP_NAME = "caesar-system"
 ROUTING_REPAIR_URL = "https://raw.githubusercontent.com/efrgdgr0024345/stress/839e449f62b3c84aeb81620c88d0be943d68c9ba/scripts/repair_cpanel_routing.py"
 ROUTING_REPAIR_SHA256 = "357b0dc99dbf053a44d7805466dd995dc25fd9fb279c42244a44157fbb79a0a9"
