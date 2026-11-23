@@ -1,12 +1,18 @@
 """Real reviewed drawing software tests, not the unavailable 1010 golden model."""
 import hashlib
+from copy import deepcopy
 import io
 from pathlib import Path
 import unittest
 import zipfile
+import json
+from unittest.mock import patch
 import fitz
+from openpyxl import load_workbook
 from packages.pdf import inspect_pdf,content_hash
 from tests.integration import test_api as fixtures
+from tests.integration.test_pipeline import native_executor
+from services.api import main,pipeline
 
 SOURCE=Path(__file__).resolve().parents[2]/"fixtures/1010/1010 Reviewed.pdf"
 SHA="7b97d44bef3d544c4c98ed0667c29607ce58fa4a401dd2463f66010a9615bb59"
@@ -14,6 +20,59 @@ SHA="7b97d44bef3d544c4c98ed0667c29607ce58fa4a401dd2463f66010a9615bb59"
 class RealDrawingTests(unittest.TestCase):
     setUp=fixtures.ApiTests.setUp
     tearDown=fixtures.ApiTests.tearDown
+    def test_normal_pipeline_exposes_real_source_features_in_website_and_excel(self):
+        p=self.client.post('/api/v1/projects',json={'title':'Real flange recognition regression','line_id':'8-PG-JE3LN2-1010-FUTURE'}).json()
+        response=self.client.post(f"/api/v1/projects/{p['id']}/intake?version={p['version']}",content=SOURCE.read_bytes(),headers={'Content-Type':'application/pdf','X-Filename':SOURCE.name})
+        self.assertEqual(response.status_code,202,response.text)
+        with patch.object(pipeline,'execute',side_effect=native_executor):
+            for _ in range(30):
+                if not pipeline.process_one(main):break
+            else:self.fail('Real recognition pipeline did not finish')
+        report=self.client.get(f"/api/v1/projects/{p['id']}/pipeline").json()['runs'][0]
+        self.assertEqual(report['state'],'DONE',report)
+        p=self.client.get(f"/api/v1/projects/{p['id']}").json()
+        features=p['automation']['feature_proposals']
+        self.assertEqual(len(features),13);self.assertEqual(p['automation']['coverage']['graphical_features'],13)
+        self.assertEqual(p['automation']['coverage']['proposed_points'],0)
+        self.assertEqual(p['nodes'],[])
+        for feature in features:
+            self.assertEqual(feature['verification'],'proposed')
+            self.assertEqual(feature['source_sha256'],SHA)
+            self.assertIn(feature['sheet_id'],{s['id'] for s in p['sheets']})
+        results=self.client.get(f"/api/v1/projects/{p['id']}/results").json()
+        rows=next(t['rows'] for t in results['tables'] if t['name']=='Source features')
+        self.assertEqual(len(rows),26);self.assertTrue(all(r['station'] is None for r in rows))
+        self.assertFalse(results['caesar']['direct_import_ready'])
+        artifact=report['progress']['artifact']
+        bundle=self.client.get(f"/api/v1/projects/{p['id']}/artifacts/{artifact['id']}/download")
+        with zipfile.ZipFile(io.BytesIO(bundle.content)) as archive:
+            self.assertEqual(len(json.loads(archive.read('automation-report.json'))['feature_proposals']),13)
+            name=next(n for n in archive.namelist() if n.endswith('.xlsx'))
+            book=load_workbook(io.BytesIO(archive.read(name)),read_only=True,data_only=True)
+            sheet=book['Source features'];header=list(next(sheet.iter_rows(min_row=5,max_row=5,values_only=True)))
+            exported=list(sheet.iter_rows(min_row=6,values_only=True))
+            self.assertEqual(len(exported),26)
+            self.assertTrue(all(r[header.index('Physical station (mm)')] is None for r in exported))
+            self.assertTrue(all(isinstance(r[header.index('PDF X (pt, graphic only)')],(int,float)) for r in exported))
+            book.close()
+        download=self.client.get(f"/api/v1/projects/{p['id']}/sources/{p['sheets'][0]['source_id']}")
+        self.assertEqual(hashlib.sha256(download.content).hexdigest(),SHA)
+        feature=features[0]
+        body={'version':p['version'],'line_id':p['line_id'],'route':'main','order':1,'kind':'flange',
+              'dimension':'','evidence':'SOFTWARE TEST source anchor, station unverified',
+              'source_feature_id':feature['id'],'source_feature_role':'flange_face',
+              'instances':[{'sheet_id':feature['sheet_id'],'anchor':feature['flange_face'],'bubble':[800,370]}]}
+        wrong=deepcopy(body);wrong['instances'][0]['anchor']=[200,200]
+        self.assertEqual(self.client.post(f"/api/v1/projects/{p['id']}/nodes",json=wrong).status_code,422)
+        response=self.client.post(f"/api/v1/projects/{p['id']}/nodes",json=body)
+        self.assertEqual(response.status_code,200,response.text);p=response.json()
+        node=p['nodes'][0];self.assertIsNone(node['station_mm'])
+        body.update(version=p['version'],evidence='SOFTWARE TEST replaced free text; provenance must survive')
+        self.assertEqual(self.client.post(f"/api/v1/projects/{p['id']}/nodes",json=body).status_code,409)
+        response=self.client.patch(f"/api/v1/projects/{p['id']}/nodes/{node['id']}",json={k:v for k,v in body.items() if not k.startswith('source_feature_')})
+        self.assertEqual(response.status_code,200,response.text)
+        self.assertEqual(response.json()['nodes'][0]['source_feature_id'],feature['id'])
+
     def test_reviewed_fixture_identity_and_vector_classification(self):
         self.assertEqual(hashlib.sha256(SOURCE.read_bytes()).hexdigest(),SHA)
         pages=inspect_pdf(SOURCE)

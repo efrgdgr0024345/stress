@@ -51,7 +51,8 @@ def qualify(build,report_path):
             sheet={'id':f'qualification-page-{page}','page_index':page,'line_id':'8-PG-JE3LN2-1010-FUTURE','width':evidence['width'],'height':evidence['height']}
             proposed,issues,ledger=materials(evidence,sheet,digest)
             if not proposed:raise ValueError('Real fixture produced no material proposals')
-            result={'page':page+1,'words':len(evidence['words']),'material_proposals':len(proposed),'response_bytes':size,'handler_elapsed_ms':value['elapsed_ms'],'wall_seconds':round(elapsed,3),'parser_peak_rss_kib':value['parser_peak_rss_kib'],'low_confidence_words':len(evidence.get('uncertain_words',[]))}
+            if len(evidence.get('symbols',[]))!=(4,9)[page]:raise ValueError('Real fixture flange-location baseline changed; inspect source geometry before changing expectations.')
+            result={'page':page+1,'words':len(evidence['words']),'material_proposals':len(proposed),'flange_location_proposals':len(evidence['symbols']),'response_bytes':size,'handler_elapsed_ms':value['elapsed_ms'],'wall_seconds':round(elapsed,3),'parser_peak_rss_kib':value['parser_peak_rss_kib'],'low_confidence_words':len(evidence.get('uncertain_words',[]))}
             report['pages'].append(result);print(json.dumps(result),flush=True)
         bad=dict(event,sha256='0'*64);value,_,_=invoke(function,bad)
         if value.get('error')!='SOURCE_HASH_MISMATCH':raise ValueError('Hash mismatch not rejected')

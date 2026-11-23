@@ -1,5 +1,23 @@
 # Physical interfaces and signed dimensional evidence
 
+Version 0.6.2 adds **Detected features** in the drawing inspector and the shared
+**Source features** website/Excel sheet. The bounded
+`iso-weld-neck-plate-v1` recognizer compares a thin flange plate, a separate
+filled pipe dot and collinear heavy linework. On the supplied 1010 PDF it finds
+4 flange symbols on sheet 1 and 9 on sheet 2, with 26 distinct proposed interface
+locations. It does not read a fixture-specific coordinate/count map.
+
+Blue graphical markers are review proposals. Inspect a face or pipe dot to
+prepare an editable point at that actual source location; confirm its route and
+order before saving. Physical stations remain blank until independently proved.
+Reopening the saved candidate selects that point rather than creating another.
+The graphical feature table labels PDF X/Y as **points, graphic only**, separate
+from engineering millimetres. Recognition neither associates a material row nor
+merges neighbouring/shared interfaces or establishes connectivity across a gap.
+Ambiguous markers and unsupported symbol conventions remain unresolved. Existing
+projects need explicit source re-extraction to obtain this new evidence field.
+The private DigitalOcean action is rebuilt automatically when its code changes.
+
 Version 0.6.0 adds three shared website/Excel sheets: **Component ports**,
 **Dimensions** and **Coordinates**. The existing drawing-pack workspace and
 DigitalOcean page processing remain the same.

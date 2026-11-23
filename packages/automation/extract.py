@@ -11,6 +11,7 @@ import tempfile
 
 import fitz
 from packages.automation import VERSION
+from packages.automation.symbols import flange_symbols
 from uuid import uuid5,NAMESPACE_URL
 
 
@@ -35,9 +36,12 @@ def extract_page(path, index, ocr=True):
                     a, b = list(item[1]), list(item[2])
                     if math.dist(a, b) >= 8:
                         segments.append({"a": a, "b": b, "width": drawing["width"]})
+        symbols, symbols_limited = flange_symbols(paths, source_sha, index)
+        symbols = [s for s in symbols if 0 <= s['bbox'][0] < s['bbox'][2] <= page.cropbox.width
+                   and 0 <= s['bbox'][1] < s['bbox'][3] <= page.cropbox.height]
         issues = []
         uncertain=[]
-        if limited or len(segments)>=1000 or len(exclusions)>=20000:issues.append("OBSERVATION_LIMIT_REACHED")
+        if limited or len(segments)>=1000 or len(exclusions)>=20000 or symbols_limited:issues.append("OBSERVATION_LIMIT_REACHED")
         for annotation in list(page.annots() or [])[:1000]:
             if len(exclusions)<20000:exclusions.append(list(annotation.rect))
         if page.get_image_info():
@@ -102,7 +106,7 @@ def extract_page(path, index, ocr=True):
         for word in words+uncertain:word["evidence_id"]=str(uuid5(NAMESPACE_URL,source_sha+f':{index}:'+repr(word)))
         return {"page_index": index, "width": page.cropbox.width,
                 "height": page.cropbox.height, "rotation": page.rotation,
-                "words": words, "uncertain_words":uncertain,"segments": segments, "exclusions": exclusions,
+                "words": words, "uncertain_words":uncertain,"segments": segments, "exclusions": exclusions,"symbols":symbols,
                 "source_sha256":source_sha,"extractor_version":VERSION,"pdf_library_version":fitz.VersionBind,
                 "ocr_used": used_ocr, "issues": issues,
                 "content_hash": [__import__("hashlib").sha256(doc.xref_stream(x)).hexdigest()

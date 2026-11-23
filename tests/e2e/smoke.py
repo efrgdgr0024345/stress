@@ -23,6 +23,7 @@ from pipeline_workflow import exercise_pipeline
 from admin_connections import exercise_connections
 from review_workflow import exercise_reviews
 from physical_model_workflow import exercise_physical_model
+from source_features_workflow import exercise_source_features
 
 Path("/tmp/caesar-screens").mkdir(exist_ok=True)
 
@@ -337,6 +338,7 @@ def run():
                     exercise_pipeline(page,context,base,tmp)
                     exercise_real_drawing(page, context, base, tmp)
                     exercise_physical_model(page,context,base)
+                    exercise_source_features(page,context,base)
                     exercise_reviews(page,context,base,browser)
                     # A mobile viewport must not introduce document-level horizontal scrolling.
                     page.set_viewport_size({"width": 390, "height": 844})

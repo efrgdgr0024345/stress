@@ -30,12 +30,24 @@ export type SourceGraph = {
   page_width: number;
   page_height: number;
 };
+export type SourceFeature = {
+  id: string;
+  sheet_id: string;
+  kind: "flange";
+  profile: string;
+  bbox: number[];
+  flange_face: [number, number];
+  opposite_pipe_dot: [number, number];
+  source_sha256: string;
+  verification: "proposed";
+};
 export type Automation = {
   run_id: string;
   state: string;
   coverage?: Record<string, number>;
   issues: PipelineIssue[];
   graph_proposals?: SourceGraph[];
+  feature_proposals?: SourceFeature[];
   inventory_ledger?: unknown[];
   evidence_run?: string;
 };

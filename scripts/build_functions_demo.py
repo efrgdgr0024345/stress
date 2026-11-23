@@ -36,7 +36,7 @@ def build(output):
     function=output/'packages/caesar/extract';function.mkdir(parents=True)
     shutil.copyfile(ROOT/'serverless/digitalocean/project.yml',output/'project.yml')
     for source in (ROOT/'serverless/digitalocean/function').glob('*.py'):shutil.copyfile(source,function/source.name)
-    for name in ('__init__.py','extract.py'):
+    for name in ('__init__.py','extract.py','symbols.py'):
         target=function/'packages/automation'/name;target.parent.mkdir(parents=True,exist_ok=True);shutil.copyfile(ROOT/'packages/automation'/name,target)
     (function/'packages/__init__.py').write_text('')
     wheel(*PYMUPDF,function/'lib');wheel(*WHEELS['x86_64'],function/'lib')

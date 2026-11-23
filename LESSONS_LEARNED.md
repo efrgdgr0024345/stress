@@ -267,3 +267,11 @@ Use the existing entry format: a unique `LESSON-###` heading, category, status, 
 - Lesson: A material count does not locate its physical interfaces, and a relative signed chain does not establish an absolute origin. Clearing test projects must also retain the account, reference data and paid-use counters needed for the next test.
 - Action: Prepare explicit unlocated component requirements, reuse evidenced interface UUIDs, retain source units and declared tolerances, reject conflicting/stale geometry and keep unknown axes blank. Reset the active workspace only after current-state checks and a private backup, with ordinary-error rollback and worker fencing.
 - Evidence: Release 0.6.0 adds shared website/Excel physical tables plus domain/API/browser coverage for ports, exact signed constraints, immutable source evidence, retained stations, stale solutions and recoverable scoped reset. Missing engineering facts and original desktop/golden-fixture gates stay visible.
+
+## LESSON-034 — Extract actual symbols before promising automatic physical models
+
+- Category: Recognition and validation
+- Status: Adopted
+- Lesson: Heavy linework and material-table OCR omitted the filled pipe dots and thin flange plates needed to locate actual interfaces. Passing workflow tests did not demonstrate that the real drawing had a physical model.
+- Action: Match bounded source geometry with explicit evidence, test the real PDF, and expose separate face/dot proposals in the drawing and Excel. Keep graphical points separate from engineering millimetres, accepted routes, material associations and completed-model claims. Reject ambiguous matches rather than fitting a target count.
+- Evidence: Release 0.6.2 recognizes 13 visible flange symbols and 26 proposed interface locations in the supplied drawing, with negative/ambiguity, contract, rotation/scale, upload/export and browser checks. Full dimensions, COD, continuation and native modelling gates remain unfinished.

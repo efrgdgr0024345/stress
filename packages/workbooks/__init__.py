@@ -72,6 +72,21 @@ def tables(project):
     result.append(table("Components",[("item","Item","text"),("page","Page","number"),("family","Family","text"),("description","Source description","text"),("size","Size","text"),("quantity","Listed count","number"),("source_value","Source quantity value","decimal"),("raw_quantity","Raw source quantity","text"),("unit","Quantity unit","text"),("located","Located count","number"),("weight","Weight (N)","decimal"),("half","Half bolting (N)","decimal"),("full","Full bolting (N)","decimal"),("length","Length (mm)","decimal"),("scope","Weight scope","text"),("quality","Catalog source quality","text"),("match","Project match state","text"),("dataset","Dataset ID","text"),("evidence","Evidence","text"),("id","Material ID","text")],components))
     from packages.physical.spreadsheets import tables as physical_tables
     result.extend(physical_tables(project))
+    features=[]
+    for feature in project.get('automation',{}).get('feature_proposals',[]):
+        sheet=sheets.get(feature['sheet_id'])
+        if not sheet:continue
+        for role in ('flange_face','opposite_pipe_dot'):
+            x,y=feature[role]
+            features.append({'id':feature['id']+':'+role,'page':sheet['page_index']+1,
+                'kind':feature['kind'],'role':role,'pdf_x':x,'pdf_y':y,'station':None,
+                'verification':'proposed','profile':feature['profile'],'sha':feature['source_sha256'],
+                'evidence':'Graphical source proposal only. Inspect Detected features in the drawing. Material, route and physical distance require review.'})
+    result.append(table('Source features',[("page","Page","number"),("kind","Symbol","text"),
+        ("role","Proposed interface","text"),("pdf_x","PDF X (pt, graphic only)","decimal"),
+        ("pdf_y","PDF Y (pt, graphic only)","decimal"),("station","Physical station (mm)","decimal"),
+        ("verification","Review state","text"),("profile","Recognition convention","text"),
+        ("evidence","Evidence","text"),("sha","Original SHA-256","text"),("id","Source feature ID","text")],features))
     issues=validate(project)
     result.append(table("Exceptions",[("severity","Severity","text"),("code","Code","text"),("node","Node","number"),("message","Review action","text"),("material_id","Material ID","text"),("sheet_id","Sheet ID","text")],[{k:i.get(k) for k in ('severity','code','node','message','material_id','sheet_id')} for i in issues]))
     result.append(table("Sources",[("filename","Source file","text"),("page","PDF page","number"),("printed","Printed sheet ID","text"),("line","Full line ID","text"),("sha","SHA-256","text"),("format","Content type","text"),("id","Sheet ID","text")],[{"filename":s["filename"],"page":s["page_index"]+1,"printed":s["printed_id"],"line":s["line_id"],"sha":s["sha256"],"format":s["format"],"id":s["id"]} for s in project["sheets"]]))

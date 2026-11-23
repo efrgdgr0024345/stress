@@ -24,7 +24,8 @@ def policy(data):
 
 
 def version(api):
-    files = [api.ROOT / 'scripts/build_functions_demo.py', api.ROOT / 'packages/automation/extract.py']
+    files = [api.ROOT / 'scripts/build_functions_demo.py', api.ROOT / 'packages/automation/extract.py',
+             api.ROOT / 'packages/automation/symbols.py']
     files += sorted((api.ROOT / 'serverless/digitalocean/function').glob('*.py'))
     return hashlib.sha256(b''.join(p.read_bytes() for p in files)).hexdigest()
 

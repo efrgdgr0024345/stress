@@ -40,6 +40,8 @@ export interface PipeNode {
   dimension_input?: string;
   evidence: string;
   reasons: string[];
+  source_feature_id?: string | null;
+  source_feature_role?: "flange_face" | "opposite_pipe_dot" | null;
   support_gap_mm: string | null;
   instances: NodeInstance[];
 }

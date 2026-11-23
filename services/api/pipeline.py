@@ -321,7 +321,7 @@ def compose(api,job,progress):
         advance(api,job,progress,"export");return
     working=deepcopy(p);issues=[i for i in working.get("automation",{}).get("issues",[]) if i["code"]=="REVISION_REBASE_REQUIRED"]
     active_ids={s["id"] for s in working["sheets"]};pages={k:v for k,v in pages.items() if k in active_ids}
-    inventory_ledger=[];graphs=[];proposals=[];new_materials=[]
+    inventory_ledger=[];graphs=[];proposals=[];new_materials=[];features=[]
     for sheet in working["sheets"]:
         page=pages.get(sheet["id"])
         if not page:
@@ -345,6 +345,13 @@ def compose(api,job,progress):
         new_materials+=items;issues+=exceptions;inventory_ledger+=ledger
         nodes,exceptions=node_proposals(page,sheet,sheet["sha256"])
         proposals+=nodes;issues+=exceptions
+        for symbol in page.get('symbols',[]):
+            features.append({**symbol,'id':identity(sheet['id'],symbol['profile'],symbol['flange_face'],symbol['opposite_pipe_dot']),
+                             'sheet_id':sheet['id'],'source_sha256':sheet['sha256'],
+                             'source_content_hash':sheet.get('content_hash'),'verification':'proposed'})
+            issues.append({'code':'FLANGE_LOCATION_REVIEW_REQUIRED','sheet_id':sheet['id'],
+                           'feature_id':symbol['id'],'bbox':symbol['bbox'],
+                           'message':'Inspect the proposed flange face and separate pipe dot in Detected features. Material identity, route and physical station remain unverified.'})
         graphs.append({"sheet_id":sheet["id"],"page_width":sheet["width"],"page_height":sheet["height"],**vector_graph(page)})
         if not nodes and not any(any(v["sheet_id"]==sheet["id"] for v in n["instances"]) for n in working["nodes"]):issues.append({"code":"PHYSICAL_ROUTE_REVIEW_REQUIRED","sheet_id":sheet["id"]})
     existing_ids={m["id"] for m in working["materials"]}
@@ -391,14 +398,14 @@ def compose(api,job,progress):
     evidence_pages=[{"sheet_id":s["id"],"source_sha256":pages[s["id"]]["source_sha256"],"run_id":pages[s["id"]]["_owner_run"],"page":pages[s["id"]]["_owner_page"]} for s in working["sheets"] if s["id"] in pages]
     working["automation"]={"run_id":job["id"],"software":VERSION,"state":"REVIEW_DRAFT",
         'processor':progress.get('processor','hosting'),'remote_transport':progress.get('remote_transport',[]),
-        "application_release":api.BUILD_ID,"recognition_profile":"explicit-point-labels-v1" if proposals else "general-review-v1",
+        "application_release":api.BUILD_ID,"recognition_profile":"explicit-point-labels-v1" if proposals else "graphical-flanges-v1" if features else "general-review-v1",
         "input_sha256":sorted({s["sha256"] for s in working["sheets"]}),
         "issues":[dict(v,severity=v.get("severity","critical"),message=v.get("message",v["code"].replace("_"," ").capitalize())) for v in dedup.values()],
-        "proposals":proposals,"graph_proposals":graphs,"inventory_ledger":inventory_ledger,
+        "proposals":proposals,"graph_proposals":graphs,"feature_proposals":features,"inventory_ledger":inventory_ledger,
         "evidence_run":progress.get("evidence_run",job["id"]),"catalog_versions":progress["catalog_versions"],
         "route_selections":p.get("automation",{}).get("route_selections",[]),
         "evidence_pages":evidence_pages,
-        "coverage":{"pages":len(pages),"material_rows":len(new_materials),"proposed_points":len(proposals),"accepted_points":sum(n.get("verification")=="reviewed" and n.get('station_mm') is not None for n in working["nodes"]),"ocr_pages":sum(bool(page.get('ocr_used')) for page in pages.values())}}
+        "coverage":{"pages":len(pages),"material_rows":len(new_materials),"proposed_points":len(proposals),"graphical_features":len(features),"accepted_points":sum(n.get("verification")=="reviewed" and n.get('station_mm') is not None for n in working["nodes"]),"ocr_pages":sum(bool(page.get('ocr_used')) for page in pages.values())}}
     if len(working["materials"])!=len(p["materials"]):working["materials_reviewed"]=False
     if old_layout!=[(s.get("axis"),s.get("table")) for s in working["sheets"]]:working["layout_reviewed"]=False
     with api.db() as conn:

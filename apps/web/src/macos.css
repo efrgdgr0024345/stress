@@ -738,6 +738,39 @@ td {
   color: #96bce9;
   border-bottom-color: #b4d0f3;
 }
+.inspector-tabs {
+  gap: 12px;
+}
+.source-features-panel {
+  display: grid;
+  gap: 12px;
+}
+.source-feature-card {
+  display: grid;
+  gap: 8px;
+  padding: 14px;
+  border: 1px solid #dbe7f7;
+  border-radius: 12px;
+  background: linear-gradient(145deg, #fff, #f0f6ff);
+  box-shadow: 0 3px 10px #2a508908;
+}
+.source-feature-card strong,
+.source-feature-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.source-feature-card strong {
+  color: #1768bf;
+  font-size: 12px;
+}
+.source-feature-actions {
+  flex-wrap: wrap;
+}
+.source-feature circle:focus-visible {
+  outline: 2px solid #007aff;
+  outline-offset: 3px;
+}
 .inspector-content .panel-title h3,
 .node-heading h3 {
   color: #99bce7;

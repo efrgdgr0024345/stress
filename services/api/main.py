@@ -767,6 +767,8 @@ class NodeInput(Version):
     )
     dimension: str = Field(default="", max_length=100)
     evidence: str = Field(default="", max_length=3000)
+    source_feature_id: str | None = Field(default=None,pattern=r'^[a-f0-9-]{36}$')
+    source_feature_role: str | None = Field(default=None,pattern=r'^(flange_face|opposite_pipe_dot)$')
     instances: list[Instance] = Field(min_length=1, max_length=200)
 
 
@@ -778,6 +780,17 @@ def apply_node(project, body, node_id=None):
     )
     if node_id and not node:
         raise HTTPException(404, "Physical point not found.")
+    if bool(body.source_feature_id)!=bool(body.source_feature_role):
+        raise HTTPException(422,'A source feature needs both its identity and interface role.')
+    if body.source_feature_id:
+        reference=(body.source_feature_id,body.source_feature_role)
+        if any((n.get('source_feature_id'),n.get('source_feature_role'))==reference and n['id']!=node_id for n in project['nodes']):
+            raise HTTPException(409,'This source interface already has a physical point. Select its existing identity.')
+        retained=bool(node and (node.get('source_feature_id'),node.get('source_feature_role'))==reference)
+        if not retained:
+            feature=next((f for f in project.get('automation',{}).get('feature_proposals',[]) if f['id']==body.source_feature_id),None)
+            if not feature or not any(i.sheet_id==feature['sheet_id'] and list(i.anchor)==feature[body.source_feature_role] for i in body.instances):
+                raise HTTPException(422,'A new source association must use the current detected interface on its actual source page.')
     if body.takeoff_id:
         tee = next((n for n in project["nodes"] if n["id"] == body.takeoff_id), None)
         if (
@@ -827,6 +840,8 @@ def apply_node(project, body, node_id=None):
         "station_mm": station,
         "dimension_input": body.dimension,
     }
+    if node and not {'source_feature_id','source_feature_role'} & body.model_fields_set:
+        data.update({key:node.get(key) for key in ('source_feature_id','source_feature_role')})
     if node:
         node.update(data)
         node["verification"]="reviewed"

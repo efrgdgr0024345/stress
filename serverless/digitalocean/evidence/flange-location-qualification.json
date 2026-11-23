@@ -1,0 +1,55 @@
+{
+  "format": "caesar-functions-qualification-1",
+  "build": {
+    "format": "caesar-functions-build-1",
+    "runtime": "python:3.12",
+    "architecture": "x86_64",
+    "zip_bytes": 31491014,
+    "limit_bytes": 48000000,
+    "zip_sha256": "37ea89b8178fe51d7d332351135eb06514cfe462c4f5513364350f1fb1c9ad9a",
+    "dependency_sha256": {
+      "PyMuPDF": "69dfc78f206a96e5b3ac22741263ebab945fdf51f0dbe7c5757c3511b23d9d72",
+      "tesserocr": "7108fa533940151b3da31ec859426157746797a7b2d7890718ff0a1aa7d6675b",
+      "eng": "7d4322bd2a7749724879683fc3912cb542f19906c83bcc1a52132556427170b2"
+    },
+    "production_transport": false
+  },
+  "limits": {
+    "memory_mib": 1024,
+    "cpus": 1,
+    "network": "none",
+    "swap": false
+  },
+  "source_sha256": "7b97d44bef3d544c4c98ed0667c29607ce58fa4a401dd2463f66010a9615bb59",
+  "request_bytes": 785647,
+  "pages": [
+    {
+      "page": 1,
+      "words": 506,
+      "material_proposals": 13,
+      "flange_location_proposals": 4,
+      "response_bytes": 132787,
+      "handler_elapsed_ms": 6018,
+      "wall_seconds": 7.764,
+      "parser_peak_rss_kib": 295684,
+      "low_confidence_words": 10
+    },
+    {
+      "page": 2,
+      "words": 691,
+      "material_proposals": 19,
+      "flange_location_proposals": 9,
+      "response_bytes": 175735,
+      "handler_elapsed_ms": 8820,
+      "wall_seconds": 12.46,
+      "parser_peak_rss_kib": 302216,
+      "low_confidence_words": 13
+    }
+  ],
+  "digitalocean_live_tested": false,
+  "engineering_verified": false,
+  "material_proposals": 32,
+  "passed": true,
+  "purpose": "Graphical flange locations; no physical dimensions, routes or material identities accepted",
+  "application_release": "0.6.2"
+}

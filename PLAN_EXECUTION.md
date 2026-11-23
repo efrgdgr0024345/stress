@@ -33,6 +33,11 @@ No milestone is complete solely because software tests pass.
   Real engineering approvals were not performed. Verified modelling stays blocked.
 - [ ] Complete typed component ports, node rules, graph/continuation review,
   dimensional constraints and unsupported-feature exception handling.
+  Release 0.6.2 adds generic, bounded weld-neck plate/filled-dot recognition:
+  13 flange symbols and 26 graphical interface proposals on the real source,
+  shown in the drawing inspector and shared website/Excel Source features sheet.
+  These are reviewable locations, not accepted physical stations, ordered route
+  nodes, material associations or proof of a completed model.
   Release 0.6.0 adds physical interface requirements/mapping and signed XYZ
   constraint solving, source proof, conflict/unknown handling and shared tables.
   General symbol interpretation, automatic continuation proof, arbitrary networks

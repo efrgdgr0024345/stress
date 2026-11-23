@@ -42,6 +42,7 @@ import {
   type DrawingNote,
 } from "./types";
 import { DrawingNotes } from "./drawing-notes";
+import type { SourceFeature } from "./pipeline";
 
 pdfjs.GlobalWorkerOptions.workerSrc = workerUrl;
 type Mutation = (
@@ -89,8 +90,11 @@ export function DrawingEditor({
     [dirty, setDirty] = useState(false);
   const [showLabels, setShowLabels] = useState(true),
     [showRoutes, setShowRoutes] = useState(false),
+    [showFeatures, setShowFeatures] = useState(true),
     [nodeQuery, setNodeQuery] = useState(""),
-    [inspectorTab, setInspectorTab] = useState<"point" | "source">("point"),
+    [inspectorTab, setInspectorTab] = useState<"point" | "source" | "features">(
+      "point",
+    ),
     [linkId, setLinkId] = useState("");
   const [routeStart, setRouteStart] = useState<number | null>(null);
   const previousSelection = useRef(selected);
@@ -100,6 +104,9 @@ export function DrawingEditor({
   }, [sheet.id]);
   const sourceGraph = project.automation?.graph_proposals?.find(
     (g) => g.sheet_id === sheet.id,
+  );
+  const sourceFeatures = (project.automation?.feature_proposals || []).filter(
+    (feature) => feature.sheet_id === sheet.id,
   );
   const [notesOpen, setNotesOpen] = useState(false),
     [editingNote, setEditingNote] = useState<DrawingNote | undefined>();
@@ -233,6 +240,58 @@ export function DrawingEditor({
   const patch = (changes: Partial<Draft>) => {
     setDraft((d) => (d ? { ...d, ...changes } : null));
     setDirty(true);
+  };
+  const proposeFeature = (
+    feature: SourceFeature,
+    role: "flange_face" | "opposite_pipe_dot",
+  ) => {
+    if (busy) return;
+    if (dirty && !confirm("Discard unsaved point changes?")) return;
+    const reference = `Source feature ${feature.id}/${role}`;
+    const existing = project.nodes.find(
+      (n) =>
+        n.source_feature_id === feature.id && n.source_feature_role === role,
+    );
+    if (existing) {
+      onSelect(existing.id);
+      setInspectorTab("point");
+      return;
+    }
+    const anchor = feature[role];
+    previousSelection.current = null;
+    onSelect(null);
+    setDraft({
+      _version: project.version,
+      line_id: sheet.line_id,
+      route: "main",
+      order:
+        Math.max(
+          0,
+          ...project.nodes
+            .filter((n) => n.line_id === sheet.line_id && n.route === "main")
+            .map((n) => n.order),
+        ) + 1,
+      kind: "flange",
+      station_mm: null,
+      dimension: "",
+      evidence: `${reference}. Unreviewed graphical ${role.replaceAll("_", " ")} proposal (${feature.profile}); source ${feature.source_sha256}. Confirm material identity, route/order and dimensional evidence.`,
+      source_feature_id: feature.id,
+      source_feature_role: role,
+      instances: [
+        {
+          sheet_id: sheet.id,
+          anchor: [...anchor],
+          bubble: clamp([anchor[0] + 35, anchor[1] - 35]),
+        },
+      ],
+    });
+    setDirty(true);
+    setMode("select");
+    setShowLabels(true);
+    setInspectorTab("point");
+    notify(
+      "Source location prepared. Check the route and order before saving; physical station is unknown.",
+    );
   };
   const clickDrawing = async (e: React.PointerEvent) => {
     if (drag.current || mode === "pan" || mode === "route") return;
@@ -370,6 +429,8 @@ export function DrawingEditor({
       kind: draft.kind,
       dimension: draft.dimension,
       evidence: draft.evidence,
+      source_feature_id: draft.source_feature_id,
+      source_feature_role: draft.source_feature_role,
       instances: draft.instances,
     };
     const p = await mutation(
@@ -531,6 +592,16 @@ export function DrawingEditor({
             >
               <Route size={17} />
             </button>
+            {!!sourceFeatures.length && (
+              <button
+                className={`tool ${showFeatures ? "chosen" : ""}`}
+                aria-label="Toggle detected flange locations"
+                title="Show proposed flange faces and separate pipe dots"
+                onClick={() => setShowFeatures(!showFeatures)}
+              >
+                <Crosshair size={17} />
+              </button>
+            )}
             <span className="toolbar-divider" />
             <button
               className={`tool ${mode === "select" ? "chosen" : ""}`}
@@ -706,6 +777,64 @@ export function DrawingEditor({
               }}
               onPointerCancel={() => (drag.current = null)}
             >
+              {showFeatures &&
+                sourceFeatures.map((feature, index) => {
+                  const a = map(feature.flange_face),
+                    b = map(feature.opposite_pipe_dot);
+                  return (
+                    <g
+                      key={feature.id}
+                      className="source-feature"
+                      data-feature={feature.id}
+                    >
+                      <line
+                        x1={a[0]}
+                        y1={a[1]}
+                        x2={b[0]}
+                        y2={b[1]}
+                        stroke="#007aff"
+                        strokeWidth={1.5}
+                        strokeDasharray="3 3"
+                        pointerEvents="none"
+                      />
+                      {(["flange_face", "opposite_pipe_dot"] as const).map(
+                        (role) => {
+                          const [x, y] = map(feature[role]);
+                          return (
+                            <circle
+                              key={role}
+                              data-feature-role={role}
+                              cx={x}
+                              cy={y}
+                              r={5}
+                              fill={
+                                role === "flange_face" ? "#fff" : "#007aff55"
+                              }
+                              stroke="#007aff"
+                              strokeWidth={1.5}
+                              role="button"
+                              tabIndex={busy ? -1 : 0}
+                              style={{ cursor: "pointer" }}
+                              aria-label={`Flange proposal ${index + 1} ${role.replaceAll("_", " ")}`}
+                              onPointerDown={(e) => {
+                                e.stopPropagation();
+                                proposeFeature(feature, role);
+                              }}
+                              onKeyDown={(e) => {
+                                if (e.key === "Enter" || e.key === " ") {
+                                  e.preventDefault();
+                                  proposeFeature(feature, role);
+                                }
+                              }}
+                            >
+                              <title>{`Proposed ${role.replaceAll("_", " ")} · inspect source before use`}</title>
+                            </circle>
+                          );
+                        },
+                      )}
+                    </g>
+                  );
+                })}
               {mode === "route" && sourceGraph && (
                 <g className="source-route-candidates">
                   {sourceGraph.edges.map(([a, b], i) => {
@@ -1063,8 +1192,57 @@ export function DrawingEditor({
           >
             Source text
           </button>
+          <button
+            className={inspectorTab === "features" ? "selected" : ""}
+            onClick={() => setInspectorTab("features")}
+          >
+            Detected features
+          </button>
         </div>
-        {inspectorTab === "source" ? (
+        {inspectorTab === "features" ? (
+          <div className="inspector-content source-features-panel">
+            <span className="eyebrow">
+              {sourceFeatures.length} FLANGE LOCATION PROPOSALS
+            </span>
+            <p className="fine-print">
+              Blue marks show proposed faces and separate pipe dots. Inspect
+              each symbol and set its route before saving a point. Physical
+              dimensions and material matches remain unknown.
+            </p>
+            {!sourceFeatures.length && (
+              <p className="fine-print">
+                No supported flange symbols were recognized on this sheet. Other
+                drawing conventions require review.
+              </p>
+            )}
+            {sourceFeatures.map((feature, index) => (
+              <div className="source-feature-card" key={feature.id}>
+                <strong>
+                  <Crosshair size={15} /> Flange proposal {index + 1}
+                </strong>
+                <span className="fine-print">
+                  Unreviewed · face and pipe dot
+                </span>
+                <div className="source-feature-actions">
+                  <button
+                    className="button secondary compact"
+                    disabled={busy}
+                    onClick={() => proposeFeature(feature, "flange_face")}
+                  >
+                    Inspect face
+                  </button>
+                  <button
+                    className="button secondary compact"
+                    disabled={busy}
+                    onClick={() => proposeFeature(feature, "opposite_pipe_dot")}
+                  >
+                    Inspect pipe dot
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : inspectorTab === "source" ? (
           <div className="inspector-content">
             <span className="eyebrow">EXTRACTED PDF TEXT</span>
             <p className="fine-print">
