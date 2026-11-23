@@ -81,6 +81,20 @@ class PipelineTests(unittest.TestCase):
         with main.db() as conn:self.assertEqual(conn.execute('SELECT COUNT(*) FROM pipeline_runs').fetchone()[0],1)
         self.assertEqual(len(list((main.DATA/'sources').glob('*.pdf'))),2) # seed + quarantine
 
+    def test_merged_source_identity_is_not_recreated_by_cached_proposals(self):
+        p=self.create();self.intake(p);self.drain(p);p=self.current(p)
+        keep=p['nodes'][1];retired=p['nodes'][2]
+        keep['instances'].extend(deepcopy(retired['instances']))
+        p['nodes']=[n for n in p['nodes'] if n['id']!=retired['id']]
+        p['point_aliases']={retired['id']:keep['id']}
+        with main.db() as conn:conn.execute('UPDATE projects SET data=? WHERE id=?',(json.dumps(p),p['id']))
+        response=self.client.post(f"/api/v1/projects/{p['id']}/pipeline/rerun",json={'version':p['version']})
+        self.assertEqual(response.status_code,200,response.text);self.drain(p);p=self.current(p)
+        self.assertEqual(len(p['nodes']),3);self.assertNotIn(retired['id'],{n['id'] for n in p['nodes']})
+        self.assertEqual(p['point_aliases'][retired['id']],keep['id'])
+        self.assertEqual(len(next(n for n in p['nodes'] if n['id']==keep['id'])['instances']),2)
+        self.assertFalse(any(i['code']=='POINT_EXCLUDED_BY_REVIEW' and i.get('point_id')==retired['id'] for i in p['issues']))
+
     def test_claims_serialize_project_and_expired_fence_is_rejected(self):
         p=self.create();self.intake(p);self.intake(p,drawing(label='SECOND'))
         a=pipeline.claim(main);self.assertIsNone(pipeline.claim(main))

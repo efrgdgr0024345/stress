@@ -5,8 +5,10 @@ from typing import Annotated,Literal
 from fastapi import Depends,HTTPException
 from pydantic import BaseModel,ConfigDict,Field
 from packages.engineering import dimension_mm
+from packages.engineering.coordinates import coordinate_value
 from packages.physical import POLICIES,prepare,audit
 from packages.physical.constraints import solve,MAX_CONSTRAINTS
+from packages.physical.cod import proposals as cod_proposals,CONVENTION
 from packages.automation.recognize import identity
 
 Coordinate=Annotated[float,Field(ge=0,le=14400,allow_inf_nan=False)]
@@ -25,6 +27,7 @@ class ComponentInput(BaseModel):
     ports:dict[str,PortInput|None]=Field(max_length=3)
     evidence:str=Field(min_length=10,max_length=3000)
     confirmed:Literal[True]
+    cod_convention_confirmed:bool=False
 
 class DimensionInput(BaseModel):
     model_config=ConfigDict(extra='forbid')
@@ -34,6 +37,7 @@ class DimensionInput(BaseModel):
     from_point_id:str
     to_point_id:str|None=None
     source_text:str=Field(min_length=1,max_length=100)
+    source_format:Literal['STANDARD','ISO_FT_IN_DOT_FRACTION']='STANDARD'
     tolerance_text:str=Field(default='0 mm',max_length=100)
     sheet_id:str
     evidence:str=Field(min_length=10,max_length=3000)
@@ -51,7 +55,27 @@ def install(api):
     def get(project_id:str,actor=Depends(api.user)):
         with api.db() as conn:p=api.project_read(project_id,actor,conn)
         return {'revision':p['version'],**audit(p),'dimensions':p.get('physical_model',{}).get('constraints',[]),
-                'solution':solve(p),'policies':POLICIES,'can_edit':actor['role'] in ('admin','engineer')}
+                'solution':solve(p),'cod_proposals':cod_proposals(p),'policies':POLICIES,'can_edit':actor['role'] in ('admin','engineer')}
+
+    @api.app.post('/api/v1/projects/{project_id}/physical-model/components/{component_id}/accept-cod')
+    def accept_cod(project_id:str,component_id:str,body:Decision,actor=Depends(api.editor)):
+        def update(p):
+            model=prepare(p)
+            proposal=next((c for c in cod_proposals(p) if c['component_id']==component_id),None)
+            if not proposal or proposal['status'] not in ('COD_PROPOSED','COD_ACCEPTED'):
+                raise HTTPException(409,'COD is not sufficiently constrained by current engineering leg coordinates and the confirmed source convention. Unknowns or conflicts remain unresolved.')
+            retained=[c for c in model['constraints'] if c.get('cod_derivation',{}).get('component_id')!=component_id]
+            if len(retained)+3>MAX_CONSTRAINTS:raise HTTPException(409,'Dimensional constraint allowance reached.')
+            sheet=api.sheet_for(p,proposal['source_sheet_id'])
+            for axis,value in proposal['coordinates_mm'].items():
+                retained.append({'id':identity(p['id'],component_id,'cod',axis),'kind':'COORDINATE','axis':axis,
+                    'from_point_id':proposal['point_id'],'to_point_id':None,'source_text':f'Derived theoretical COD {axis}: {value} mm',
+                    'value_mm':value,'tolerance_mm':'0','tolerance_text':'0 mm','sheet_id':sheet['id'],
+                    'source_sha256':sheet['sha256'],'source_content_hash':sheet.get('content_hash'),
+                    'evidence':body.reason,'verification':'reviewed','reviewed_by':actor['id'],'reviewed_at':api.now(),
+                    'cod_derivation':deepcopy(proposal['derivation'])})
+            model['constraints']=retained
+        return api.change(project_id,body.version,actor,'Accepted exact dimension-chain theoretical COD; route stations and bend radius not inferred',update)
 
     @api.app.patch('/api/v1/projects/{project_id}/physical-model/components/{component_id}')
     def component(project_id:str,component_id:str,body:ComponentInput,actor=Depends(api.editor)):
@@ -83,6 +107,8 @@ def install(api):
                     'content_hash':sheet.get('content_hash'),'bbox':list(port.bbox),
                     'evidence':port.evidence,'dimension_convention':port.dimension_convention,
                     'reviewed_by':actor['id'],'reviewed_at':api.now()}}
+                if body.kind=='elbow' and body.cod_convention_confirmed:
+                    associations[key]['proof']['dimension_convention_kind']=CONVENTION
             points=[next(n for n in p['nodes'] if n['id']==a['point_id']) for a in associations.values() if a]
             if len(points)==2:
                 a,b=points
@@ -107,7 +133,9 @@ def install(api):
             ids={body.from_point_id,body.to_point_id}-{None}
             if not any(any(v['sheet_id']==sheet['id'] for v in nodes[n]['instances']) for n in ids):
                 raise HTTPException(422,'Select a source sheet depicting at least one referenced point.')
-            try:value=dimension_mm(body.source_text);tolerance=dimension_mm(body.tolerance_text)
+            try:
+                parsed=coordinate_value(body.source_text,body.axis,body.source_format)
+                value=Decimal(parsed['value_mm']);tolerance=dimension_mm(body.tolerance_text)
             except ValueError as error:raise HTTPException(422,str(error)) from None
             if value.copy_abs()>Decimal('1000000000000') or not 0<=tolerance<=Decimal('100000'):
                 raise HTTPException(422,'Dimension or explicit tolerance is outside the supported range.')
@@ -116,6 +144,7 @@ def install(api):
             if not previous and len(model['constraints'])>=MAX_CONSTRAINTS:raise HTTPException(409,'Dimensional constraint allowance reached.')
             data={**body.model_dump(exclude={'version','confirmed'}),'id':dimension_id or api.uid(),
                   'value_mm':str(value),'tolerance_mm':str(tolerance),'source_sha256':sheet['sha256'],
+                  'source_direction':parsed['source_direction'],
                   'source_content_hash':sheet.get('content_hash'),'verification':'reviewed',
                   'reviewed_by':actor['id'],'reviewed_at':api.now()}
             if previous:previous.clear();previous.update(data)

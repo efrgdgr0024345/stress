@@ -275,3 +275,19 @@ Use the existing entry format: a unique `LESSON-###` heading, category, status, 
 - Lesson: Heavy linework and material-table OCR omitted the filled pipe dots and thin flange plates needed to locate actual interfaces. Passing workflow tests did not demonstrate that the real drawing had a physical model.
 - Action: Match bounded source geometry with explicit evidence, test the real PDF, and expose separate face/dot proposals in the drawing and Excel. Keep graphical points separate from engineering millimetres, accepted routes, material associations and completed-model claims. Reject ambiguous matches rather than fitting a target count.
 - Evidence: Release 0.6.2 recognizes 13 visible flange symbols and 26 proposed interface locations in the supplied drawing, with negative/ambiguity, contract, rotation/scale, upload/export and browser checks. Full dimensions, COD, continuation and native modelling gates remain unfinished.
+
+## LESSON-035 — Bind shared identity and derived geometry to their source proof
+
+- Category: Engineering integrity
+- Status: Adopted
+- Lesson: Equal coordinates do not prove two interfaces are connected. A derived COD can also appear valid after its original leg dimensions change unless the derivation is bound to its inputs.
+- Action: Require exact independent XYZ plus explicit topology/interface review before merging identities. Retain every source depiction and audit trail. Fingerprint COD inputs and source conventions; invalidate affected geometry after edits. Keep discrepancy and unsupported-loop exceptions visible.
+- Evidence: Release 0.7.0 adds continuation/COD domain, API and browser fixtures, with atomic rejection, three-depiction identity, withdrawal/revalidation, changed-source invalidation and retained unknown stations/radius. Original golden and application qualification remain open.
+
+## LESSON-036 — Download the actual workbook after accepting solved geometry
+
+- Category: Export validation
+- Status: Adopted
+- Lesson: A bend table reused a coordinate-list variable for one coordinate dictionary. The website showed the new values, but XLSX generation failed only after the complete acceptance workflow.
+- Action: Keep table-building values separate and exercise source review, COD acceptance, signed-vector acceptance and the actual downloaded workbook together. Check numeric cells and blank unknowns rather than only the HTTP status or displayed table.
+- Evidence: Release 0.7.0 includes API and Chromium regressions for the complete workflow. Library PDF round trips separately check editable native objects and source content streams without claiming desktop-editor qualification.

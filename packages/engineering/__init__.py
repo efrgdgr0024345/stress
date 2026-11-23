@@ -134,6 +134,8 @@ def compute_reasons(nodes):
         if node.get("kind") == "continuation" and len(node["instances"]) < 2:
             reasons.append("PROVISIONAL_CONTINUATION")
         reasons.extend(r for r in node.get('component_review_reasons',[]) if r not in reasons)
+        reasons.extend(r for r in node.get('continuation_review_reasons',[]) if r not in reasons)
+        reasons.extend(r for r in node.get('geometry_review_reasons',[]) if r not in reasons)
         node["reasons"] = reasons
         node["support_gap_mm"] = None
     routes = set((n["line_id"], n["route"]) for n in nodes)
@@ -161,13 +163,17 @@ def compute_reasons(nodes):
 
 
 def validate(project):
+    from packages.engineering.continuations import apply_reasons
+    continuation_issues=apply_reasons(project)
     compute_reasons(project["nodes"])
     project["graph"] = topology(project["nodes"])
     issues = list(project.get("automation",{}).get("issues",[]))
+    issues.extend(continuation_issues)
     from packages.physical import audit as physical_audit
-    from packages.physical.constraints import solve
+    from packages.physical.constraints import apply_geometry_reasons
     issues.extend(physical_audit(project)['issues'])
-    if project.get('physical_model') or project.get('analysis_model'):issues.extend(solve(project)['issues'])
+    issues.extend(apply_geometry_reasons(project))
+    compute_reasons(project['nodes'])
     orders = {}
     for node in project["nodes"]:
         key = (node["line_id"], node["route"], node["order"])

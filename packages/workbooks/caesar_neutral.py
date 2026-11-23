@@ -20,6 +20,8 @@ OPTIONAL_SECTIONS=('NODENAME','BEND','RIGID','EXPJT','RESTRANT','DISPLMNT','FORC
 def assess(project):
     model=project.get('analysis_model',{});nodes=project['nodes'];edges=topology(nodes)['edges'];by_id={n['id']:n for n in nodes};entered={e['id']:e for e in model.get('elements',[])};missing=[]
     if not edges:missing.append('A reviewed connected pipe route is required.')
+    from packages.engineering.continuations import audit as continuation_audit
+    if continuation_audit(project):missing.append('Resolve provisional, stale or conflicting continuation identities before native export.')
     from packages.physical import audit as physical_audit
     if physical_audit(project)['components']:missing.append('Component ports/auxiliaries are not represented by this straight-pipe-only native profile.')
     if project.get('physical_model') or project.get('analysis_model'):

@@ -185,9 +185,14 @@ def export_bundle(project, source_path, output_path):
                 annots=True,
             )
     manifest = []
+    reserved_names={a.info.get('id') for page in doc for a in page.annots() or [] if a.info.get('id')}
 
     def register(annot, page, sheet, role, group, color=RED):
         name = f"caesar:{project['id']}:{sheet['id']}:{group}:{role}"
+        original_name=name;suffix=0
+        while name in reserved_names:
+            suffix+=1;name=f"{original_name}:revision-{project['version']}-{suffix}"
+        reserved_names.add(name)
         annot.set_info(
             title="CAESAR ISO",
             subject=f"{role} | {group}",
@@ -202,6 +207,7 @@ def export_bundle(project, source_path, output_path):
                 "sheet_id": sheet["id"],
                 "group": group,
                 "role": role,
+                "physical_point_id": group if role in ('leader','bubble','number') else None,
                 "rect": list(annot.rect),
                 "revision": project["version"],
             }
@@ -321,8 +327,9 @@ def export_bundle(project, source_path, output_path):
     with fitz.open(stream=pdf_bytes, filetype="pdf") as check:
         if any(content_hash(page) != originals[i] for i, page in enumerate(check)):
             raise ValueError("Original source content changed. Export aborted.")
-        names = {a.info["id"] for page in check for a in (page.annots() or [])}
-        if not all(m["name"] in names for m in manifest):
+        from collections import Counter
+        names = Counter(a.info["id"] for page in check for a in (page.annots() or []))
+        if not all(names[m["name"]]==1 for m in manifest):
             raise ValueError("Native annotation integrity check failed.")
     csv_file = io.StringIO()
     writer = csv.writer(csv_file)

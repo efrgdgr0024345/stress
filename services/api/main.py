@@ -402,6 +402,10 @@ def change(project_id, version, actor, action, update):
         update(project)
         from packages.physical import prepare as prepare_physical
         prepare_physical(project)
+        from packages.engineering.continuations import apply_reasons
+        apply_reasons(project)
+        from packages.physical.constraints import apply_geometry_reasons
+        apply_geometry_reasons(project)
         project['contributors'] = sorted(set(project.get('contributors', [])) | {actor['id']})
         compute_reasons(project["nodes"])
         project["version"] += 1
@@ -784,7 +788,8 @@ def apply_node(project, body, node_id=None):
         raise HTTPException(422,'A source feature needs both its identity and interface role.')
     if body.source_feature_id:
         reference=(body.source_feature_id,body.source_feature_role)
-        if any((n.get('source_feature_id'),n.get('source_feature_role'))==reference and n['id']!=node_id for n in project['nodes']):
+        if any(((n.get('source_feature_id'),n.get('source_feature_role'))==reference or
+                any((v['id'],v['role'])==reference for v in n.get('source_feature_links',[]))) and n['id']!=node_id for n in project['nodes']):
             raise HTTPException(409,'This source interface already has a physical point. Select its existing identity.')
         retained=bool(node and (node.get('source_feature_id'),node.get('source_feature_role'))==reference)
         if not retained:
@@ -1162,6 +1167,8 @@ from services.api.results import install as install_results
 install_results(sys.modules[__name__])
 from services.api.physical_model import install as install_physical_model
 install_physical_model(sys.modules[__name__])
+from services.api.continuations import install as install_continuations
+install_continuations(sys.modules[__name__])
 
 from services.api.digitalocean import install as install_digitalocean
 install_digitalocean(sys.modules[__name__])

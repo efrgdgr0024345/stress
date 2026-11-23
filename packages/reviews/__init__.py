@@ -66,10 +66,14 @@ def scopes(project, processing_sources=()):
         if any(n.get('verification')=='proposed' for n in nodes):missing.append('NODE_PROPOSALS_UNREVIEWED')
         missing.extend(i['code'] for i in component_state['issues'] if i.get('component_id') in component_ids)
         missing.extend(i['code'] for i in dimensional_checks)
+        from packages.engineering.continuations import audit as continuation_audit
+        continuation_checks=[i for i in continuation_audit(project) if i['line_id']==line]
+        missing.extend(i['code'] for i in continuation_checks)
         if any(any(v is None for v in edge['delta_mm'].values()) for edge in dimensional_state['elements'] if edge['line_id']==line):missing.append('SIGNED_XYZ_UNRESOLVED')
         add('geometry',line,'Line '+line+' · physical model',{'nodes':nodes,
               'elements':[e for e in project.get('analysis_model',{}).get('elements',[]) if e.get('from_point_id',e.get('from')) in point_ids or e.get('to_point_id',e.get('to')) in point_ids],
               'continuations':[c for c in project.get('continuations',[]) if c.get('point_id') in point_ids or c.get('line_id')==line],
+              'continuation_checks':continuation_checks,
               'components':[c for c in components if c['line_id']==line],
               'component_association_checks':[i for i in component_state['issues'] if i.get('component_id') in component_ids],
               'dimensional_constraints':[c for c in project.get('physical_model',{}).get('constraints',[]) if c.get('from_point_id') in point_ids or c.get('to_point_id') in point_ids],

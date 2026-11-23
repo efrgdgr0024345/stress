@@ -63,12 +63,13 @@ def required_security_contract(data):
                 if 'data' in columns:
                     for row in conn.execute('SELECT data FROM projects'):
                         p=json.loads(row[0]);model=p.get('physical_model',{})
-                        if model.get('components') or model.get('constraints') or any(e.get('geometry_origin')=='constraint-solution' for e in p.get('analysis_model',{}).get('elements',[])):return 2
-            if 'users' in tables and conn.execute("SELECT 1 FROM users WHERE role='reviewer' LIMIT 1").fetchone():return 1
-            if 'account_state' in tables and conn.execute('SELECT 1 FROM account_state WHERE enabled=0 LIMIT 1').fetchone():return 1
-            if 'mfa_accounts' in tables and conn.execute('SELECT 1 FROM mfa_accounts WHERE enabled=1 LIMIT 1').fetchone():return 1
+                        if p.get('continuations') or p.get('point_aliases') or any(c.get('cod_derivation') for c in model.get('constraints',[])):minimum=max(minimum,3)
+                        if model.get('components') or model.get('constraints') or any(e.get('geometry_origin')=='constraint-solution' for e in p.get('analysis_model',{}).get('elements',[])):minimum=max(minimum,2)
+            if 'users' in tables and conn.execute("SELECT 1 FROM users WHERE role='reviewer' LIMIT 1").fetchone():minimum=max(minimum,1)
+            if 'account_state' in tables and conn.execute('SELECT 1 FROM account_state WHERE enabled=0 LIMIT 1').fetchone():minimum=max(minimum,1)
+            if 'mfa_accounts' in tables and conn.execute('SELECT 1 FROM mfa_accounts WHERE enabled=1 LIMIT 1').fetchone():minimum=max(minimum,1)
             for table in ('review_signoffs','project_approvals','review_qualifications'):
-                if table in tables and conn.execute('SELECT 1 FROM '+table+' LIMIT 1').fetchone():return 1
+                if table in tables and conn.execute('SELECT 1 FROM '+table+' LIMIT 1').fetchone():minimum=max(minimum,1)
     return minimum
 
 

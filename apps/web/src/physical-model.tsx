@@ -5,7 +5,12 @@ import { Dialog } from "./ui";
 
 type Port = {
   point_id: string;
-  proof: { sheet_id: string; evidence: string; dimension_convention?: string };
+  proof: {
+    sheet_id: string;
+    evidence: string;
+    dimension_convention?: string;
+    dimension_convention_kind?: string;
+  };
 };
 type Component = {
   id: string;
@@ -25,6 +30,7 @@ type Dimension = {
   from_point_id: string;
   to_point_id: string | null;
   source_text: string;
+  source_format?: string;
   tolerance_text: string;
   sheet_id: string;
   evidence: string;
@@ -33,6 +39,13 @@ type Model = {
   components: Component[];
   dimensions: Dimension[];
   can_edit: boolean;
+  cod_proposals: {
+    component_id: string;
+    point_id: string | null;
+    status: string;
+    coordinates_mm: Record<string, string> | null;
+    leg_point_ids?: string[];
+  }[];
   policies: Record<string, { ports: string[]; proof: string[] }>;
   solution: {
     issues: { code: string }[];
@@ -40,7 +53,7 @@ type Model = {
   };
 };
 export type ModelSelection = {
-  type: "component" | "dimension";
+  type: "component" | "dimension" | "cod";
   id: string;
 } | null;
 
@@ -57,9 +70,9 @@ export function PhysicalModelControls({
 }) {
   const [data, setData] = useState<Model | null>(null),
     [error, setError] = useState("");
-  const [mode, setMode] = useState<"component" | "dimension" | "apply" | null>(
-      null,
-    ),
+  const [mode, setMode] = useState<
+      "component" | "dimension" | "apply" | "cod" | null
+    >(null),
     [busy, setBusy] = useState(false);
   const [componentId, setComponentId] = useState(""),
     [dimensionId, setDimensionId] = useState("");
@@ -83,12 +96,14 @@ export function PhysicalModelControls({
   useEffect(() => {
     if (selection) {
       setMode(selection.type);
-      if (selection.type === "component") setComponentId(selection.id);
+      if (selection.type === "component" || selection.type === "cod")
+        setComponentId(selection.id);
       else setDimensionId(selection.id);
     }
   }, [selection]);
   const component = data?.components.find((c) => c.id === componentId);
   const dimension = data?.dimensions.find((d) => d.id === dimensionId);
+  const cod = data?.cod_proposals?.find((c) => c.component_id === componentId);
   useEffect(() => {
     if (component) {
       setKind(component.kind);
@@ -163,6 +178,17 @@ export function PhysicalModelControls({
             >
               <CheckCircle2 size={16} /> Accept solved XYZ
             </button>
+            <button
+              className="button secondary"
+              disabled={!data?.cod_proposals?.length}
+              onClick={() => {
+                setComponentId(data?.cod_proposals?.[0]?.component_id || "");
+                setDimensionId("");
+                setMode("cod");
+              }}
+            >
+              <Ruler size={16} /> Review bend COD
+            </button>
           </>
         )}
       </div>
@@ -186,7 +212,9 @@ export function PhysicalModelControls({
                 ? dimension
                   ? "Review source dimension"
                   : "Add source dimension"
-                : "Accept solved engineering vectors"
+                : mode === "cod"
+                  ? "Review theoretical bend COD"
+                  : "Accept solved engineering vectors"
           }
           subtitle={`Project revision ${project.version} · ${data.can_edit ? "Engineering evidence required" : "Read only"}`}
           onClose={close}
@@ -233,7 +261,15 @@ export function PhysicalModelControls({
                       ),
                     };
                   }
-                  body = { kind, ports: mapped, evidence, confirmed: true };
+                  body = {
+                    kind,
+                    ports: mapped,
+                    evidence,
+                    confirmed: true,
+                    cod_convention_confirmed: form.has(
+                      "cod_convention_confirmed",
+                    ),
+                  };
                 } else if (mode === "dimension") {
                   const type = String(form.get("kind"));
                   suffix =
@@ -246,11 +282,15 @@ export function PhysicalModelControls({
                     to_point_id:
                       type === "DELTA" ? form.get("to_point_id") : null,
                     source_text: form.get("source_text"),
+                    source_format: form.get("source_format"),
                     tolerance_text: form.get("tolerance_text"),
                     sheet_id: form.get("sheet_id"),
                     evidence,
                     confirmed: true,
                   };
+                } else if (mode === "cod") {
+                  suffix = "/components/" + componentId + "/accept-cod";
+                  body = { reason: evidence, confirmed: true };
                 } else {
                   suffix = "/apply-vectors";
                   body = { reason: evidence, confirmed: true };
@@ -394,20 +434,38 @@ export function PhysicalModelControls({
                       );
                     })}
                     {kind === "elbow" && (
-                      <label className="form-field">
-                        Engineering dimension convention proving theoretical COD
-                        <textarea
-                          name="dimension_convention"
-                          required
-                          minLength={10}
-                          maxLength={1000}
-                          disabled={!data.can_edit}
-                          defaultValue={
-                            component.ports.theoretical_cod?.proof
-                              .dimension_convention || ""
-                          }
-                        />
-                      </label>
+                      <>
+                        <label className="form-field">
+                          Engineering dimension convention proving theoretical
+                          COD
+                          <textarea
+                            name="dimension_convention"
+                            required
+                            minLength={10}
+                            maxLength={1000}
+                            disabled={!data.can_edit}
+                            defaultValue={
+                              component.ports.theoretical_cod?.proof
+                                .dimension_convention || ""
+                            }
+                          />
+                        </label>
+                        <label className="check-row">
+                          <input
+                            type="checkbox"
+                            name="cod_convention_confirmed"
+                            aria-label="Source convention proves theoretical centreline intersection"
+                            defaultChecked={
+                              component.ports.theoretical_cod?.proof
+                                .dimension_convention_kind ===
+                              "THEORETICAL_CENTRELINE_INTERSECTION"
+                            }
+                            disabled={!data.can_edit}
+                          />{" "}
+                          The source convention proves COD at the intersection
+                          of its two adjacent straight centreline legs.
+                        </label>
+                      </>
                     )}
                   </>
                 )}
@@ -415,6 +473,21 @@ export function PhysicalModelControls({
             )}
             {mode === "dimension" && (
               <>
+                <label className="form-field">
+                  Printed source number convention
+                  <select
+                    name="source_format"
+                    aria-label="Printed source number convention"
+                    defaultValue={dimension?.source_format || "STANDARD"}
+                  >
+                    <option value="STANDARD">
+                      Standard explicit mm / inch / feet and fractions
+                    </option>
+                    <option value="ISO_FT_IN_DOT_FRACTION">
+                      Printed ISO feet/inch fraction (for example 3'10.3/8")
+                    </option>
+                  </select>
+                </label>
                 <div className="form-grid">
                   <label className="form-field">
                     Constraint type
@@ -489,7 +562,7 @@ export function PhysicalModelControls({
                       required
                       maxLength={100}
                       defaultValue={dimension?.source_text || ""}
-                      placeholder={"e.g. -2 1/8 in or 152.4 mm"}
+                      placeholder={"e.g. -2 1/8 in, S 500 mm or EL 3' 2\""}
                     />
                   </label>
                   <label className="form-field">
@@ -526,6 +599,52 @@ export function PhysicalModelControls({
                 be accepted as exact geometry.
               </p>
             )}
+            {mode === "cod" && (
+              <>
+                <label className="form-field">
+                  Elbow occurrence
+                  <select
+                    aria-label="Elbow occurrence"
+                    value={componentId}
+                    onChange={(e) => setComponentId(e.target.value)}
+                  >
+                    {data.cod_proposals.map((c) => (
+                      <option key={c.component_id} value={c.component_id}>
+                        Item{" "}
+                        {
+                          data.components.find((v) => v.id === c.component_id)
+                            ?.item_no
+                        }{" "}
+                        · {c.status.replaceAll("_", " ")}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <p>
+                  <strong>{cod?.status.replaceAll("_", " ")}</strong>
+                </p>
+                <p className="fine-print">
+                  COD uses only fully constrained engineering XYZ points on the
+                  two straight legs and the confirmed source convention. Unknown
+                  leg coordinates, parallel/skew lines or incompatible source
+                  facts remain unresolved. Stations and bend radius are not
+                  inferred.
+                </p>
+                {cod?.coordinates_mm && (
+                  <p>
+                    {Object.entries(cod.coordinates_mm)
+                      .map(([axis, value]) => `${axis}: ${value} mm`)
+                      .join(" · ")}
+                  </p>
+                )}
+                {!!cod?.leg_point_ids?.length && (
+                  <p className="fine-print">
+                    Source leg points:{" "}
+                    {cod.leg_point_ids.map(pointName).join(" → ")}
+                  </p>
+                )}
+              </>
+            )}
             {data.can_edit && (
               <>
                 <label className="form-field">
@@ -537,16 +656,22 @@ export function PhysicalModelControls({
                     maxLength={3000}
                     rows={3}
                     defaultValue={
-                      mode === "component"
-                        ? component?.evidence || ""
-                        : dimension?.evidence || ""
+                      mode === "cod"
+                        ? ""
+                        : mode === "component"
+                          ? component?.evidence || ""
+                          : dimension?.evidence || ""
                     }
                   />
                 </label>
                 <label className="check-row">
-                  <input type="checkbox" required />I inspected the source
-                  engineering evidence. Graphic pixel distances are not physical
-                  dimensions.
+                  <input
+                    type="checkbox"
+                    aria-label="Confirm engineering source evidence"
+                    required
+                  />
+                  I inspected the source engineering evidence. Graphic pixel
+                  distances are not physical dimensions.
                 </label>
                 <div className="modal-footer">
                   <button
@@ -557,13 +682,20 @@ export function PhysicalModelControls({
                   >
                     Cancel
                   </button>
-                  <button className="button primary" disabled={busy}>
+                  <button
+                    className="button primary"
+                    disabled={
+                      busy || (mode === "cod" && cod?.status !== "COD_PROPOSED")
+                    }
+                  >
                     {busy && <Loader2 size={16} className="spin" />}
                     {mode === "component"
                       ? "Save source connections"
                       : mode === "dimension"
                         ? "Save source dimension"
-                        : "Accept engineering vectors"}
+                        : mode === "cod"
+                          ? "Accept proved COD coordinates"
+                          : "Accept engineering vectors"}
                   </button>
                 </div>
               </>

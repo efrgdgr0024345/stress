@@ -1,6 +1,6 @@
 # Current CII gate and next component milestones
 
-This checklist describes `packages/workbooks/caesar_neutral.py` release 0.6.2.
+This checklist describes `packages/workbooks/caesar_neutral.py` release 0.7.0.
 It does not extend that writer or qualify a desktop application. XLSX/CSV remain
 engineering-review handoffs; native CII remains an import candidate only.
 
@@ -12,7 +12,7 @@ engineering-review handoffs; native CII remains an import candidate only.
 | Component coverage | Node kind `endpoint` only. Any prepared physical component occurrence blocks this straight-pipe profile, even if ports are mapped. |
 | Station evidence | Every point has an accepted station and nonempty source evidence; no `verification: proposed` points. |
 | Signed geometry | Every topology edge has explicit DX/DY/DZ; nonzero straight length agrees with accepted along-route station difference within 0.01 mm. Page XY is never used. |
-| Constraints | No conflicting/stale dimensional source or stale accepted vector solution. |
+| Constraints | No conflicting/stale dimensional source, stale accepted vector/COD solution or unresolved continuation proof. |
 | Origin | Explicitly confirm the first ordered main point as the local model origin. This does not claim a surveyed origin. |
 | Settings | Piping code ID 1–999; vertical axis Y or Z; finite ambient temperature between −273.15 and 2000 °C. |
 | Numbers and labels | Unique node numbers 1–9,999,999; Windows-1252 labels without control characters and within documented field widths. |

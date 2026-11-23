@@ -3,7 +3,10 @@
 The user's 23 November 2026 instructions supersede the previous feature order:
 restore the original golden regression first; then engineering core, native
 export, PDF QA, and only then more recognition or production infrastructure.
-No new OCR, website styling or hosting work is included in this change.
+This restoration checkpoint added no OCR, styling or hosting infrastructure.
+The later instruction to proceed with all steps continues independent
+engineering-core work in 0.7.0 while retaining this blocked golden gate;
+see ENGINEERING_CORE_07.md. It does not replace the missing originals.
 The exact [pasted priority instructions](PRIORITY_2026_11_23.txt) are preserved
 with SHA-256 `153f23cd3975d21f3aa64a9c8fd1c4c800d1e8edcced59aa04319e980466a052`.
 

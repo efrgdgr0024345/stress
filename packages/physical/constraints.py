@@ -14,10 +14,11 @@ MAX_POINTS=2000
 MAX_CONSTRAINTS=6000
 
 
-def observations(project,invalid=None):
+def base_observations(project,invalid=None):
     invalid=invalid if invalid is not None else []
     sheets={s['id']:s for s in project.get('sheets',[])};result=[]
     for c in project.get('physical_model',{}).get('constraints',[]):
+        if c.get('cod_derivation'):continue
         sheet=sheets.get(c.get('sheet_id'))
         if c.get('verification')!='reviewed':
             invalid.append({'code':'DIMENSION_PROPOSAL_REVIEW','constraint_id':c['id'],'message':'A source dimension proposal requires explicit review.'});continue
@@ -36,6 +37,41 @@ def observations(project,invalid=None):
                     'value_mm':value,'source_text':value+' mm','tolerance_mm':'0',
                     'evidence':element['evidence'],'verification':'reviewed','source':'analysis-element'})
     return result
+
+
+def observations(project,invalid=None):
+    invalid=invalid if invalid is not None else []
+    result=base_observations(project,invalid)
+    from packages.physical.cod import digest
+    basis=digest(sorted(result,key=lambda c:c['id']))
+    components={c['id']:c for c in project.get('physical_model',{}).get('components',[])}
+    sheets={s['id']:s for s in project.get('sheets',[])}
+    for c in project.get('physical_model',{}).get('constraints',[]):
+        proof=c.get('cod_derivation')
+        if not proof:continue
+        component=components.get(proof['component_id']);port=component.get('ports',{}).get('theoretical_cod') if component else None
+        sheet=sheets.get(c.get('sheet_id'))
+        valid=(c.get('verification')=='reviewed' and port and proof['basis_sha256']==basis and
+            proof['association_sha256']==digest(port) and sheet and c.get('source_content_hash')==sheet.get('content_hash'))
+        if not valid:
+            invalid.append({'code':'COD_SOURCE_STALE','constraint_id':c['id'],'point_ids':[c['from_point_id']],'message':'Derived COD source dimensions or association proof changed. Reconstruct and review it again; no stale coordinates were accepted.'})
+        else:result.append(dict(c))
+    return result
+
+
+def apply_geometry_reasons(project):
+    solution=solve(project) if project.get('physical_model') or project.get('analysis_model') else {'issues':[]}
+    constraints={c['id']:c for c in project.get('physical_model',{}).get('constraints',[])}
+    elements={e['id']:e for e in project.get('analysis_model',{}).get('elements',[])}
+    for node in project['nodes']:
+        reasons=[]
+        for issue in solution['issues']:
+            constraint=constraints.get(issue.get('constraint_id'),{});element=elements.get(issue.get('element_id'),{})
+            points=set(issue.get('point_ids',[]))|{constraint.get('from_point_id'),constraint.get('to_point_id'),element.get('from_point_id'),element.get('to_point_id')}
+            if node['id'] in points or issue['code']=='DIMENSION_SOLVER_LIMIT':reasons.append(issue['code'])
+        if reasons:node['geometry_review_reasons']=sorted(set(reasons))
+        else:node.pop('geometry_review_reasons',None)
+    return solution['issues']
 
 
 def solve(project):
@@ -100,8 +136,10 @@ def solve(project):
                 first=output[a]['axes'][axis];second=output[b]['axes'][axis]
                 same=first['relative_basis_point_id']==second['relative_basis_point_id']
                 known=same and first['relative_mm'] is not None and second['relative_mm'] is not None
-                row['delta_mm'][axis]=str(Decimal(second['relative_mm'])-Decimal(first['relative_mm'])) if known else None
-                row['evidence_groups'][axis]=[first['evidence_group']] if known else []
+                absolute=first['value_mm'] is not None and second['value_mm'] is not None
+                row['delta_mm'][axis]=(str(Decimal(second['value_mm'])-Decimal(first['value_mm'])) if absolute else
+                    str(Decimal(second['relative_mm'])-Decimal(first['relative_mm'])) if known else None)
+                row['evidence_groups'][axis]=list(dict.fromkeys([first['evidence_group'],second['evidence_group']])) if absolute else [first['evidence_group']] if known else []
             first_node,second_node=nodes[a],nodes[b]
             bends=any(n['kind']=='elbow' or any(p['kind']=='elbow' for p in n.get('component_ports',[])) for n in (first_node,second_node))
             if (not bends and first_node['route']==second_node['route'] and

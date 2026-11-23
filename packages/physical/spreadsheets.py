@@ -33,7 +33,35 @@ def tables(project):
                 'line':n['line_id'],'axis':axis,'coordinate':value['value_mm'],'relative':value['relative_mm'],
                 'basis':nodes.get(value['relative_basis_point_id'],{}).get('number'),'state':value['status'],
                 'tolerance':value['tolerance_mm'],'evidence_group':value['evidence_group']})
+    continuations=[]
+    from packages.engineering.continuations import audit as continuation_audit
+    checks=continuation_audit(project)
+    def display(uid):return nodes.get(project.get('point_aliases',{}).get(uid,uid),{}).get('number')
+    for c in project.get('continuations',[]):
+        reasons=', '.join(i['code'] for i in checks if i['continuation_id']==c['id'])
+        for axis in ('X','Y','Z'):
+            continuations.append({'id':c['id']+':'+axis,'continuation_id':c['id'],'line':c['line_id'],
+                'left':display(c['left_point_id']),'right':display(c['right_point_id']),
+                'shared':nodes.get(c.get('point_id'),{}).get('number'),'axis':axis,'delta':c['delta_mm'].get(axis),
+                'left_coordinate':c.get('coordinates',{}).get(c['left_point_id'],{}).get(axis),
+                'right_coordinate':c.get('coordinates',{}).get(c['right_point_id'],{}).get(axis),
+                'state':c['status'],'reasons':reasons,'evidence':c['evidence'],'point_id':c.get('point_id')})
+    unresolved={i['evidence_id'] for i in checks if i['code']=='UNRESOLVED_CONTINUATION_REFERENCE'}
+    continuation_sources=[{'id':c['id'],'sheet':sheets.get(c['sheet_id'],{}).get('printed_id') or c['sheet_id'],
+        'source':c['source_text'],'target_sheet':c.get('target_printed_sheet'),'target_line':c.get('target_line_proposal'),
+        'state':'PROPOSED — SOURCE REVIEW REQUIRED' if c['id'] in unresolved else 'SHARED IDENTITY REVIEWED','source_sha':c['source_sha256']}
+        for c in project.get('automation',{}).get('continuation_candidates',[])]
+    from packages.physical.cod import proposals as cod_proposals
+    bends=[]
+    for c in cod_proposals(project):
+        cod_coordinates=c.get('coordinates_mm') or {}
+        bends.append({'id':c['component_id'],'component_id':c['component_id'],'node':nodes.get(c['point_id'],{}).get('number'),
+            'state':c['status'],'x':cod_coordinates.get('X'),'y':cod_coordinates.get('Y'),'z':cod_coordinates.get('Z'),
+            'station':None,'radius':None,'legs':', '.join(str(nodes.get(v,{}).get('number')) for v in c.get('leg_point_ids',[]))})
     return [
+        table('Bend COD',[('node','COD node','number'),('state','Reconstruction state','text'),('x','Proved X / East (mm)','decimal'),('y','Proved Y / North (mm)','decimal'),('z','Proved Z / Up (mm)','decimal'),('station','Station inferred from COD (mm)','decimal'),('radius','Bend radius inferred (mm)','decimal'),('legs','Engineering leg nodes','text'),('component_id','Elbow occurrence ID','text')],bends),
+        table('Continuations',[('line','Full line ID','text'),('left','Source node','number'),('right','Other depiction node','number'),('shared','Shared node','number'),('axis','Engineering axis','text'),('left_coordinate','Original source coordinate (mm)','decimal'),('right_coordinate','Other source coordinate (mm)','decimal'),('delta','Other minus source (mm)','decimal'),('state','Match state','text'),('reasons','Current reasons','text'),('evidence','Engineering evidence','text'),('point_id','Shared physical ID','text'),('continuation_id','Review ID','text')],continuations),
+        table('Continuation sources',[('sheet','Source sheet','text'),('source','Printed continuation reference','text'),('target_sheet','Referenced sheet number','number'),('target_line','Referenced full line proposal','text'),('state','Review state','text'),('source_sha','Source PDF SHA256','text'),('id','Source observation ID','text')],continuation_sources),
         table('Component ports', [('item','Item','text'),('occurrence','Occurrence','number'),('line','Full line ID','text'),('kind','Component type','text'),('port','Required physical interface','text'),('node','Node','number'),('station','Accepted station (mm)','decimal'),('state','Association state','text'),('reasons','Unresolved reasons','text'),('proof_kind','Source feature','text'),('evidence','Source evidence','text'),('point_id','Physical point ID','text'),('component_id','Component ID','text')],ports),
         table('Dimensions',[('kind','Constraint type','text'),('axis','Signed engineering axis','text'),('from_node','From / coordinate node','number'),('to_node','To node','number'),('source_text','Original source dimension','text'),('value','Canonical value (mm)','decimal'),('tolerance','Declared tolerance (mm)','decimal'),('state','Review state','text'),('sheet','Source sheet','text'),('evidence','Engineering evidence','text'),('source_sha','Original PDF SHA256','text'),('id','Constraint ID','text')],dimensions),
         table('Coordinates',[('node','Node','number'),('line','Full line ID','text'),('axis','Engineering axis','text'),('coordinate','Source coordinate (mm)','decimal'),('relative','Relative to basis (mm)','decimal'),('basis','Relative basis node','number'),('state','Constraint status','text'),('tolerance','Declared uncertainty (mm)','decimal'),('evidence_group','Evidence group','text'),('point_id','Physical point ID','text')],coordinates),

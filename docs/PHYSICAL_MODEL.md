@@ -1,5 +1,10 @@
 # Physical interfaces and signed dimensional evidence
 
+Version 0.7.0 adds reviewed continuation identities, signed cardinal source
+coordinates and exact theoretical COD from independently proved engineering
+legs. See [the workflow and limitations](ENGINEERING_CORE_07.md). These extend
+the interface model below; they do not infer physical distances from page XY.
+
 Version 0.6.2 adds **Detected features** in the drawing inspector and the shared
 **Source features** website/Excel sheet. The bounded
 `iso-weld-neck-plate-v1` recognizer compares a thin flange plate, a separate

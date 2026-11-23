@@ -321,7 +321,8 @@ def compose(api,job,progress):
         advance(api,job,progress,"export");return
     working=deepcopy(p);issues=[i for i in working.get("automation",{}).get("issues",[]) if i["code"]=="REVISION_REBASE_REQUIRED"]
     active_ids={s["id"] for s in working["sheets"]};pages={k:v for k,v in pages.items() if k in active_ids}
-    inventory_ledger=[];graphs=[];proposals=[];new_materials=[];features=[]
+    inventory_ledger=[];graphs=[];proposals=[];new_materials=[];features=[];continuation_candidates=[]
+    from packages.engineering.continuations import source_candidates,candidate_matches,LIMIT as CONTINUATION_LIMIT
     for sheet in working["sheets"]:
         page=pages.get(sheet["id"])
         if not page:
@@ -342,6 +343,11 @@ def compose(api,job,progress):
         if not sheet.get("identity_verified"):
             issues.append({"code":"DRAWING_IDENTITY_REVIEW_REQUIRED","sheet_id":sheet["id"],"message":"Confirm the printed full line and sheet identity in the drawing register; OCR proposals are not approval."})
         items,exceptions,ledger=materials(page,sheet,sheet["sha256"])
+        if len(continuation_candidates)<CONTINUATION_LIMIT:
+            found_continuations=source_candidates(page,sheet)
+            continuation_candidates.extend(found_continuations[:CONTINUATION_LIMIT-len(continuation_candidates)])
+            if len(found_continuations)>=100:issues.append({'code':'CONTINUATION_SHEET_CANDIDATE_LIMIT','sheet_id':sheet['id']})
+        else:issues.append({'code':'CONTINUATION_CANDIDATE_LIMIT','sheet_id':sheet['id']})
         new_materials+=items;issues+=exceptions;inventory_ledger+=ledger
         nodes,exceptions=node_proposals(page,sheet,sheet["sha256"])
         proposals+=nodes;issues+=exceptions
@@ -360,12 +366,13 @@ def compose(api,job,progress):
     existing_nodes={n["id"] for n in working["nodes"]}
     # Explicit source route/order profiles can prepare a model; generic centreline
     # candidates stay separate until an engineer establishes route identity/order.
-    excluded_nodes=set(working.get("automation_tombstones",{}).get("node_ids",[]))
+    aliases=set(working.get('point_aliases',{}))
+    excluded_nodes=set(working.get("automation_tombstones",{}).get("node_ids",[]))|aliases
     working["nodes"].extend(n for n in proposals if n["id"] not in existing_nodes|excluded_nodes and n["route"]=="main")
     for node in proposals:
-        if node["id"] in excluded_nodes:issues.append({"code":"POINT_EXCLUDED_BY_REVIEW","point_id":node["id"],"severity":"review"})
+        if node["id"] in excluded_nodes-aliases:issues.append({"code":"POINT_EXCLUDED_BY_REVIEW","point_id":node["id"],"severity":"review"})
     for n in proposals:
-        if n["route"]!="main":issues.append({"code":"BRANCH_TAKEOFF_REVIEW_REQUIRED","point_id":n["id"]})
+        if n["route"]!="main" and n['id'] not in aliases:issues.append({"code":"BRANCH_TAKEOFF_REVIEW_REQUIRED","point_id":n["id"]})
     with api.db() as conn:
         datasets=[]
         for version in progress["catalog_versions"]:
@@ -402,6 +409,7 @@ def compose(api,job,progress):
         "input_sha256":sorted({s["sha256"] for s in working["sheets"]}),
         "issues":[dict(v,severity=v.get("severity","critical"),message=v.get("message",v["code"].replace("_"," ").capitalize())) for v in dedup.values()],
         "proposals":proposals,"graph_proposals":graphs,"feature_proposals":features,"inventory_ledger":inventory_ledger,
+        "continuation_candidates":continuation_candidates,"continuation_pairs":candidate_matches(continuation_candidates,working['sheets']),
         "evidence_run":progress.get("evidence_run",job["id"]),"catalog_versions":progress["catalog_versions"],
         "route_selections":p.get("automation",{}).get("route_selections",[]),
         "evidence_pages":evidence_pages,

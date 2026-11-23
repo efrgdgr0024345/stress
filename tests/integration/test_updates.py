@@ -66,6 +66,25 @@ class UpdateApiTests(unittest.TestCase):
         finally:main.LOCAL_DEMO=previous
 
 class ReleaseTests(unittest.TestCase):
+    def test_rollback_contract_includes_later_identity_and_derived_geometry_records(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root,public,data,directory,config,release=self.fixture(Path(temporary))
+            with sqlite3.connect(data/'workspace.sqlite3') as conn:
+                conn.execute('DROP TABLE projects')
+                conn.execute('CREATE TABLE projects (data TEXT)')
+                conn.execute('INSERT INTO projects VALUES (?)',(json.dumps({'physical_model':{'constraints':[{'id':'older-physical-model'}]}}),))
+                conn.execute('INSERT INTO projects VALUES (?)',(json.dumps({'point_aliases':{'old':'canonical'}}),))
+            self.assertEqual(u.required_security_contract(data),3)
+            u.write(root/'RELEASE.json',{'version':'previous','security_contract':2})
+            with self.assertRaisesRegex(ValueError,'predates'):u.security_compatible(data,root)
+            u.write(root/'RELEASE.json',{'version':'current','security_contract':3})
+            u.security_compatible(data,root)
+            for p in ({'continuations':[{'id':'reviewed'}]}, {'physical_model':{'constraints':[{'cod_derivation':{'basis_sha256':'source-proof'}}]}}):
+                with sqlite3.connect(data/'workspace.sqlite3') as conn:
+                    conn.execute('DELETE FROM projects')
+                    conn.execute('INSERT INTO projects VALUES (?)',(json.dumps(p),))
+                self.assertEqual(u.required_security_contract(data),3)
+
     def test_auto_update_holds_failed_package_until_new_bytes_or_explicit_retry(self):
         with tempfile.TemporaryDirectory() as temporary:
             root,public,data,directory,config,release=self.fixture(Path(temporary))

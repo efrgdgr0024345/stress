@@ -250,7 +250,11 @@ export function DrawingEditor({
     const reference = `Source feature ${feature.id}/${role}`;
     const existing = project.nodes.find(
       (n) =>
-        n.source_feature_id === feature.id && n.source_feature_role === role,
+        (n.source_feature_id === feature.id &&
+          n.source_feature_role === role) ||
+        n.source_feature_links?.some(
+          (r) => r.id === feature.id && r.role === role,
+        ),
     );
     if (existing) {
       onSelect(existing.id);

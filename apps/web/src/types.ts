@@ -42,6 +42,10 @@ export interface PipeNode {
   reasons: string[];
   source_feature_id?: string | null;
   source_feature_role?: "flange_face" | "opposite_pipe_dot" | null;
+  source_feature_links?: {
+    id: string;
+    role: "flange_face" | "opposite_pipe_dot";
+  }[];
   support_gap_mm: string | null;
   instances: NodeInstance[];
 }

@@ -9,6 +9,7 @@ import {
 import { api, type Project } from "./types";
 import { appPath } from "./paths";
 import { PhysicalModelControls, type ModelSelection } from "./physical-model";
+import { ContinuationControls } from "./continuations";
 import { Dialog } from "./ui";
 import "./results.css";
 
@@ -81,6 +82,9 @@ export function EngineeringResults({
     [busy, setBusy] = useState(false),
     [settingsOpen, setSettingsOpen] = useState(false);
   const [modelSelection, setModelSelection] = useState<ModelSelection>(null);
+  const [continuationSelection, setContinuationSelection] = useState<
+    string | null
+  >(null);
   const firstMain = project.nodes
     .filter((n) => n.route === "main")
     .sort((a, b) => a.order - b.order)[0];
@@ -109,8 +113,12 @@ export function EngineeringResults({
         ),
     );
   const rowAction = (row: Record<string, Cell>) => {
+    if (selected === "Continuations" && row.continuation_id)
+      setContinuationSelection(String(row.continuation_id));
     if (selected === "Component ports" && row.component_id)
       setModelSelection({ type: "component", id: String(row.component_id) });
+    if (selected === "Bend COD" && row.component_id)
+      setModelSelection({ type: "cod", id: String(row.component_id) });
     if (selected === "Dimensions" && row.id)
       setModelSelection({ type: "dimension", id: String(row.id) });
     if (selected === "CAESAR input") setEditing(row);
@@ -190,6 +198,12 @@ export function EngineeringResults({
           selection={modelSelection}
           onClear={() => setModelSelection(null)}
         />
+        <ContinuationControls
+          project={project}
+          onUpdate={onUpdate}
+          selection={continuationSelection}
+          onClear={() => setContinuationSelection(null)}
+        />
         <div className="results-formula-bar">
           <span>fx</span>
           <span>
@@ -231,6 +245,8 @@ export function EngineeringResults({
                       "CAESAR input",
                       "Component ports",
                       "Dimensions",
+                      "Continuations",
+                      "Bend COD",
                     ].includes(selected)
                       ? 0
                       : undefined

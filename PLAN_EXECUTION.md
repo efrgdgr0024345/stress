@@ -33,6 +33,12 @@ No milestone is complete solely because software tests pass.
   Real engineering approvals were not performed. Verified modelling stays blocked.
 - [ ] Complete typed component ports, node rules, graph/continuation review,
   dimensional constraints and unsupported-feature exception handling.
+  Release 0.7.0 adds source-local continuation candidates, per-axis comparison,
+  reviewed exact physical identity with source-bound revalidation, and exact
+  theoretical COD reconstruction from four proved engineering leg points.
+  Website and editable XLSX share these results. Unknown stations/radius stay
+  blank; generic automatic network reconstruction and desktop qualification
+  remain open. See docs/ENGINEERING_CORE_07.md for bounds and evidence.
   Release 0.6.2 adds generic, bounded weld-neck plate/filled-dot recognition:
   13 flange symbols and 26 graphical interface proposals on the real source,
   shown in the drawing inspector and shared website/Excel Source features sheet.
@@ -56,7 +62,7 @@ No milestone is complete solely because software tests pass.
 | 3 | Normal live transfers/quotas passed; malware scanning and production storage/security remain |
 | 4 | Actual supported desktop-editor save/edit/reopen round trips |
 | 5 | Material reconciliation and multiple unrelated drawing fixtures |
-| 6 | Signed XYZ chains now implemented; general graph recognition and independent station/COD proof remain |
+| 6 | Signed XYZ chains, exact reviewed continuation identity and source-bound COD from proved legs implemented; general graph recognition, automatic leg discovery and station proof remain |
 | 7 | Original 48 unique / 49 display node gates with original assets |
 | 8 | Complete native-object layout and editor qualification |
 | 9 | Scoped independent review/locked issues passed live software tests; general revision reconciliation and verified-modelling application gates remain |
