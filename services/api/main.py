@@ -1276,6 +1276,8 @@ from services.api.topology_review import install as install_topology_review
 install_topology_review(sys.modules[__name__])
 from services.api.project_catalog_review import install as install_project_catalog_review
 install_project_catalog_review(sys.modules[__name__])
+from services.api.pdf_layout import install as install_pdf_layout
+install_pdf_layout(sys.modules[__name__])
 from services.api.continuations import install as install_continuations
 install_continuations(sys.modules[__name__])
 

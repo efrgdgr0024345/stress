@@ -34,6 +34,7 @@ from real_station_workflow import exercise_real_stations
 from real_source_exceptions import exercise_real_source_exceptions
 from real_graph_numbering import exercise_real_graph_numbering
 from real_catalog_schedules import exercise_real_catalog_schedules
+from real_pdf_layout import exercise_real_pdf_layout
 
 Path("/tmp/caesar-screens").mkdir(exist_ok=True)
 
@@ -356,6 +357,7 @@ def run():
                     exercise_real_source_exceptions(page,context,base)
                     exercise_real_graph_numbering(page,context,base)
                     exercise_real_catalog_schedules(page,context,base)
+                    exercise_real_pdf_layout(page,context,base)
                     exercise_continuations(page,context,base)
                     exercise_cod(page,context,base)
                     exercise_pdf_lifecycle(page,context,base)

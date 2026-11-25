@@ -75,6 +75,7 @@ class ReleaseTests(unittest.TestCase):
                             {'physical_model':{'station_constraints':[{'id':'accepted-source-station'}]}},
                             {'nodes':[{'station_proof':{'basis':'LOCAL_ORIGIN'}}]},
                             {'project_manufacturer_reviews':[{'decision':'CONFIRM'}]},
+                            {'native_layout_review':{'engineering_values_modified':False}},
                             {'materials':[{'project_manufacturer_status':'UNCONFIRMED'}]},
                             {'materials':[{'connection_profile':{'kind':'TWO_PROCESS_ENDS_CLASSIFICATION_UNCONFIRMED'}}]}):
                 with sqlite3.connect(data/'workspace.sqlite3') as conn:

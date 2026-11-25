@@ -13,6 +13,11 @@ def digest(value):
 
 def scopes(project, processing_sources=()):
     result=[]
+    native_layout_review=None
+    if project.get('native_layout_review'):
+        from packages.pdf import accepted_plan_current
+        native_layout_review={**{k:project['native_layout_review'].get(k) for k in
+            ('input_sha256','placements_sha256','reviewed_by','reviewed_at','reason')},'current':accepted_plan_current(project)}
     partial=project.get('automation',{}).get('partial_pages',{})
     evidence=project.get('automation',{}).get('evidence_pages',[])
     def observed(sheet):
@@ -53,6 +58,7 @@ def scopes(project, processing_sources=()):
         visible=[{k:m.get(k) for k in ('item_no','description','size','quantity','quantity_value','quantity_unit','catalog_match','catalog_review_state','project_manufacturer_status')} for m in items]
         add('layout',sheet['id'],title+' · presentation',{'sheet':proof,'axis':sheet.get('axis'),
              'table':sheet.get('table'),'graphics':graphics,'schedule':visible,
+             'native_layout_review':native_layout_review,
              'notes':[a for a in project.get('annotations',[]) if a['sheet_id']==sheet['id']]},observed(sheet),layout)
     lines=list(dict.fromkeys([s['line_id'] for s in project['sheets']]+[n['line_id'] for n in project['nodes']]))
     component_state=component_audit(project);components=component_state['components']

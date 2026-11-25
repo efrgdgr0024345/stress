@@ -2,7 +2,13 @@ import { appPath } from "./paths";
 import { useEffect, useRef, useState } from "react";
 import * as pdfjs from "pdfjs-dist";
 import workerUrl from "pdfjs-dist/build/pdf.worker.min.mjs?url";
-import { ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  Loader2,
+  ZoomIn,
+  ZoomOut,
+} from "lucide-react";
 import { Dialog } from "./ui";
 import { type Artifact, type Project } from "./types";
 pdfjs.GlobalWorkerOptions.workerSrc = workerUrl;
@@ -15,9 +21,36 @@ export function PDFPreview({
   artifact: Artifact;
   onClose: () => void;
 }) {
+  return (
+    <Dialog
+      title="Generated review PDF"
+      subtitle={`Revision ${artifact.revision} · ${project.title}. Edit points and notes in Drawing workspace.`}
+      onClose={onClose}
+      wide
+    >
+      <PDFPages
+        url={appPath(
+          `api/v1/projects/${project.id}/artifacts/${artifact.id}/pdf`,
+        )}
+        totalAdditions={artifact.count}
+      />
+    </Dialog>
+  );
+}
+
+export function PDFPages({
+  url,
+  totalAdditions,
+  onPageRendered,
+}: {
+  url: string;
+  totalAdditions?: number;
+  onPageRendered?: (page: number, totalPages: number) => void;
+}) {
   const [doc, setDoc] = useState<pdfjs.PDFDocumentProxy | null>(null),
     [pageIndex, setPageIndex] = useState(1),
     [width, setWidth] = useState(700),
+    [zoom, setZoom] = useState(1),
     [count, setCount] = useState(0),
     [error, setError] = useState(""),
     [loading, setLoading] = useState(true);
@@ -27,13 +60,16 @@ export function PDFPreview({
     let alive = true;
     const controller = new AbortController();
     let task: pdfjs.PDFDocumentLoadingTask | undefined;
-    fetch(
-      appPath(`api/v1/projects/${project.id}/artifacts/${artifact.id}/pdf`),
-      {
-        credentials: "same-origin",
-        signal: controller.signal,
-      },
-    )
+    setDoc(null);
+    setPageIndex(1);
+    setZoom(1);
+    setError("");
+    setLoading(true);
+    setCount(0);
+    fetch(url, {
+      credentials: "same-origin",
+      signal: controller.signal,
+    })
       .then((response) => {
         if (!response.ok)
           throw new Error(
@@ -63,7 +99,7 @@ export function PDFPreview({
       controller.abort();
       void task?.destroy().catch(() => undefined);
     };
-  }, [artifact.id]);
+  }, [url]);
   useEffect(() => {
     if (!container.current) return;
     const observer = new ResizeObserver((entries) =>
@@ -82,13 +118,13 @@ export function PDFPreview({
       .then(async (page) => {
         if (!alive) return;
         const base = page.getViewport({ scale: 1 }),
-          scale = width / base.width,
+          scale = (width / base.width) * zoom,
           ratio = Math.min(window.devicePixelRatio || 1, 2),
           viewport = page.getViewport({ scale: scale * ratio });
         const c = canvas.current!;
         c.width = viewport.width;
         c.height = viewport.height;
-        c.style.width = `${width}px`;
+        c.style.width = `${width * zoom}px`;
         c.style.height = `${base.height * scale}px`;
         task = page.render({
           canvasContext: c.getContext("2d")!,
@@ -100,6 +136,7 @@ export function PDFPreview({
         if (alive) {
           setCount(annotations.length);
           setLoading(false);
+          onPageRendered?.(pageIndex, doc.numPages);
         }
       })
       .catch((e) => {
@@ -112,14 +149,9 @@ export function PDFPreview({
       alive = false;
       task?.cancel();
     };
-  }, [doc, pageIndex, width]);
+  }, [doc, pageIndex, width, zoom]);
   return (
-    <Dialog
-      title="Generated review PDF"
-      subtitle={`Revision ${artifact.revision} · ${project.title}. Edit points and notes in Drawing workspace.`}
-      onClose={onClose}
-      wide
-    >
+    <>
       <div
         className="pdf-preview"
         ref={container}
@@ -163,10 +195,34 @@ export function PDFPreview({
         style={{ justifyContent: "space-between", marginTop: 16 }}
       >
         <span className="fine-print">
-          {count} native annotations on this page · {artifact.count} total
-          additions
+          {count} native annotations on this page
+          {totalAdditions == null ? "" : ` · ${totalAdditions} total additions`}
         </span>
         <div className="inline-actions">
+          <button
+            className="icon-button"
+            aria-label="Zoom out native PDF"
+            disabled={loading || zoom <= 1}
+            onClick={() => setZoom((value) => Math.max(1, value - 0.5))}
+          >
+            <ZoomOut size={16} />
+          </button>
+          <button
+            className="button secondary"
+            onClick={() => setZoom(1)}
+            disabled={loading || zoom === 1}
+            aria-label="Fit native PDF width"
+          >
+            {zoom === 1 ? "Fit width" : `${Math.round(zoom * 100)}%`}
+          </button>
+          <button
+            className="icon-button"
+            aria-label="Zoom in native PDF"
+            disabled={loading || zoom >= 4}
+            onClick={() => setZoom((value) => Math.min(4, value + 0.5))}
+          >
+            <ZoomIn size={16} />
+          </button>
           <button
             className="icon-button"
             aria-label="Previous preview page"
@@ -188,6 +244,6 @@ export function PDFPreview({
           </button>
         </div>
       </div>
-    </Dialog>
+    </>
   );
 }

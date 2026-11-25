@@ -13,6 +13,7 @@ import { ContinuationControls } from "./continuations";
 import { StationControls } from "./stations";
 import { TopologyReviewControls } from "./topology-review";
 import { ProjectCatalogReviewControls } from "./project-catalog-review";
+import { NativePDFLayoutControls } from "./native-pdf-layout";
 import { Dialog } from "./ui";
 import "./results.css";
 
@@ -229,6 +230,11 @@ export function EngineeringResults({
           onInspect={(id) => onReview(id, "node")}
         />
         <ProjectCatalogReviewControls project={project} onUpdate={onUpdate} />
+        <NativePDFLayoutControls
+          project={project}
+          onUpdate={onUpdate}
+          onInspect={(id) => onReview(id, "node")}
+        />
         <div className="results-formula-bar">
           <span>fx</span>
           <span>
