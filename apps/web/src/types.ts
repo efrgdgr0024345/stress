@@ -61,7 +61,9 @@ export interface PipeNode {
   topology_state?: "ASSIGNED" | "UNASSIGNED";
   topology_confirmed?: boolean;
   source_location_confirmed?: boolean;
+  source_location_sheet_id?: string;
   source_observation?: SourceObservation;
+  source_observations?: SourceObservation[];
   source_review_reasons?: string[];
   line_id: string;
   route: string | null;

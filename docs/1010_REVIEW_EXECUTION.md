@@ -14,7 +14,7 @@ physical distance, coordinate, topology, weight or manufacturer.
 | Stage | State | Evidence / remaining work |
 | --- | --- | --- |
 | 1 Source interfaces | Implemented and checked | 47 source points; 40 component occurrences / 60 required interfaces; 55 proposed mappings and 5 unlocated COD exceptions. API, browser, numeric XLSX, tombstone/idempotency and source-proof checks pass; no route/station/CAESAR number invented. |
-| 2 Continuations | Pending | Existing matcher, source-bound terminal/rejection decision and reversible review |
+| 2 Continuations | Implemented and checked | Four source-bound references, explicit endpoint exceptions/rejections/external boundaries, reversible/stale decisions; independent XYZ/source proof and canonical-UUID merge checks; real Chromium workflow passed. |
 | 3 Dimension/station constraints | Pending | Accepted source-only coordinates/dimensions and along-route station proof |
 | 4 Graph/numbering | Pending | Explicit connected topology and deterministic numbering/history |
 | 5 Catalog/schedules | Pending | Evidenced match or N/A for every flange/valve, independent manufacturer status |

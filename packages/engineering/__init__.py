@@ -66,42 +66,64 @@ def assigned_nodes(nodes):
     return [node for node in nodes if topology_assigned(node)]
 
 
-def source_location_reviewed(node, sheets=None):
-    """Source inspection and route assignment are independent review facts."""
-    observation = node.get('source_observation') or {}
-    proof = observation.get('review_proof') or {}
-    anchor = proof.get('anchor')
-    if not isinstance(anchor, (list, tuple)) or len(anchor) != 2:
-        return False
-    if observation.get('verification') != 'reviewed' or not proof.get('reviewed_by') or not proof.get('evidence'):
-        return False
-    instance = next((i for i in node.get('instances', []) if i['sheet_id'] == proof.get('sheet_id')), None)
-    if not instance or list(instance['anchor']) != list(anchor):
-        return False
+def source_observations(node):
+    """Canonical per-source observations, retaining the primary legacy field."""
+    result=[];seen=set()
+    for observation in ([node['source_observation']] if node.get('source_observation') else [])+node.get('source_observations',[]):
+        key=(observation.get('id'),observation.get('sheet_id'))
+        if key in seen:continue
+        seen.add(key);result.append(observation)
+    return result
+
+
+def _source_observation_reviewed(node,observation,sheets=None):
+    proof=observation.get('review_proof') or {};anchor=proof.get('anchor')
+    if not isinstance(anchor,(list,tuple)) or len(anchor)!=2:return False
+    if observation.get('verification')!='reviewed' or not proof.get('reviewed_by') or not proof.get('evidence'):return False
+    if proof.get('sheet_id')!=observation.get('sheet_id'):return False
+    instance=next((i for i in node.get('instances',[]) if i['sheet_id']==proof['sheet_id']),None)
+    if not instance or list(instance['anchor'])!=list(anchor):return False
+    if observation.get('content_hash'):
+        if proof.get('content_hash')!=observation['content_hash']:return False
+    elif proof.get('source_sha256')!=observation.get('source_sha256'):return False
     if sheets is not None:
-        sheet = sheets.get(proof.get('sheet_id'))
-        if not sheet:
-            return False
+        sheet=sheets.get(proof['sheet_id'])
+        if not sheet:return False
         if proof.get('content_hash'):
-            if proof['content_hash'] != sheet.get('content_hash'):
-                return False
-        elif proof.get('source_sha256') != sheet.get('sha256'):
-            return False
+            if proof['content_hash']!=sheet.get('content_hash'):return False
+        elif proof.get('source_sha256')!=sheet.get('sha256'):return False
     return True
 
 
+def source_location_reviewed(node,sheets=None,sheet_id=None):
+    """A shared UUID retains an independent inspection on each source sheet."""
+    observations=source_observations(node)
+    if sheet_id is not None:observations=[o for o in observations if o.get('sheet_id')==sheet_id]
+    return bool(observations) and all(_source_observation_reviewed(node,o,sheets) for o in observations)
+
+
+def record_source_location_review(node,proof):
+    observations=source_observations(node)
+    targets=[o for o in observations if o.get('sheet_id')==proof['sheet_id']]
+    if not targets:raise ValueError('No source observation exists for the inspected sheet.')
+    for observation in targets:
+        if observation.get('verification')=='reviewed' and observation.get('review_proof'):
+            observation.setdefault('review_history',[]).append(deepcopy(observation['review_proof']))
+        observation.update(verification='reviewed',review_proof=deepcopy(proof))
+        observation.pop('review_invalidated_reason',None)
+    if node.get('source_observations') is not None or len(observations)>1:node['source_observations']=deepcopy(observations)
+
+
 def refresh_source_locations(project):
-    """Invalidate stale inspections without losing their evidence/history."""
-    sheets = {s['id']: s for s in project.get('sheets', [])}
+    """Invalidate only changed source inspections, retaining every prior proof."""
+    sheets={s['id']:s for s in project.get('sheets',[])}
     for node in project['nodes']:
-        observation = node.get('source_observation')
-        if not observation or observation.get('verification') != 'reviewed':
-            continue
-        if not source_location_reviewed(node, sheets):
-            if observation.get('review_proof'):
-                observation.setdefault('review_history', []).append(deepcopy(observation['review_proof']))
-            observation['verification'] = 'proposed'
-            observation['review_invalidated_reason'] = 'SOURCE_CONTENT_OR_ANCHOR_CHANGED'
+        observations=source_observations(node)
+        for observation in observations:
+            if observation.get('verification')=='reviewed' and not _source_observation_reviewed(node,observation,sheets):
+                if observation.get('review_proof'):observation.setdefault('review_history',[]).append(deepcopy(observation['review_proof']))
+                observation['verification']='proposed';observation['review_invalidated_reason']='SOURCE_CONTENT_OR_ANCHOR_CHANGED'
+        if node.get('source_observations') is not None or len(observations)>1:node['source_observations']=deepcopy(observations)
 
 
 def renumber(nodes):

@@ -244,12 +244,17 @@ export function DrawingEditor({
     Math.max(14, Math.min(sheet.height - 14, y)),
   ];
   const current = project.nodes.find((n) => n.id === selected);
-  const sourceProof = draft?.source_observation?.review_proof;
+  const activeObservation =
+    draft?.source_observations?.find((o) => o.sheet_id === sheet.id) ||
+    (draft?.source_observation?.sheet_id === sheet.id
+      ? draft.source_observation
+      : undefined);
+  const sourceProof = activeObservation?.review_proof;
   const inspectedInstance = draft?.instances.find(
     (instance) => instance.sheet_id === sourceProof?.sheet_id,
   );
   const sourceLocationCurrent =
-    draft?.source_observation?.verification === "reviewed" &&
+    activeObservation?.verification === "reviewed" &&
     !!sourceProof &&
     !!inspectedInstance &&
     sourceProof.anchor.every(
@@ -489,6 +494,7 @@ export function DrawingEditor({
       topology_state: draft.topology_state ?? "ASSIGNED",
       topology_confirmed: draft.topology_confirmed ?? false,
       source_location_confirmed: draft.source_location_confirmed ?? false,
+      source_location_sheet_id: sheet.id,
       kind: draft.kind,
       dimension: draft.dimension,
       evidence: draft.evidence,
@@ -1392,19 +1398,17 @@ export function DrawingEditor({
                 </span>
               </div>
             ))}
-            {draft.source_observation && (
+            {activeObservation && (
               <div className="field-section">
                 <span className="eyebrow">SOURCE LOCATION</span>
                 <p className="fine-print">
                   Observed feature:{" "}
-                  {label(draft.source_observation.kind || draft.kind)}.
-                  {draft.source_observation.material_item_no != null &&
-                    ` Source item ${draft.source_observation.material_item_no}.`}
+                  {label(activeObservation.kind || draft.kind)}.
+                  {activeObservation.material_item_no != null &&
+                    ` Source item ${activeObservation.material_item_no}.`}
                 </p>
-                {draft.source_observation.evidence && (
-                  <p className="fine-print">
-                    {draft.source_observation.evidence}
-                  </p>
+                {activeObservation.evidence && (
+                  <p className="fine-print">{activeObservation.evidence}</p>
                 )}
                 <div className="notice amber">
                   <span>
@@ -1413,18 +1417,10 @@ export function DrawingEditor({
                       : "This source location needs inspection against the original drawing."}
                   </span>
                 </div>
-                {draft.source_observation.reason_codes
-                  ?.filter((reason) => !current?.reasons.includes(reason))
-                  .map((reason) => (
-                    <div className="reason" key={reason}>
-                      <CircleHelp size={13} />
-                      <span>{label(reason)}</span>
-                    </div>
-                  ))}
-                {draft.source_observation.review_invalidated_reason && (
+                {activeObservation.review_invalidated_reason && (
                   <p className="fine-print">
                     Previous review invalidated:{" "}
-                    {label(draft.source_observation.review_invalidated_reason)}.
+                    {label(activeObservation.review_invalidated_reason)}.
                   </p>
                 )}
                 <label className="checkbox-field">

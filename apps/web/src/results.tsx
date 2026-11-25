@@ -85,6 +85,8 @@ export function EngineeringResults({
   const [continuationSelection, setContinuationSelection] = useState<
     string | null
   >(null);
+  const [continuationSourceSelection, setContinuationSourceSelection] =
+    useState<string | null>(null);
   const firstMain = project.nodes
     .filter((n) => n.route === "main")
     .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))[0];
@@ -113,8 +115,17 @@ export function EngineeringResults({
         ),
     );
   const rowAction = (row: Record<string, Cell>) => {
-    if (selected === "Continuations" && row.continuation_id)
+    if (selected === "Continuations" && row.continuation_id) {
+      setContinuationSourceSelection(null);
       setContinuationSelection(String(row.continuation_id));
+    }
+    if (
+      selected === "Continuation sources" &&
+      (row.source_candidate_id || row.id)
+    ) {
+      setContinuationSelection(null);
+      setContinuationSourceSelection(String(row.source_candidate_id || row.id));
+    }
     if (selected === "Component ports" && row.component_id)
       setModelSelection({ type: "component", id: String(row.component_id) });
     if (selected === "Bend COD" && row.component_id)
@@ -202,7 +213,11 @@ export function EngineeringResults({
           project={project}
           onUpdate={onUpdate}
           selection={continuationSelection}
-          onClear={() => setContinuationSelection(null)}
+          sourceSelection={continuationSourceSelection}
+          onClear={() => {
+            setContinuationSelection(null);
+            setContinuationSourceSelection(null);
+          }}
         />
         <div className="results-formula-bar">
           <span>fx</span>
@@ -211,7 +226,9 @@ export function EngineeringResults({
               ? "Select an element row to enter its verified geometry and properties."
               : selected === "Nodes"
                 ? "Select a point to inspect or edit its drawing evidence."
-                : "Unknown values stay N/A here and blank in numeric Excel cells."}
+                : selected === "Continuation sources"
+                  ? "Select a printed source reference to review its boundary or matching exception."
+                  : "Unknown values stay N/A here and blank in numeric Excel cells."}
           </span>
           <label>
             <Search size={14} />
@@ -246,6 +263,7 @@ export function EngineeringResults({
                       "Component ports",
                       "Dimensions",
                       "Continuations",
+                      "Continuation sources",
                       "Bend COD",
                     ].includes(selected)
                       ? 0

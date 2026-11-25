@@ -417,6 +417,9 @@ def compose(api,job,progress):
         "route_selections":p.get("automation",{}).get("route_selections",[]),
         "evidence_pages":evidence_pages,
         "coverage":{"pages":len(pages),"material_rows":len(new_materials),"proposed_points":len(proposals),"graphical_features":len(features),"accepted_points":sum(n.get("verification")=="reviewed" and n.get('station_mm') is not None for n in working["nodes"]),"ocr_pages":sum(bool(page.get('ocr_used')) for page in pages.values())}}
+    if working.get('source_review',{}).get('prepared'):
+        from packages.physical.source_review import prepare_source_points
+        prepare_source_points(working)
     if len(working["materials"])!=len(p["materials"]):working["materials_reviewed"]=False
     if old_layout!=[(s.get("axis"),s.get("table")) for s in working["sheets"]]:working["layout_reviewed"]=False
     with api.db() as conn:

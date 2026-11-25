@@ -23,7 +23,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.exceptions import RequestValidationError
 from pydantic import BaseModel, ConfigDict, Field
 
-from packages.engineering import compute_reasons, dimension_mm, renumber, validate, topology_assigned, source_location_reviewed, refresh_source_locations
+from packages.engineering import compute_reasons, dimension_mm, renumber, validate, topology_assigned, source_location_reviewed, refresh_source_locations, source_observations, record_source_location_review
 from packages.pdf import create_sample, export_bundle
 from services.api import diagnostics as diag
 
@@ -748,8 +748,10 @@ def patch_sheet(
                     422,
                     "Place the annotation inside the page with at least 50 pt clearance.",
                 )
+        identity_changed=sheet.get('printed_id')!=body.printed_id or sheet.get('line_id')!=body.line_id
         sheet.update(body.model_dump(exclude={"version","confirm_identity"}))
         if body.confirm_identity:sheet["identity_verified"]=True
+        elif identity_changed:sheet['identity_verified']=False
         p["layout_reviewed"] = False
 
     return change(
@@ -772,6 +774,7 @@ class NodeInput(Version):
     topology_state: Literal['ASSIGNED','UNASSIGNED'] = 'ASSIGNED'
     topology_confirmed: bool = False
     source_location_confirmed: bool = False
+    source_location_sheet_id: str | None = Field(default=None,max_length=100)
     kind: str = Field(
         pattern=r"^(endpoint|flange|tee|elbow|support|valve|instrument|continuation)$"
     )
@@ -791,8 +794,12 @@ def apply_node(project, body, node_id=None, actor=None):
     if node_id and not node:
         raise HTTPException(404, "Physical point not found.")
     sheets = {s['id']: s for s in project['sheets']}
-    observation = node.get('source_observation') if node else None
-    location_preview = {**node, 'instances': [i.model_dump() for i in body.instances]} if node else None
+    observations = source_observations(node) if node else []
+    observation = next((o for o in observations if o.get('sheet_id')==body.source_location_sheet_id),None) if body.source_location_sheet_id else (observations[0] if observations else None)
+    location_preview = deepcopy(node) if node else None
+    if location_preview is not None:location_preview['instances']=[i.model_dump() for i in body.instances]
+    if observations and set(i.sheet_id for i in body.instances)-{i['sheet_id'] for i in node['instances']}:
+        raise HTTPException(422,'Use continuation review with independent source proof to add another depiction of this source point.')
     topology_state = body.topology_state
     if node and not topology_assigned(node) and 'topology_state' not in body.model_fields_set and not body.topology_confirmed:
         topology_state = 'UNASSIGNED'
@@ -804,7 +811,7 @@ def apply_node(project, body, node_id=None, actor=None):
             raise HTTPException(422, 'An assigned model point needs an explicit route and physical sequence order.')
         if node and not topology_assigned(node) and not body.topology_confirmed:
             raise HTTPException(422, 'Explicit topology confirmation is required before promoting an unassigned source point into the ordered model.')
-        if observation and not body.source_location_confirmed and not source_location_reviewed(location_preview, sheets):
+        if observations and not body.source_location_confirmed and not source_location_reviewed(location_preview, sheets):
             raise HTTPException(422, 'Review the actual source location separately before accepting this source point into an ordered route.')
     source_review_proof = None
     if body.source_location_confirmed:
@@ -821,6 +828,10 @@ def apply_node(project, body, node_id=None, actor=None):
         source_review_proof = {'sheet_id': sheet['id'], 'source_sha256': sheet['sha256'],
             'content_hash': sheet.get('content_hash'), 'anchor': list(instance.anchor),
             'evidence': body.evidence, 'reviewed_by': actor['id'], 'reviewed_at': now()}
+    if source_review_proof and topology_state=='ASSIGNED' and node and not topology_assigned(node):
+        record_source_location_review(location_preview,source_review_proof)
+        if not source_location_reviewed(location_preview,sheets):
+            raise HTTPException(422,'Review every source depiction independently before promoting this shared point into an ordered route.')
     if bool(body.source_feature_id)!=bool(body.source_feature_role):
         raise HTTPException(422,'A source feature needs both its identity and interface role.')
     if body.source_feature_id:
@@ -903,11 +914,7 @@ def apply_node(project, body, node_id=None, actor=None):
         target.setdefault('review_label', 'P-'+target['id'][:8])
     if source_review_proof:
         target = node or project['nodes'][-1]
-        observation = target['source_observation']
-        if observation.get('verification') == 'reviewed' and observation.get('review_proof'):
-            observation.setdefault('review_history', []).append(deepcopy(observation['review_proof']))
-        observation.update(verification='reviewed', review_proof=source_review_proof)
-        observation.pop('review_invalidated_reason', None)
+        record_source_location_review(target,source_review_proof)
     if topology_state == 'ASSIGNED' and body.route != "main":
         for member in project["nodes"]:
             if member["line_id"] == body.line_id and member["route"] == body.route:

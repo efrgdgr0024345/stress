@@ -3270,5 +3270,453 @@
     "engineering_approved": false,
     "capture": "DigitalOcean page extraction, 23 November 2026",
     "purpose": "Reproducible source-specific review proposals; never original/golden acceptance"
+  },
+  "continuation_source_facts": {
+    "source_sha256": "7b97d44bef3d544c4c98ed0667c29607ce58fa4a401dd2463f66010a9615bb59",
+    "profile_version": 1,
+    "scope": "STAGE_2_VISUAL_SOURCE_FACTS_ONLY",
+    "verification": "PROPOSED_UNACCEPTED_SOURCE_TRANSCRIPTION",
+    "drawing_coordinate_units": "PDF points, graphic only",
+    "engineering_constraints_created": false,
+    "physical_identity_accepted": false,
+    "approvals_created": false,
+    "notes": [
+      "Transcribed by inspecting original source renders, not trusting OCR numeric substitutions.",
+      "Printed sheet identifiers are explicit title-block facts, not inferred from PDF page position.",
+      "All source text below remains reviewable and unaccepted; no engineering station, geometry or connection is verified.",
+      "Nominal size is the explicit NPS8 main-line source/BOM context; equipment reference is not a full piping-line ID.",
+      "I inspected continuation boundaries only; no general Stage3 dimension chain was audited."
+    ],
+    "sheets": [
+      {
+        "page_index": 0,
+        "source_content_hash": [
+          "ba9acdb2d9ce59f50a9a73357658f6f7f06f2609550b945c5d12f350677181cb"
+        ],
+        "printed_sheet_text": "1 OF 2",
+        "printed_id_proposal": "SHEET 1 OF 2",
+        "printed_sheet_number": 1,
+        "printed_sheet_total": 2,
+        "printed_sheet_label_bbox": [
+          2437,
+          1668,
+          2467,
+          1681
+        ],
+        "printed_sheet_value_bbox": [
+          2453,
+          1685,
+          2506,
+          1705
+        ],
+        "title_block_bbox": [
+          2160,
+          1668,
+          2514,
+          1707
+        ],
+        "line_id_text": "8\"-PG-JE3LN2-1010-FUTURE",
+        "normalized_line_id_proposal": "8-PG-JE3LN2-1010-FUTURE",
+        "line_id_label_bbox": [
+          2164,
+          1668,
+          2203,
+          1682
+        ],
+        "line_id_value_bbox": [
+          2165,
+          1686,
+          2402,
+          1705
+        ],
+        "verification": "VISUALLY_TRANSCRIBED_NOT_ENGINEER_ACCEPTED",
+        "ocr_warning": "The sheet fraction was OCRed as Lo 2 / 2o 2; the visible original explicitly reads 1 OF 2."
+      },
+      {
+        "page_index": 1,
+        "source_content_hash": [
+          "9cf7204dacc60ba7e8aac60bf13fea3baa157df7421c089ee92fd88ac47974c3"
+        ],
+        "printed_sheet_text": "2 OF 2",
+        "printed_id_proposal": "SHEET 2 OF 2",
+        "printed_sheet_number": 2,
+        "printed_sheet_total": 2,
+        "printed_sheet_label_bbox": [
+          2437,
+          1668,
+          2467,
+          1681
+        ],
+        "printed_sheet_value_bbox": [
+          2453,
+          1685,
+          2506,
+          1705
+        ],
+        "title_block_bbox": [
+          2160,
+          1668,
+          2514,
+          1707
+        ],
+        "line_id_text": "8\"-PG-JE3LN2-1010-FUTURE",
+        "normalized_line_id_proposal": "8-PG-JE3LN2-1010-FUTURE",
+        "line_id_label_bbox": [
+          2164,
+          1668,
+          2203,
+          1682
+        ],
+        "line_id_value_bbox": [
+          2165,
+          1686,
+          2402,
+          1705
+        ],
+        "verification": "VISUALLY_TRANSCRIBED_NOT_ENGINEER_ACCEPTED",
+        "ocr_warning": "The sheet fraction was OCRed as Lo 2 / 2o 2; the visible original explicitly reads 2 OF 2."
+      }
+    ],
+    "continuations": [
+      {
+        "source_observation_id": "4daa57ea-60f0-5d09-b0fb-84d813007eac",
+        "source_label": "S1-CONT-1093",
+        "page_index": 0,
+        "source_sha256": "7b97d44bef3d544c4c98ed0667c29607ce58fa4a401dd2463f66010a9615bb59",
+        "source_content_hash": [
+          "ba9acdb2d9ce59f50a9a73357658f6f7f06f2609550b945c5d12f350677181cb"
+        ],
+        "printed_sheet_identity_proposal": "SHEET 1 OF 2",
+        "source_full_line_id_text": "8\"-PG-JE3LN2-1010-FUTURE",
+        "normalized_source_full_line_id_proposal": "8-PG-JE3LN2-1010-FUTURE",
+        "graphic_anchor": [
+          881.9932861328125,
+          413.39013671875
+        ],
+        "anchor_bbox": [
+          869.9932861328125,
+          401.39013671875,
+          893.9932861328125,
+          425.39013671875
+        ],
+        "source_reference_bbox": [
+          704,
+          408,
+          860,
+          441
+        ],
+        "coordinate_text_bbox": [
+          704,
+          442,
+          860,
+          494
+        ],
+        "source_coordinate_texts": {
+          "X": "E 136'11.3/4\"",
+          "Y": "S 314'11.3/4\"",
+          "Z": "EL +77'6.1/16\""
+        },
+        "source_coordinate_syntax": "ISO_FT_IN_DOT_FRACTION",
+        "coordinate_text_accepted": false,
+        "nominal_pipe_size_proposal": {
+          "nps_inches_text": "8",
+          "source_unit": "NPS inches",
+          "source_text": "8",
+          "source_material_item_no": "4",
+          "source_material_size_bbox": [
+            2203,
+            393,
+            2214,
+            408
+          ],
+          "source_line_prefix_text": "8\"",
+          "basis": "Explicit SIZE 8 in the associated main-line flange/valve source row and the 8-inch main-line identity/callouts.",
+          "accepted": false
+        },
+        "target_reference_proposal": {
+          "kind": "EXTERNAL_PIPING_LINE",
+          "source_text": "8\"-PG-JE3LN2-1093",
+          "normalized_full_line_id": "8-PG-JE3LN2-1093",
+          "printed_sheet": null
+        },
+        "interface_status": "OWN_SHEET_FLANGE_FACE_SOURCE_PROPOSAL",
+        "physical_identity_accepted": false,
+        "topology_accepted": false,
+        "station_mm": null,
+        "route": null,
+        "order": null,
+        "evidence": "Original title block, continuation text, signed E/S/EL block and source leader/face were visually inspected. Printed values are transcriptions only; no engineering constraints or approvals are created.",
+        "shares_flange_face_source_proposal": {
+          "page_index": 0,
+          "anchor": [
+            881.9932861328125,
+            413.39013671875
+          ]
+        }
+      },
+      {
+        "source_observation_id": "18360da6-e810-5b71-9ef8-76a102b94336",
+        "source_label": "S1-CONT-SHEET2",
+        "page_index": 0,
+        "source_sha256": "7b97d44bef3d544c4c98ed0667c29607ce58fa4a401dd2463f66010a9615bb59",
+        "source_content_hash": [
+          "ba9acdb2d9ce59f50a9a73357658f6f7f06f2609550b945c5d12f350677181cb"
+        ],
+        "printed_sheet_identity_proposal": "SHEET 1 OF 2",
+        "source_full_line_id_text": "8\"-PG-JE3LN2-1010-FUTURE",
+        "normalized_source_full_line_id_proposal": "8-PG-JE3LN2-1010-FUTURE",
+        "graphic_anchor": [
+          855.6368408203125,
+          1337.54638671875
+        ],
+        "anchor_bbox": [
+          843,
+          1325,
+          868,
+          1350
+        ],
+        "source_reference_bbox": [
+          680,
+          1370,
+          775,
+          1415
+        ],
+        "coordinate_text_bbox": [
+          550,
+          1348,
+          690,
+          1397
+        ],
+        "source_coordinate_texts": {
+          "X": "E 135'4.1/4\"",
+          "Y": "S 312'10.3/8\"",
+          "Z": "EL +37'10.3/4\""
+        },
+        "source_coordinate_syntax": "ISO_FT_IN_DOT_FRACTION",
+        "coordinate_text_accepted": false,
+        "nominal_pipe_size_proposal": {
+          "nps_inches_text": "8",
+          "source_unit": "NPS inches",
+          "source_text": "8",
+          "source_material_item_no": "6",
+          "source_material_size_bbox": [
+            2203,
+            577,
+            2214,
+            592
+          ],
+          "source_line_prefix_text": "8\"",
+          "basis": "Explicit SIZE 8 in the associated main-line flange/valve source row and the 8-inch main-line identity/callouts.",
+          "accepted": false
+        },
+        "target_reference_proposal": {
+          "kind": "SAME_LINE_PRINTED_SHEET",
+          "source_text": "CONT. ON SHEET 2",
+          "normalized_full_line_id": "8-PG-JE3LN2-1010-FUTURE",
+          "printed_sheet": 2
+        },
+        "interface_status": "PHYSICAL_INTERFACE_BOUNDARY_UNCONFIRMED",
+        "physical_identity_accepted": false,
+        "topology_accepted": false,
+        "station_mm": null,
+        "route": null,
+        "order": null,
+        "evidence": "Original title block, continuation text, signed E/S/EL block and source leader/face were visually inspected. Printed values are transcriptions only; no engineering constraints or approvals are created.",
+        "interface_warning": "Independent coordinate leader ends on the dashed valve/flange depiction; the recognized flange face is adjacent but not at this exact source anchor. No coincidence or physical separation is inferred from page coordinates."
+      },
+      {
+        "source_observation_id": "0e11b051-da0a-5c6f-b5b1-d57e2aed480d",
+        "source_label": "S2-CONT-SHEET1",
+        "page_index": 1,
+        "source_sha256": "7b97d44bef3d544c4c98ed0667c29607ce58fa4a401dd2463f66010a9615bb59",
+        "source_content_hash": [
+          "9cf7204dacc60ba7e8aac60bf13fea3baa157df7421c089ee92fd88ac47974c3"
+        ],
+        "printed_sheet_identity_proposal": "SHEET 2 OF 2",
+        "source_full_line_id_text": "8\"-PG-JE3LN2-1010-FUTURE",
+        "normalized_source_full_line_id_proposal": "8-PG-JE3LN2-1010-FUTURE",
+        "graphic_anchor": [
+          1632.0028076171875,
+          415.0672607421875
+        ],
+        "anchor_bbox": [
+          1620,
+          403,
+          1644,
+          427
+        ],
+        "source_reference_bbox": [
+          1678,
+          372,
+          1780,
+          414
+        ],
+        "coordinate_text_bbox": [
+          1415,
+          247,
+          1541,
+          303
+        ],
+        "source_coordinate_texts": {
+          "X": "E 135'4.1/4\"",
+          "Y": "S 312'10.3/8\"",
+          "Z": "EL +37'10.3/4\""
+        },
+        "source_coordinate_syntax": "ISO_FT_IN_DOT_FRACTION",
+        "coordinate_text_accepted": false,
+        "nominal_pipe_size_proposal": {
+          "nps_inches_text": "8",
+          "source_unit": "NPS inches",
+          "source_text": "8",
+          "source_material_item_no": "5",
+          "source_material_size_bbox": [
+            2203,
+            424,
+            2214,
+            439
+          ],
+          "source_line_prefix_text": "8\"",
+          "basis": "Explicit SIZE 8 in the associated main-line flange/valve source row and the 8-inch main-line identity/callouts.",
+          "accepted": false
+        },
+        "target_reference_proposal": {
+          "kind": "SAME_LINE_PRINTED_SHEET",
+          "source_text": "CONT. FROM SHEET 1",
+          "normalized_full_line_id": "8-PG-JE3LN2-1010-FUTURE",
+          "printed_sheet": 1
+        },
+        "interface_status": "PHYSICAL_INTERFACE_BOUNDARY_UNCONFIRMED",
+        "physical_identity_accepted": false,
+        "topology_accepted": false,
+        "station_mm": null,
+        "route": null,
+        "order": null,
+        "evidence": "Original title block, continuation text, signed E/S/EL block and source leader/face were visually inspected. Printed values are transcriptions only; no engineering constraints or approvals are created.",
+        "interface_warning": "Independent coordinate leader ends on the dashed valve/flange depiction; the recognized flange face is adjacent but not at this exact source anchor. No coincidence or physical separation is inferred from page coordinates.",
+        "ocr_disagreement": "Live OCR read S 312'10.3/78\"; the original visible fraction is S 312'10.3/8\"."
+      },
+      {
+        "source_observation_id": "782d9a12-0f60-5ce5-9bcd-b8823e841141",
+        "source_label": "S2-CONT-EDUCTOR",
+        "page_index": 1,
+        "source_sha256": "7b97d44bef3d544c4c98ed0667c29607ce58fa4a401dd2463f66010a9615bb59",
+        "source_content_hash": [
+          "9cf7204dacc60ba7e8aac60bf13fea3baa157df7421c089ee92fd88ac47974c3"
+        ],
+        "printed_sheet_identity_proposal": "SHEET 2 OF 2",
+        "source_full_line_id_text": "8\"-PG-JE3LN2-1010-FUTURE",
+        "normalized_source_full_line_id_proposal": "8-PG-JE3LN2-1010-FUTURE",
+        "graphic_anchor": [
+          514.6471862792969,
+          1060.7775268554688
+        ],
+        "anchor_bbox": [
+          502.6471862792969,
+          1048.7775268554688,
+          526.6471862792969,
+          1072.7775268554688
+        ],
+        "source_reference_bbox": [
+          273,
+          1061,
+          655,
+          1079
+        ],
+        "coordinate_text_bbox": [
+          273,
+          1078,
+          420,
+          1131
+        ],
+        "source_coordinate_texts": {
+          "X": "E 111'10.5/8\"",
+          "Y": "S 312'10.3/8\"",
+          "Z": "EL +37'10.3/4\""
+        },
+        "source_coordinate_syntax": "ISO_FT_IN_DOT_FRACTION",
+        "coordinate_text_accepted": false,
+        "nominal_pipe_size_proposal": {
+          "nps_inches_text": "8",
+          "source_unit": "NPS inches",
+          "source_text": "8",
+          "source_material_item_no": "5",
+          "source_material_size_bbox": [
+            2203,
+            424,
+            2214,
+            439
+          ],
+          "source_line_prefix_text": "8\"",
+          "basis": "Explicit SIZE 8 in the associated main-line flange/valve source row and the 8-inch main-line identity/callouts.",
+          "accepted": false
+        },
+        "target_reference_proposal": {
+          "kind": "EXTERNAL_EQUIPMENT",
+          "source_text": "ZBA-7680_EDUCTOR",
+          "normalized_full_line_id": null,
+          "equipment_reference": "ZBA-7680_EDUCTOR",
+          "printed_sheet": null
+        },
+        "interface_status": "OWN_SHEET_FLANGE_FACE_SOURCE_PROPOSAL",
+        "physical_identity_accepted": false,
+        "topology_accepted": false,
+        "station_mm": null,
+        "route": null,
+        "order": null,
+        "evidence": "Original title block, continuation text, signed E/S/EL block and source leader/face were visually inspected. Printed values are transcriptions only; no engineering constraints or approvals are created.",
+        "shares_flange_face_source_proposal": {
+          "page_index": 1,
+          "anchor": [
+            514.6471862792969,
+            1060.7775268554688
+          ]
+        }
+      }
+    ],
+    "intersheet_source_comparison": {
+      "left_source_observation_id": "18360da6-e810-5b71-9ef8-76a102b94336",
+      "right_source_observation_id": "0e11b051-da0a-5c6f-b5b1-d57e2aed480d",
+      "reference_text_reciprocal": true,
+      "explicit_printed_sheet_identities": [
+        1,
+        2
+      ],
+      "normalized_source_full_line_ids_equal": true,
+      "nominal_size_source_texts_equal": true,
+      "literal_coordinate_texts_equal": {
+        "X": true,
+        "Y": true,
+        "Z": true
+      },
+      "printed_values_really_match": true,
+      "comparison_status": "SOURCE_TEXT_EXACT_MATCH_PROPOSAL_ONLY",
+      "physical_interface_boundary_confirmed": false,
+      "topology_confirmed": false,
+      "physical_identity_accepted": false,
+      "accepted_delta_mm": {
+        "X": null,
+        "Y": null,
+        "Z": null
+      },
+      "evidence": "Both original source blocks visibly print E 135'4.1/4\", S 312'10.3/8\", EL +37'10.3/4\". Exact printed-text equality does not prove that the two unresolved dashed interface depictions represent one physical station."
+    },
+    "external_scope_exceptions": [
+      {
+        "source_label": "S1-CONT-1093",
+        "code": "EXTERNAL_LINE_PEER_DRAWING_NOT_SUPPLIED",
+        "source_target_text": "8\"-PG-JE3LN2-1093",
+        "normalized_target_line_id": "8-PG-JE3LN2-1093",
+        "source_current_line_id": "8-PG-JE3LN2-1010-FUTURE",
+        "reason": "The original CONT label explicitly names a different full piping line ending 1093. Its peer drawing/source coordinates/topology are not supplied in this two-sheet 1010 project. Preserve a boundary endpoint exception; do not match it to another 1010 continuation or silently connect lines."
+      },
+      {
+        "source_label": "S2-CONT-EDUCTOR",
+        "code": "EXTERNAL_EQUIPMENT_CONNECTION_UNCONFIRMED",
+        "source_target_text": "ZBA-7680_EDUCTOR",
+        "normalized_target_line_id": null,
+        "source_current_line_id": "8-PG-JE3LN2-1010-FUTURE",
+        "reason": "The original CONT label names equipment ZBA-7680_EDUCTOR rather than a full piping-line ID. No equipment/nozzle peer drawing, physical interface proof or independent target coordinates are supplied. Preserve an explicit equipment-boundary exception; do not manufacture a reciprocal point."
+      }
+    ]
   }
 }

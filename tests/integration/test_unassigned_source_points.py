@@ -87,6 +87,7 @@ class UnassignedEngineeringTests(unittest.TestCase):
     def test_source_inspection_is_invalidated_by_content_changes_without_losing_its_proof(self):
         source = self.source_point()
         source.update(origin='source-review-profile', source_observation={
+            'sheet_id':'sheet-a','content_hash':['original-stream'],'source_sha256':'original-file',
             'verification':'reviewed','review_proof':{'sheet_id':'sheet-a','anchor':[10,20],
                 'content_hash':['original-stream'],'source_sha256':'original-file',
                 'reviewed_by':'rule-test-only','evidence':'Generic source-state contract, not 1010 evidence.'}})

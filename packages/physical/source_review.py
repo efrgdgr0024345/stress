@@ -32,10 +32,17 @@ def incoming_materials(project,observations):
 def _profile_materials(project,profile,matching):
     """Actual retained source observations are unreviewed, never catalog facts."""
     tombstones=set(project.get('automation_tombstones',{}).get('material_ids',[]))
+    bindings=project.setdefault('source_review',{}).setdefault('material_bindings',{})
     for observed in profile.get('material_observations',[]):
         sheet=matching.get(observed['page_index'])
         if not sheet:continue
-        existing=next((m for m in project['materials'] if m['sheet_id']==sheet['id'] and m['item_no']==observed['item_no']),None)
+        key=sheet['id']+':'+observed['item_no']
+        if bindings.get(key) in tombstones:continue
+        if any(i.get('material_id') in tombstones and i.get('sheet_id')==sheet['id'] and
+            (i.get('evidence_id')==observed.get('evidence_id') or i.get('bbox')==observed.get('source_bbox'))
+            for i in project.get('automation',{}).get('issues',[])):continue
+        existing=next((m for m in project['materials'] if m['id']==bindings.get(key)),None)
+        existing=existing or next((m for m in project['materials'] if m['sheet_id']==sheet['id'] and m['item_no']==observed['item_no']),None)
         if not existing:
             uid=identity(project['id'],'source-review-material',sheet['sha256'],observed['page_index'],observed['item_no'])
             if uid in tombstones:continue
@@ -44,6 +51,7 @@ def _profile_materials(project,profile,matching):
         elif existing.get('verification')!='reviewed' and existing.get('quantity_unit')=='unresolved' and observed.get('source_review_notes'):
             existing.setdefault('source_review_history',[]).append({k:deepcopy(existing.get(k)) for k in ('size','quantity','quantity_raw','quantity_value','quantity_unit')})
             existing.update({k:deepcopy(observed[k]) for k in ('size','quantity','quantity_raw','quantity_value','quantity_unit','source_review_notes')})
+        bindings[key]=existing['id']
         if observed['page_index']==1 and observed['item_no']=='11' and existing['family']=='other':
             existing['connection_profile']={'kind':'TWO_PROCESS_ENDS_CLASSIFICATION_UNCONFIRMED',
                 'source_sha256':sheet['sha256'],'evidence':'The actual PV-7680 inline source body has two visible process interfaces. Valve/instrument classification remains unproved; both end requirements are proposals.'}
@@ -61,6 +69,59 @@ def _profile_flanges(project,profile,matching):
             **{k:deepcopy(association[k]) for k in ('bbox','flange_face','opposite_pipe_dot')},
             'source_paths':association['source_path_ids'],'sheet_id':sheet['id'],'source_sha256':sheet['sha256'],
             'source_content_hash':sheet.get('content_hash'),'verification':'proposed'})
+
+
+def _profile_references(project,profile,matching,observation_nodes):
+    """Explicit source transcriptions replace incomplete OCR candidates only.
+
+    They never accept an engineering coordinate or identify two depictions as
+    one physical point. Each no-proof match receives a visible endpoint reason.
+    """
+    from packages.engineering.continuations import candidate_matches,create_source_exception
+    facts=profile.get('continuation_source_facts',{})
+    for observed in facts.get('sheets',[]):
+        sheet=matching.get(observed['page_index'])
+        if not sheet:continue
+        sheet['source_identity_proposal']=deepcopy(observed)
+        if not sheet.get('printed_id'):sheet['printed_id']=observed['printed_id_proposal']
+        sheet.setdefault('identity_verified',False)
+    automation=project.setdefault('automation',{})
+    curated=[]
+    for observed in facts.get('continuations',[]):
+        sheet=matching.get(observed['page_index'])
+        point=observation_nodes.get(observed['source_observation_id'])
+        if not sheet:continue
+        target=observed['target_reference_proposal']
+        source_text=next((o['callout_tag'] for o in profile['observations'] if o['id']==observed['source_observation_id']),target['source_text'])
+        candidate={'id':identity(sheet['id'],'source-profile-continuation',observed['source_observation_id']),
+            'sheet_id':sheet['id'],'line_id':sheet['line_id'],'source_sha256':sheet['sha256'],
+            'source_content_hash':sheet.get('content_hash'),'source_text':source_text,
+            'bbox':deepcopy(observed['source_reference_bbox']),'anchor':deepcopy(observed['graphic_anchor']),
+            'point_id':point['id'] if point else None,'source_label':observed['source_label'],
+            'source_observation_id':observed['source_observation_id'],
+            'target_printed_sheet':target.get('printed_sheet'),'target_line_proposal':target.get('normalized_full_line_id'),
+            'target_kind':target['kind'],'verification':'proposed','origin':'source-review-profile',
+            'printed_coordinate_proposals':deepcopy(observed['source_coordinate_texts']),
+            'source_format':observed['source_coordinate_syntax'],'coordinate_text_bbox':deepcopy(observed['coordinate_text_bbox']),
+            'nominal_size_proposal':deepcopy(observed['nominal_pipe_size_proposal']),
+            'source_evidence':observed['evidence'],'interface_status':observed['interface_status']}
+        curated.append(candidate)
+    if not curated:return
+    old=automation.get('continuation_candidates',[])
+    replaced=[c for c in old if c['source_sha256']==profile['source_sha256'] and c.get('origin')!='source-review-profile']
+    if replaced:
+        archive=automation.setdefault('retained_raw_continuation_candidates',[])
+        ids={c['id'] for c in archive};archive.extend(c for c in replaced if c['id'] not in ids)
+    automation['continuation_candidates']=[c for c in old if c['source_sha256']!=profile['source_sha256']]+curated
+    automation['continuation_pairs']=candidate_matches(automation['continuation_candidates'],project['sheets'])
+    for candidate in curated:
+        if candidate['target_kind']=='EXTERNAL_PIPING_LINE':
+            reason='MISSING_PEER_IN_PACK';evidence='The source names another full piping line, 1093. No peer source/independent coordinates/interface proof is supplied in this drawing pack; an internal match is rejected and an external endpoint exception retained.'
+        elif candidate['target_kind']=='EXTERNAL_EQUIPMENT':
+            reason='EQUIPMENT_BOUNDARY';evidence='The source names equipment EDUCTOR rather than a peer piping drawing. No nozzle/peer interface evidence is supplied; a reciprocal piping match is rejected and an equipment endpoint exception retained.'
+        else:
+            reason='ACCEPTED_XYZ_REQUIRED';evidence='The reciprocal printed references and source coordinate text are review proposals only. Independent XYZ, sheet identity and physical interface/topology are not accepted; the current identity match is rejected pending engineering review. No connection was invented.'
+        create_source_exception(project,candidate,reason,evidence)
 
 
 def prepare_source_points(project):
@@ -108,6 +169,10 @@ def prepare_source_points(project):
         uid=identity(project['id'],'source-review-point',sheet['sha256'],observation['id'])
         if uid in nodes:
             observation_nodes[observation['id']]=nodes[uid];continue
+        if uid in project.get('point_aliases',{}):
+            target=nodes.get(project['point_aliases'][uid])
+            if target:observation_nodes[observation['id']]=target
+            continue
         if uid in tombstones:continue
         reference=(observation.get('source_feature_id'),observation.get('source_feature_role'))
         existing=next((n for n in project['nodes'] if reference[0] and (
@@ -170,6 +235,7 @@ def prepare_source_points(project):
                 'sheet_id':sheet['id'],'source_sha256':sheet['sha256'],'material_id':material['id'] if material else None,
                 'color':'blue','severity':'critical','status':'REVIEW_REQUIRED','message':entry['evidence']})
         project['source_review']['exceptions']=exceptions
+        _profile_references(project,profile,matching,observation_nodes)
     prepare(project)
     from packages.engineering import refresh_source_locations
     refresh_source_locations(project)
