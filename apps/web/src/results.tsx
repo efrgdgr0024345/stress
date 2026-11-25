@@ -11,6 +11,7 @@ import { appPath } from "./paths";
 import { PhysicalModelControls, type ModelSelection } from "./physical-model";
 import { ContinuationControls } from "./continuations";
 import { StationControls } from "./stations";
+import { TopologyReviewControls } from "./topology-review";
 import { Dialog } from "./ui";
 import "./results.css";
 
@@ -221,6 +222,11 @@ export function EngineeringResults({
           }}
         />
         <StationControls project={project} onUpdate={onUpdate} />
+        <TopologyReviewControls
+          project={project}
+          onUpdate={onUpdate}
+          onInspect={(id) => onReview(id, "node")}
+        />
         <div className="results-formula-bar">
           <span>fx</span>
           <span>

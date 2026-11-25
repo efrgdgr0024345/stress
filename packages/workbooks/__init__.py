@@ -22,6 +22,8 @@ def readiness(project):
     nodes=project["nodes"];elements=project.get("analysis_model",{}).get("elements",[])
     from packages.physical.stations import solve_stations
     station_issues=solve_stations(project)['issues']
+    from packages.engineering.graph_review import audit_graph
+    graph_review=audit_graph(project)
     from packages.automation.recognize import identity
     expected={identity(project["id"],e["from"],e["to"]) for e in topology(nodes)["edges"]}
     entered={e['id']:e for e in elements}
@@ -29,12 +31,14 @@ def readiness(project):
     gates=[{"gate":"CAESAR import profile","passed":False,"detail":"The documented CAESAR II 15.1 straight-pipe candidate profile still needs an actual application import round trip."},
            {"gate":"Engineering approval","passed":False,"detail":"This application currently issues engineering-review drafts; lead approval of verified stress input is required."},
            {"gate":"Physical points","passed":bool(nodes),"detail":f"{len(nodes)} model points."},
+           {"gate":"Explicit connected graph","passed":bool(nodes) and graph_review['summary']['connected_assigned'] and not graph_review['structural_issues'],"detail":"Every point needs an accepted route; branches must share the existing main-run tee on the same full line. Source changes require topology review."},
            {"gate":"Station evidence","passed":bool(nodes) and not station_issues and all(n.get("station_mm") is not None and n.get("evidence") and n.get("verification")!="proposed" for n in nodes),"detail":"Every required point needs source-current along-centreline evidence and an accepted station datum."},
            {"gate":"Element geometry and properties","passed":bool(expected) and complete==len(expected),"detail":f"{complete} of {len(expected)} active elements have required geometry and properties. Signed XYZ values must come from engineering evidence, never drawing pixels."}]
     return {"status":"ENGINEERING_REVIEW_ONLY","direct_import_ready":False,"format":FORMAT,"gates":gates}
 
 
 def tables(project):
+    issues=validate(project)
     nodes=project["nodes"];by_id={n["id"]:n for n in nodes};sheets={s["id"]:s for s in project["sheets"]}
     def table(name,columns,rows):return {"name":name,"columns":[{"key":key,"label":label,"kind":kind} for key,label,kind in columns],"rows":rows}
     result=[]
@@ -52,6 +56,16 @@ def tables(project):
             "source_dimension":n.get("dimension_input",""),"evidence":n.get("evidence",""),
             "sheets":", ".join(str(sheets[v["sheet_id"]]["page_index"]+1) for v in n["instances"] if v["sheet_id"] in sheets),"id":n["id"],"proposed_station":n.get("proposed_station_mm"),"proposed_dimension":n.get("proposed_dimension_input",""),"review_label":n.get("review_label"),"topology_state":n.get("topology_state","ASSIGNED")})
     result.append(table("Nodes",[("number","Node","number"),("line","Full line ID","text"),("route","Route","text"),("kind","Type","text"),("station","Accepted station (mm)","decimal"),("x","X / East (mm)","decimal"),("y","Y / North (mm)","decimal"),("z","Z / Elevation (mm)","decimal"),("verification","Review state","text"),("reasons","Reasons","text"),("source_dimension","Accepted dimension","text"),("evidence","Evidence","text"),("sheets","Source pages","text"),("id","Physical point ID","text"),("proposed_station","Source station proposal (mm)","decimal"),("proposed_dimension","Proposed source dimension","text"),("review_label","Temporary review point","text"),("topology_state","Topology status","text")],rows))
+    for row in rows:
+        node=by_id[row['id']]
+        row.update(route_order=node.get('order'),takeoff_id=node.get('takeoff_id'),
+            topology_evidence=node.get('topology_proof',{}).get('evidence'),
+            topology_review_status='UNASSIGNED' if node.get('topology_state')=='UNASSIGNED' else
+                'SOURCE OR TOPOLOGY REVIEW REQUIRED' if {'TOPOLOGY_REVIEW_STALE','SOURCE_LOCATION_REVIEW_REQUIRED','POINT_SOURCE_LINE_MISMATCH'} & set(node.get('reasons',[])) else
+                'REVIEWED ROUTE' if node.get('topology_proof') else 'ENTERED ORDER')
+    result[-1]['columns'] += [{'key':key,'label':title,'kind':kind} for key,title,kind in (
+        ('route_order','Route sequence order','number'),('takeoff_id','Shared main tee physical point ID','text'),
+        ('topology_review_status','Route review state','text'),('topology_evidence','Route review evidence','text'))]
     entered={e["id"]:e for e in project.get("analysis_model",{}).get("elements",[])}
     from packages.automation.recognize import identity
     edges=topology(nodes)["edges"]
@@ -84,6 +98,8 @@ def tables(project):
     result.extend(physical_tables(project))
     from packages.physical.station_tables import tables as station_tables
     result.extend(station_tables(project))
+    from packages.engineering.graph_tables import tables as graph_tables
+    result.extend(graph_tables(project))
     features=[]
     for feature in project.get('automation',{}).get('feature_proposals',[]):
         sheet=sheets.get(feature['sheet_id'])
@@ -99,7 +115,6 @@ def tables(project):
         ("pdf_y","PDF Y (pt, graphic only)","decimal"),("station","Physical station (mm)","decimal"),
         ("verification","Review state","text"),("profile","Recognition convention","text"),
         ("evidence","Evidence","text"),("sha","Original SHA-256","text"),("id","Source feature ID","text")],features))
-    issues=validate(project)
     result.append(table("Exceptions",[("severity","Severity","text"),("code","Code","text"),("node","Node","number"),("message","Review action","text"),("material_id","Material ID","text"),("sheet_id","Sheet ID","text"),("id","Exception ID","text"),("requirement_id","Physical requirement ID","text"),("port","Interface","text"),("point_id","Physical point ID","text"),("source_sha256","Source PDF SHA256","text"),("evidence","Source evidence","text"),("color","Review colour","text"),("status","Status","text")],[{k:i.get(k) for k in ('severity','code','node','message','material_id','sheet_id','id','requirement_id','port','point_id','source_sha256','evidence','color','status')} for i in issues]))
     result.append(table("Sources",[("filename","Source file","text"),("page","PDF page","number"),("printed","Printed sheet ID","text"),("line","Full line ID","text"),("sha","SHA-256","text"),("format","Content type","text"),("id","Sheet ID","text")],[{"filename":s["filename"],"page":s["page_index"]+1,"printed":s["printed_id"],"line":s["line_id"],"sha":s["sha256"],"format":s["format"],"id":s["id"]} for s in project["sheets"]]))
     return result

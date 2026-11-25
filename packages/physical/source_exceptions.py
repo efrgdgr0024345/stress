@@ -155,6 +155,7 @@ def _continuation_disposition(project,label):
     from packages.engineering.continuations import source_review_states,independent_source_coordinates
     state=next((s for s in source_review_states(project).values() if s.get('source_label')==label),None)
     if not state or not state.get('current') or state.get('stale') or state.get('verification')!='reviewed':return None
+    state={k:deepcopy(v) for k,v in state.items() if k!='point_label'}
     if state['status'] in ('ENDPOINT_EXCEPTION','REJECTED_MATCH'):
         return {'method':'CURRENT_REVIEWED_PEER_REJECTION_RETAINED_SEPARATE','state':deepcopy(state),
                 'physical_identity_accepted':False,'engineering_approved':False}

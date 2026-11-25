@@ -58,8 +58,10 @@ def scopes(project, processing_sources=()):
     from packages.physical.source_exceptions import source_exception_report
     source_exception_state=source_exception_report(project)
     sheet_lines={s['id']:s['line_id'] for s in project['sheets']}
+    from packages.engineering.graph_review import audit_graph
+    graph_state=audit_graph(project)
     for line in lines:
-        nodes=[{k:n.get(k) for k in ('id','line_id','route','order','takeoff_id','kind','station_mm','coordinates_mm','dimension_input','evidence','verification','component_ports','topology_state','source_observation','source_observations','source_review_reasons','source_exception_reasons','station_proof','manual_station_basis')}
+        nodes=[{k:n.get(k) for k in ('id','line_id','route','order','takeoff_id','kind','station_mm','coordinates_mm','dimension_input','evidence','verification','component_ports','topology_state','source_observation','source_observations','source_review_reasons','source_exception_reasons','station_proof','manual_station_basis','topology_proof')}
                for n in project['nodes'] if n['line_id']==line]
         point_ids={n['id'] for n in nodes}
         component_ids={c['id'] for c in components if c['line_id']==line}
@@ -68,6 +70,7 @@ def scopes(project, processing_sources=()):
         station_checks=[i for i in station_state['issues'] if point_ids.intersection(i.get('point_ids',[])) or i['code']=='STATION_SOLVER_LIMIT']
         source_checks=[i for i in source_exception_state['all'] if sheet_lines.get(i.get('sheet_id'))==line or point_ids.intersection(i.get('point_ids',[]))]
         source_exception_ids={i['id'] for i in source_checks}
+        graph_checks=[i for i in graph_state['issues'] if i.get('line_id')==line or point_ids.intersection(i.get('point_ids',[])) or i['code']=='GRAPH_POINT_LIMIT']
         missing=[]
         if not nodes:missing.append('NO_PHYSICAL_NODES')
         if any(n['station_mm'] is None or not n.get('evidence') for n in nodes):missing.append('PHYSICAL_STATIONS_UNVERIFIED')
@@ -76,6 +79,7 @@ def scopes(project, processing_sources=()):
         missing.extend(i['code'] for i in dimensional_checks)
         missing.extend(i['code'] for i in station_checks)
         missing.extend(i['code'] for i in source_checks if i['active'])
+        missing.extend(i['code'] for i in graph_checks)
         from packages.engineering.continuations import audit as continuation_audit
         continuation_checks=[i for i in continuation_audit(project) if i['line_id']==line]
         missing.extend(i['code'] for i in continuation_checks)
@@ -93,6 +97,7 @@ def scopes(project, processing_sources=()):
               'station_checks':station_checks,
               'source_exceptions':source_checks,
               'source_exception_reviews':[r for r in source_exception_state['reviews'] if r['exception_id'] in source_exception_ids],
+              'topology_checks':graph_checks,
               'model_frame':{k:project.get('analysis_model',{}).get(k) for k in ('local_origin_confirmed','origin_point_id','vertical_axis','piping_code_id','ambient_temperature_c')}},
               all(observed(s) for s in project['sheets'] if s['line_id']==line),missing)
     return result

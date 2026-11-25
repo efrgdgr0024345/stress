@@ -12,6 +12,18 @@ from tests.unit import test_source_exceptions as fixture
 
 
 class SourceExceptionScopeTests(unittest.TestCase):
+    def test_resolved_reference_review_does_not_bind_its_display_number(self):
+        p=self.model()
+        from packages.engineering.continuations import make_source_review
+        candidate=next(c for c in p['automation']['continuation_candidates'] if c.get('source_label')=='S2-CONT-SHEET1')
+        p.setdefault('continuation_source_reviews',[]).append(make_source_review(
+            p,candidate,'REJECT_MATCH','ACCEPTED_XYZ_REQUIRED',fixture.EVIDENCE,fixture.REVIEWER,fixture.WHEN))
+        original=self.geometry(p)
+        row=next(r for r in original['payload']['source_exceptions'] if r['code']=='CONTINUATION_INTERFACE_REVIEW_REQUIRED')
+        self.assertFalse(row['active'])
+        next(n for n in p['nodes'] if n['id']==candidate['point_id'])['number']=170
+        self.assertEqual(self.geometry(p)['sha256'],original['sha256'])
+
     def model(self):
         return fixture.SourceExceptionTests().model()
 

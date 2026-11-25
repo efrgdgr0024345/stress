@@ -59,7 +59,8 @@ def topology_assigned(node):
     """
     return (node.get('topology_state', 'ASSIGNED') == 'ASSIGNED'
             and bool(re.fullmatch(r'main|branch-\d{2}', node.get('route') or ''))
-            and isinstance(node.get('order'), int) and not isinstance(node.get('order'), bool))
+            and isinstance(node.get('order'), int) and not isinstance(node.get('order'), bool)
+            and 0 <= node['order'] <= 100000)
 
 
 def assigned_nodes(nodes):
@@ -126,86 +127,72 @@ def refresh_source_locations(project):
         if node.get('source_observations') is not None or len(observations)>1:node['source_observations']=deepcopy(observations)
 
 
-def renumber(nodes):
-    """Route order is explicitly engineer-entered; sheets never set numbering order."""
-    eligible = assigned_nodes(nodes)
-    lines = list(dict.fromkeys(n["line_id"] for n in eligible))
-    mapping, previous_max = [], 0
-    for line_index, line in enumerate(lines):
-        group = [n for n in eligible if n["line_id"] == line]
-        main = sorted(
-            [n for n in group if n["route"] == "main"],
-            key=lambda n: (n["order"], n["id"]),
-        )
-        if not main:
-            raise ValueError(
-                f"{line}: a main route is required before branch numbering."
-            )
-        start = 10 if line_index == 0 else next_boundary(previous_max, 1000)
-        assigned = []
-        for i, node in enumerate(main):
-            assigned.append((node, start + i * 10))
-        branch_base = next_boundary(assigned[-1][1], 100)
-        by_id = {n["id"]: n for n in main}
+def renumber(nodes, primary_line=None):
+    """Deterministic labels only; route/source geometry and identities are retained.
 
+    Explicit but incomplete legacy branches may still receive display numbers.
+    Their missing takeoff remains a typed graph exception, never an invented edge.
+    Invalid identity/order ambiguity fails before any number is changed.
+    """
+    ids=[n['id'] for n in nodes]
+    if len(ids)!=len(set(ids)):raise ValueError('Duplicate physical point IDs prevent unambiguous numbering.')
+    eligible=assigned_nodes(nodes)
+    lines=sorted({n['line_id'] for n in eligible},key=lambda line:(line!=primary_line,line))
+    planned={};previous_max=0
+    for line_index,line in enumerate(lines):
+        group=[n for n in eligible if n['line_id']==line]
+        routes={route:sorted((n for n in group if n['route']==route),key=lambda n:(n['order'],n['id']))
+                for route in {n['route'] for n in group}}
+        for route,members in routes.items():
+            if len({n['order'] for n in members})!=len(members):
+                raise ValueError(f'{line} / {route}: duplicate route order must be resolved before numbering.')
+        main=routes.get('main',[])
+        if not main:raise ValueError(f'{line}: a main route is required before branch numbering.')
+        start=10 if line_index==0 else next_boundary(previous_max,1000)
+        for index,node in enumerate(main):planned[node['id']]=start+index*10
+        branch_base=next_boundary(planned[main[-1]['id']],100)
+        by_id={n['id']:n for n in main}
         def branch_key(route):
-            members = [n for n in group if n["route"] == route]
-            takeoff = by_id.get(members[0].get("takeoff_id"))
-            return (takeoff["order"] if takeoff else 100001, route)
-
-        branches = sorted(
-            set(n["route"] for n in group if n["route"] != "main"), key=branch_key
-        )
-        for branch in branches:
-            points = sorted(
-                [n for n in group if n["route"] == branch],
-                key=lambda n: (n["order"], n["id"]),
-            )
-            for i, node in enumerate(points):
-                assigned.append((node, branch_base + i * 10))
-            branch_base = next_boundary(assigned[-1][1], 100)
-        for node, number in assigned:
-            mapping.append(
-                {"point_id": node["id"], "old": node.get("number"), "new": number}
-            )
-            node["number"] = number
-        previous_max = max(number for _, number in assigned)
-    for node in nodes:
-        if not topology_assigned(node):
-            mapping.append({'point_id': node['id'], 'old': node.get('number'), 'new': None})
-            node['number'] = None
+            takeoffs={n.get('takeoff_id') for n in routes[route]}
+            takeoff=by_id.get(next(iter(takeoffs))) if len(takeoffs)==1 else None
+            valid=takeoff and takeoff['kind']=='tee'
+            return (takeoff['order'] if valid else 100001,route)
+        for branch in sorted((r for r in routes if r!='main'),key=branch_key):
+            for index,node in enumerate(routes[branch]):planned[node['id']]=branch_base+index*10
+            branch_base=next_boundary(planned[routes[branch][-1]['id']],100)
+        previous_max=max(planned[n['id']] for n in group)
+    mapping=[{'point_id':n['id'],'old':n.get('number'),'new':planned.get(n['id'])}
+             for n in sorted(nodes,key=lambda n:n['id'])]
+    for node in nodes:node['number']=planned.get(node['id'])
     return mapping
 
 
-def topology(nodes):
-    """Build directed route edges from explicit model order and shared main-run tees."""
-    edges = []
-    eligible = assigned_nodes(nodes)
-    eligible_ids = {node['id'] for node in eligible}
-    for line, route in sorted(set((n["line_id"], n["route"]) for n in eligible)):
-        ordered = sorted(
-            [n for n in eligible if n["line_id"] == line and n["route"] == route],
-            key=lambda n: (n["order"], n["id"]),
-        )
-        if route != "main" and ordered and ordered[0].get("takeoff_id") in eligible_ids:
-            edges.append(
-                {
-                    "from": ordered[0]["takeoff_id"],
-                    "to": ordered[0]["id"],
-                    "line_id": line,
-                    "route": route,
-                }
-            )
-        edges += [
-            {"from": a["id"], "to": b["id"], "line_id": line, "route": route}
-            for a, b in zip(ordered, ordered[1:])
-        ]
-    return {
-        "points": [n["id"] for n in nodes],
-        "unassigned_points": [n['id'] for n in nodes if not topology_assigned(n)],
-        "edges": edges,
-        "source": "engineer-entered route order; not inferred from drawing pixels",
-    }
+def topology(nodes, primary_line=None):
+    """Edges follow explicit unique order; only a common main tee joins a branch."""
+    from collections import Counter
+    edges=[];eligible=assigned_nodes(nodes);ids=[n['id'] for n in nodes]
+    # A duplicate identity cannot be interpreted as two different vertices.
+    duplicates={uid for uid,count in Counter(ids).items() if count>1}
+    eligible=[n for n in eligible if n['id'] not in duplicates]
+    by_id={n['id']:n for n in eligible}
+    groups={key:sorted((n for n in eligible if (n['line_id'],n['route'])==key),
+                       key=lambda n:(n['order'],n['id']))
+            for key in {(n['line_id'],n['route']) for n in eligible}}
+    ambiguous={key for key,members in groups.items() if len({n['order'] for n in members})!=len(members)}
+    for line,route in sorted(groups,key=lambda key:(key[0]!=primary_line,key[0],key[1]!='main',key[1])):
+        ordered=groups[(line,route)]
+        if (line,route) in ambiguous:continue
+        if route!='main':
+            takeoffs={n.get('takeoff_id') for n in ordered}
+            tee=by_id.get(next(iter(takeoffs))) if len(takeoffs)==1 else None
+            if (tee and tee['line_id']==line and tee['route']=='main' and tee['kind']=='tee'
+                    and (line,'main') not in ambiguous):
+                edges.append({'from':tee['id'],'to':ordered[0]['id'],'line_id':line,'route':route})
+        edges.extend({'from':a['id'],'to':b['id'],'line_id':line,'route':route}
+                     for a,b in zip(ordered,ordered[1:]))
+    return {'points':[n['id'] for n in nodes],
+        'unassigned_points':[n['id'] for n in nodes if not topology_assigned(n)],
+        'edges':edges,'source':'engineer-entered route order; not inferred from drawing pixels'}
 
 
 def compute_reasons(nodes):
@@ -231,6 +218,7 @@ def compute_reasons(nodes):
         reasons.extend(r for r in node.get('station_review_reasons',[]) if r not in reasons)
         reasons.extend(r for r in node.get('source_review_reasons',[]) if r not in reasons)
         reasons.extend(r for r in node.get('source_exception_reasons',[]) if r not in reasons)
+        reasons.extend(r for r in node.get('topology_review_reasons',[]) if r not in reasons)
         node["reasons"] = reasons
         node["support_gap_mm"] = None
     eligible = assigned_nodes(nodes)
@@ -274,6 +262,8 @@ def validate(project):
     issues.extend(apply_station_reasons(project))
     from packages.physical.source_exceptions import refresh_source_exceptions
     issues.extend(refresh_source_exceptions(project))
+    from packages.engineering.graph_review import apply_topology_reasons
+    issues.extend(apply_topology_reasons(project))
     compute_reasons(project['nodes'])
     orders = {}
     for node in assigned_nodes(project["nodes"]):

@@ -154,7 +154,8 @@ class ApiTests(unittest.TestCase):
         updated = r.json()
         self.assertEqual(Decimal(updated["nodes"][0]["station_mm"]), Decimal("53.975"))
         self.assertEqual(updated["nodes"][0]["dimension_input"], "2 1/8 in")
-        self.assertEqual(updated["nodes"][0]["reasons"], [])
+        # An accepted route station alone does not prove signed XYZ.
+        self.assertEqual(updated["nodes"][0]["reasons"], ["GRAPH_XYZ_UNPROVED"])
         self.assertEqual(
             self.client.post(
                 f"/api/v1/projects/{p['id']}/nodes", json=self.node(p)

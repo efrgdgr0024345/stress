@@ -413,6 +413,8 @@ def change(project_id, version, actor, action, update):
         apply_station_reasons(project)
         from packages.physical.source_exceptions import refresh_source_exceptions
         refresh_source_exceptions(project)
+        from packages.engineering.graph_review import apply_topology_reasons
+        apply_topology_reasons(project)
         project['contributors'] = sorted(set(project.get('contributors', [])) | {actor['id']})
         compute_reasons(project["nodes"])
         project["version"] += 1
@@ -797,6 +799,8 @@ def apply_node(project, body, node_id=None, actor=None):
     )
     if node_id and not node:
         raise HTTPException(404, "Physical point not found.")
+    previous_topology={k:deepcopy(node.get(k)) for k in ('line_id','route','order','takeoff_id','kind','topology_state')} if node else None
+    if previous_topology is not None:previous_topology['topology_state']=node.get('topology_state','ASSIGNED')
     sheets = {s['id']: s for s in project['sheets']}
     observations = source_observations(node) if node else []
     observation = next((o for o in observations if o.get('sheet_id')==body.source_location_sheet_id),None) if body.source_location_sheet_id else (observations[0] if observations else None)
@@ -921,12 +925,22 @@ def apply_node(project, body, node_id=None, actor=None):
     if source_review_proof:
         target = node or project['nodes'][-1]
         record_source_location_review(target,source_review_proof)
+    target=node or project['nodes'][-1]
+    current_topology={k:deepcopy(target.get(k)) for k in ('line_id','route','order','takeoff_id','kind','topology_state')}
+    if actor and topology_assigned(target) and (previous_topology!=current_topology or body.topology_confirmed):
+        current_sheets={s['id']:s for s in project['sheets']}
+        if not source_observations(target) or source_location_reviewed(target,current_sheets):
+            from packages.engineering.graph_review import record_point_topology_review
+            record_point_topology_review(project,[target['id']],
+                body.evidence.strip() if len(body.evidence.strip())>=10 else 'User explicitly entered this route and order; physical dimensions remain unknown.',
+                actor['id'],now())
     if topology_state == 'ASSIGNED' and body.route != "main":
         for member in project["nodes"]:
             if member["line_id"] == body.line_id and member["route"] == body.route:
                 member["takeoff_id"] = body.takeoff_id
     try:
-        project["numbering_map"] = renumber(project["nodes"])
+        from packages.engineering.graph_review import renumber_project
+        renumber_project(project,'Updated explicit physical point order / numbering',actor['id'] if actor else None,now())
     except ValueError as exc:
         raise HTTPException(422, str(exc))
     project["layout_reviewed"] = False
@@ -966,7 +980,8 @@ def delete_node(project_id: str, node_id: str, version: int, actor=Depends(edito
             )
         p["nodes"] = [n for n in p["nodes"] if n["id"] != node_id]
         try:
-            p["numbering_map"] = renumber(p["nodes"])
+            from packages.engineering.graph_review import renumber_project
+            renumber_project(p,'Deleted physical point and renumbered retained identities',actor['id'],now())
         except ValueError as exc:
             raise HTTPException(422, str(exc))
         p["layout_reviewed"] = False
@@ -978,7 +993,8 @@ def delete_node(project_id: str, node_id: str, version: int, actor=Depends(edito
 def renumber_nodes(project_id: str, body: Version, actor=Depends(editor)):
     def update(p):
         try:
-            p["numbering_map"] = renumber(p["nodes"])
+            from packages.engineering.graph_review import renumber_project
+            renumber_project(p,'Explicit deterministic route renumber',actor['id'],now())
         except ValueError as exc:
             raise HTTPException(422, str(exc))
 
@@ -1244,6 +1260,8 @@ from services.api.source_exceptions import install as install_source_exceptions
 install_source_exceptions(sys.modules[__name__])
 from services.api.stations import install as install_stations
 install_stations(sys.modules[__name__])
+from services.api.topology_review import install as install_topology_review
+install_topology_review(sys.modules[__name__])
 from services.api.continuations import install as install_continuations
 install_continuations(sys.modules[__name__])
 

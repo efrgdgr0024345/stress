@@ -193,7 +193,7 @@ def install(api):
                 working=deepcopy(p)
                 inherited={cid for previous in links if previous['status']=='ACCEPTED' and previous.get('point_id') in (body.left_point_id,body.right_point_id)
                            for cid in previous.get('source_candidate_ids',[])}
-                try:keep=merge_identity(working,body.left_point_id,body.right_point_id)
+                try:keep=merge_identity(working,body.left_point_id,body.right_point_id,reviewer=actor['id'],reviewed_at=api.now())
                 except ValueError as error:raise HTTPException(409,str(error)) from None
                 solution=solve(working)
                 canonical=next((c for c in solution['coordinates'] if c['point_id']==keep['id']),None)

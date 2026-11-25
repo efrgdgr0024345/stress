@@ -17,5 +17,7 @@ def install(api):
         def update(p):
             try:prepare_source_points(p)
             except ValueError as error:raise HTTPException(409,str(error)) from None
+            from packages.engineering.graph_review import renumber_project
+            renumber_project(p,'Registered complete provisional source-point numbering map',actor['id'],api.now())
             p['layout_reviewed']=False
         return api.change(project_id,body.version,actor,'Prepared source-located provisional physical interfaces; no topology, station or engineering approval inferred',update)

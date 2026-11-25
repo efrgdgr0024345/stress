@@ -23,6 +23,8 @@ def assess(project):
     if any(n.get('source_observation') and not source_location_reviewed(n,{s['id']:s for s in project['sheets']}) or n.get('source_review_reasons') for n in nodes):
         missing.append('Review current source anchors and resolve typed source-interface reasons before native export.')
     if not edges:missing.append('A reviewed connected pipe route is required.')
+    from packages.engineering.graph_review import audit_graph
+    if audit_graph(project)['structural_issues']:missing.append('Resolve invalid, unassigned or stale source topology before native export.')
     from packages.physical.source_exceptions import source_exception_report
     if source_exception_report(project)['active']:missing.append('Resolve the current source-linked physical-interface and dimension-witness exceptions before native export.')
     from packages.engineering.continuations import audit as continuation_audit

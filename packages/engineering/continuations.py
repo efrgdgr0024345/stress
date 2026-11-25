@@ -271,7 +271,7 @@ def _source_observations(node):
     return deepcopy(source_observations(node))
 
 
-def merge_identity(project,left_id,right_id):
+def merge_identity(project,left_id,right_id,reviewer=None,reviewed_at=None):
     """Called only after reviewed exact-source/size/topology checks by the API.
 
     Never discard engineering records or opposite ends of a component.
@@ -301,6 +301,15 @@ def merge_identity(project,left_id,right_id):
             raise ValueError('Those depictions have other route points between them. A loop/revisit requires an explicit loop model; its topology cannot be collapsed.')
     if keep.get('station_mm') is not None and old.get('station_mm') is not None and Decimal(keep['station_mm'])!=Decimal(old['station_mm']):
         raise ValueError('Accepted route stations disagree. Resolve their source evidence before merging identities.')
+    if keep.get('station_mm') is not None and old.get('station_mm') is not None:
+        from packages.physical.stations import apply_station_reasons,station_comparison_basis
+        checked=deepcopy(project)
+        apply_station_reasons(checked)
+        checked_nodes={n['id']:n for n in checked['nodes']}
+        first_basis=station_comparison_basis(checked_nodes[keep['id']])
+        second_basis=station_comparison_basis(checked_nodes[old['id']])
+        if not first_basis or first_basis!=second_basis:
+            raise ValueError('Accepted station datums are different or stale. Review their source basis before merging identities.')
     if {v['sheet_id'] for v in keep['instances']} & {v['sheet_id'] for v in old['instances']}:raise ValueError('Those point depictions share a sheet and cannot be silently merged.')
     kinds={keep['kind'],old['kind']}
     if len(kinds)>1 and not kinds<={'endpoint','continuation','flange','valve','instrument'}:
@@ -316,8 +325,15 @@ def merge_identity(project,left_id,right_id):
     if not keep.get('source_observation') and old.get('source_observation'):keep['source_observation']=deepcopy(old['source_observation'])
     keep['source_review_reasons']=sorted(set(keep.get('source_review_reasons',[]))|set(old.get('source_review_reasons',[])))
     if keep.get('station_mm') is None and old.get('station_mm') is not None:
+        if keep.get('station_proof'):
+            keep.setdefault('station_proof_history',[]).append(deepcopy(keep['station_proof']))
         for key in ('station_mm','dimension_input','evidence','verification'):
             if key in old:keep[key]=deepcopy(old[key])
+        for key in ('station_proof','manual_station_basis'):
+            if key in old:keep[key]=deepcopy(old[key])
+            else:keep.pop(key,None)
+        for key in ('station_proof_history','station_history'):
+            if old.get(key):keep.setdefault(key,[]).extend(deepcopy(old[key]))
     if keep['kind'] in ('endpoint','continuation') and old['kind'] not in ('endpoint','continuation'):keep['kind']=old['kind']
     if keep['kind']=='endpoint':keep['kind']='continuation'
     refs=[]
@@ -331,7 +347,7 @@ def merge_identity(project,left_id,right_id):
     for c in project.get('physical_model',{}).get('components',[]):
         for port in c['ports'].values():
             if port and port['point_id']==right_id:port['point_id']=left_id
-    for constraint in project.get('physical_model',{}).get('constraints',[]):
+    for constraint in project.get('physical_model',{}).get('constraints',[])+project.get('physical_model',{}).get('station_constraints',[]):
         for key in ('from_point_id','to_point_id'):
             if constraint.get(key)==right_id:constraint[key]=left_id
     model=project.get('analysis_model',{})
@@ -364,7 +380,8 @@ def merge_identity(project,left_id,right_id):
         if (link['status']=='ACCEPTED' and link.get('point_id') in (left_id,right_id)) or len(pair)==1:
             link['status']='SUPERSEDED'
     if any(i['code']=='COORDINATE_MISMATCH' for i in solve(project)['issues']):raise ValueError('Merging introduces conflicting coordinate constraints; source values were not accepted.')
-    project['numbering_map']=renumber(project['nodes'])
+    from packages.engineering.graph_review import renumber_project
+    renumber_project(project,'Unified reviewed continuation identity and retained every physical numbering alias',reviewer,reviewed_at)
     return keep
 
 
