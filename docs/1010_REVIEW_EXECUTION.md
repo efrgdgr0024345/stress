@@ -21,8 +21,8 @@ physical distance, coordinate, topology, weight or manufacturer.
 | 5 Catalog/schedules | Implemented and checked | 57 focused/compatibility cases plus scope regression and real Chromium/XLSX pass. Exact supplied 627-row workbook is pinned for CI. Six material rows / 18 flange-valve occurrences receive current exact reference or explicit source-bound N/A; actual RTJ/API/type/bore gaps and absent valve data keep all real weights/lengths N/A. PV stays a separate classification exception. Manufacturer confirmation has an independent explicit history/gate; every flange schedule always shows W_flange/W_half/W_full, with safe bare/assembly scope and unknowns. |
 | 6 Editable PDF | Implemented and checked | All 47 located points have safe graphical placements, routed leaders and source-linked warnings. 285 editable native objects include five unlocated COD warnings, PV, schedules and separate force/moment triads. Acceptance/replanning/export retain identical placements. Three rendering regressions, two API cases and actual Chromium edit-every-object/two-reopen checks pass; raw/decoded original streams and original annotation appearances/flags/vertices/blend mode remain unchanged. |
 | 7 Exports | Supported subset checked; BEND requirement unmet | 40 focused tests and the real-source browser pass. One revision supplies PDF/XLSX/all CSV tables, source/constraint/review JSON, exceptions, manifests and numbering history. Independent fixed-field decoding checks documented straight/rigid/B31J-tee/basic-restraint candidates. BEND remains blocked pending verified vendor field-layout and COD/native geometry contracts; actual application import qualification is unperformed. This is an explicit unmet original requirement, not a completed bend implementation. |
-| 8 CI/live proof | Pending | Current real-source tests, live reviewed project, measured evidence |
-| 9 Handoff | Pending | Engineer workflow and reproducible source preparation |
+| 8 CI/live proof | Review demo qualified | Release 0.8.0 is live. GitHub passed all 385 tests and both complete browser mounts. Exact PDF processed through two DigitalOcean callbacks, with 47 provisional points, 60 interfaces and 26 matching website/XLSX/CSV tables. All 298 native additions survived edits/two reopens while source streams and original annotations stayed unchanged. The retained live project is revision 14; no real engineering decisions were invented. See LIVE_VALIDATION.md and evidence/engineering-core-080-live.json. Missing original/golden gate remains separate. |
+| 9 Handoff | Delivered for review demo; full engineering/native completion open | HOW_TO_FINISH_1010.md follows the actual UI. The real project is retained, 42 lessons are live, logs are correlated and the GitHub hosting ZIP checksum is verified. Remaining engineering data, BEND/native application qualification and older-release rollback incompatibility are explicit in the live record. |
 
 An automatically/source-profile-located point has an immutable UUID, source
 anchor and temporary review label. Its route, order, CAESAR number and station
@@ -43,3 +43,28 @@ classification and shared support facts cannot be waived with an explanation.
 An ambiguous printed length can be mapped only to a separately accepted,
 source-current along-centreline constraint preserving its exact source value.
 Geometry signoffs bind the active exceptions and their review records.
+
+## Reproduce the software qualification
+
+Use a fresh clone with Node.js 24, Python 3.12 and Docker. The authoritative
+Ubuntu setup and browser dependency commands are in
+[the CI workflow](../.github/workflows/ci.yml). The source PDF and reference
+workbook are already pinned in the clone; no live credentials are required.
+
+```bash
+git clone https://github.com/efrgdgr0024345/stress.git
+cd stress
+python3.12 -m venv .venv
+.venv/bin/python -m pip install -r requirements-dev.txt
+npm ci
+npm run build
+docker build -f worker.Dockerfile -t caesar-worker:local .
+.venv/bin/python -m unittest discover -s tests -v
+.venv/bin/python -m playwright install --with-deps chromium
+export CHROMIUM_PATH="$(.venv/bin/python -c 'from playwright.sync_api import sync_playwright; p=sync_playwright().start(); print(p.chromium.executable_path); p.stop()')"
+.venv/bin/python tests/e2e/smoke.py
+CAESAR_TEST_MOUNT=/stress .venv/bin/python tests/e2e/smoke.py
+```
+
+These commands create disposable local software-validation projects. They do
+not approve the real engineering facts or operate on the retained live project.

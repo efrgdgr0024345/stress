@@ -1,4 +1,63 @@
-# Live demo validation and clean workspace
+# Live validation and deployment history
+
+## Current: 0.8.0 — 25 November 2026
+
+The installed engineering-review demo is **0.8.0**, verified at
+**05:30 UTC on 25 November 2026**. Open the retained
+[real 1010 review project](https://easyai.com.au/stress/?project=fc220228-ebca-459e-8d74-6f2dfa42570a).
+Its source is the exact pinned reviewed PDF; its technical facts remain
+unapproved. The latest request to retain this project supersedes the earlier
+test-workspace cleanup recorded below. No existing user projects were deleted.
+
+| Live acceptance check | Measured result |
+| --- | --- |
+| Installed release / project revision | 0.8.0 / 14 |
+| Real source pages / DigitalOcean callbacks | 2 / 2; no inline recovery |
+| Located provisional points | 47, displayed as 15 and 32 across the two sheets |
+| Source component occurrences / required interfaces | 40 / 60 |
+| Proposed interface mappings / unlocated theoretical CODs | 55 / 5 |
+| Classified flange/valve schedule rows / occurrences | 6 / 18 |
+| Registered reference workbook records | 627 across four dataset versions |
+| Honest N/A catalog dispositions / manufacturer confirmations | 6 / 0 |
+| Shared website, XLSX and CSV tables | 26, checked from the same revision |
+| Individually editable native PDF additions | 298 |
+| Every added object edited and reopened twice | Passed; original raw/decoded streams and original annotations/appearances unchanged |
+| Both drawings, Excel download, review controls and correlated logs | Passed in the live browser |
+| Loader lessons | All 42 individually displayed |
+| Unexpected browser JavaScript / HTTP errors | 0 / 0 |
+| Real engineering approvals / ready CII | 0 / unavailable with explicit reasons |
+
+The full [GitHub check](https://github.com/efrgdgr0024345/stress/actions/runs/45551514419)
+passed all **385** Python tests, the isolated worker build and complete browser
+workflows at both the site root and `/stress/`. The unchanged serverless worker
+also passed its [qualification workflow](https://github.com/efrgdgr0024345/stress/actions/runs/45550992889).
+The separate original/golden-assets gate remains red for the documented missing
+assets; those assets were not substituted or waived.
+
+The safe updater verified the package, staged startup, API and frontend; retained
+the administrator session; and kept automatic updates enabled. It took a private
+database/code/public backup and had compatible rollback at activation. Once the
+new contract-4 model data was created, code-only rollback to the retained 0.7.1
+release correctly became **blocked** because that release lacks the new model
+safeguards. A compatible release or a deliberate coordinated recovery is
+required; no unsafe downgrade or live-data rollback was attempted.
+
+The loader's optional HEAD probe for a locally hosted ZIP returned 404. Its
+intended GitHub fallback downloaded successfully, and the actual 1,208,319-byte
+package matched SHA-256
+`7225dd9866a883e27fceff7c748e0edc96471926b4a489898584be757480483f`.
+No extra VPS, database service or worker deployment was added.
+
+This is a working **engineering-review demo**, not full original-plan completion.
+All real stations, topology, CAESAR numbers and unproved XYZ remain unaccepted;
+unknown technical values remain blank/N/A. Native BEND serialization, actual
+CAESAR application qualification, desktop-editor qualification and the original
+production/golden acceptance gates remain unfinished. See the
+[execution ledger](docs/1010_REVIEW_EXECUTION.md),
+[engineer workflow](docs/HOW_TO_FINISH_1010.md) and
+[machine-readable live evidence](docs/evidence/engineering-core-080-live.json).
+
+## Historical: 0.7.1 — 23 November 2026
 
 Verified on **23 November 2026, Australia/Sydney**. Installed release: **0.7.1**.
 The live site is https://easyai.com.au/stress/.

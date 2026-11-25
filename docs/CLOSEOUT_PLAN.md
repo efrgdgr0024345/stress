@@ -7,11 +7,14 @@ four finite checkpoints.
 
 ## Starting point
 
-Stages 1–6 are implemented and locally checked. Stage 7's review packet and
-documented CII subset are checked; BEND serialization remains an unmet original
-requirement, pending a verified vendor contract. The current work is release
-qualification, followed by live proof. These changes have not yet been deployed.
-The exact reviewed PDF and supplied reference workbook are pinned in the repository.
+Stages 1–6 are implemented and checked. Stage 7's review packet and documented
+CII subset are checked; BEND serialization remains an unmet original requirement,
+pending a verified vendor contract. Release **0.8.0 is deployed and live-tested**:
+385 tests and both browser mounts passed; the real PDF returned two DigitalOcean
+callbacks, and its PDF/XLSX/26 CSV tables were checked from one revision. The
+review project is retained. Handoff is recorded in the
+[execution ledger](1010_REVIEW_EXECUTION.md) and
+[measured live evidence](../LIVE_VALIDATION.md).
 
 The target is a working engineering-review system. Missing source facts are
 valid blue exceptions, not software defects to solve by guessing. The five
