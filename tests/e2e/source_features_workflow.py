@@ -6,6 +6,20 @@ from openpyxl import load_workbook
 from playwright.sync_api import expect
 
 
+def wait_for_generated_revision(page, context, project, revision):
+    """A saved edit queues a new draft; editing is disabled until it finishes."""
+    deadline = time.monotonic() + 180
+    report = None
+    while time.monotonic() < deadline:
+        report = context.request.get(project + '/pipeline').json()['runs'][0]
+        if report['revision'] >= revision:
+            if report['state'] == 'DONE':
+                return
+            assert report['state'] not in ('FAILED', 'CANCELLED', 'SUPERSEDED'), report
+        page.wait_for_timeout(500)
+    raise AssertionError({'expected_revision': revision, 'latest_pipeline_run': report})
+
+
 def exercise_source_features(page,context,base):
     source=Path(__file__).resolve().parents[2]/'fixtures/1010/1010 Reviewed.pdf'
     p=context.request.post(base+'/api/v1/projects',data={'title':'SOFTWARE ONLY real source flange proposals','line_id':'8-PG-JE3LN2-1010-FUTURE'}).json()
@@ -28,13 +42,19 @@ def exercise_source_features(page,context,base):
     page.get_by_role('button',name='Inspect face',exact=True).first.click()
     expect(page.get_by_role('heading',name='New physical point',exact=True)).to_be_visible()
     expect(page.get_by_label('Dimension source / evidence',exact=True)).to_have_value(__import__('re').compile('Source feature .+/flange_face'))
-    page.get_by_role('button',name='Save point',exact=True).click()
+    with page.expect_response(lambda r: r.url.endswith('/nodes') and r.request.method == 'POST') as saved:
+        page.get_by_role('button',name='Save point',exact=True).click()
+    assert saved.value.ok, saved.value.text()
+    wait_for_generated_revision(page, context, project, saved.value.json()['version'])
     expect(page.get_by_role('heading',name='Physical point',exact=True)).to_be_visible()
     # Selected-point -> new candidate exercises preservation of the new draft.
     page.get_by_role('button',name='Detected features',exact=True).click()
     page.get_by_role('button',name='Inspect pipe dot',exact=True).first.click()
     expect(page.get_by_role('heading',name='New physical point',exact=True)).to_be_visible()
-    page.get_by_role('button',name='Save point',exact=True).click()
+    with page.expect_response(lambda r: r.url.endswith('/nodes') and r.request.method == 'POST') as saved:
+        page.get_by_role('button',name='Save point',exact=True).click()
+    assert saved.value.ok, saved.value.text()
+    wait_for_generated_revision(page, context, project, saved.value.json()['version'])
     expect(page.get_by_role('heading',name='Physical point',exact=True)).to_be_visible()
     p=context.request.get(project).json();assert len(p['nodes'])==2,p
     assert all(n['station_mm'] is None and 'UNVERIFIED_DIMENSION' in n['reasons'] for n in p['nodes'])
