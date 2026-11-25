@@ -23,6 +23,6 @@ def csv_bundle(project):
                     values.append(value)
                 writer.writerow(values)
             archive.writestr(table['name'].lower().replace(' ','-')+'.csv',text.getvalue().encode('utf-8-sig'))
-        archive.writestr('README.txt','ENGINEERING REVIEW DATA\nUnknown fields are blank. Geometry is mm; weights N; temperature Celsius; pressure MPa.\nThese CSV tables are an interchange handoff, not a claim that CAESAR directly imports arbitrary CSV.\nUse the qualified neutral-file profile for a native CAESAR import candidate.\n')
+        archive.writestr('README.txt','ENGINEERING REVIEW DATA\nUnknown fields are blank. Geometry is mm; weights N; temperature Celsius; pressure MPa.\nThese CSV tables are an interchange handoff, not a claim that CAESAR directly imports arbitrary CSV.\nThe documented neutral-file candidate has strict data gates; target-application import qualification remains separate.\n')
         archive.writestr('manifest.json',json.dumps({'format':FORMAT,'project_id':project['id'],'revision':project['version'],'status':'ENGINEERING_REVIEW'},indent=2))
     return output.getvalue()

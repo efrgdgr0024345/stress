@@ -10,7 +10,7 @@ from packages.automation.recognize import identity
 from packages.engineering import topology
 from packages.workbooks import FORMAT,readiness,tables,workbook
 from packages.workbooks.csv_export import csv_bundle
-from packages.workbooks.caesar_neutral import assess,neutral_file
+from packages.workbooks.caesar_neutral import assess,neutral_file,PROFILE
 
 
 class ElementInput(BaseModel):
@@ -62,7 +62,7 @@ def install(api):
         p=project(project_id,actor)
         try:contents=neutral_file(p)
         except ValueError as error:raise HTTPException(422,str(error))
-        return api.Response(contents,media_type='text/plain; charset=windows-1252',headers={'Content-Disposition':f'attachment; filename="caesar-import-candidate-r{p["version"]}.cii"','X-CAESAR-Profile':'caesar-15.1-straight-pipe-v1'})
+        return api.Response(contents,media_type='text/plain; charset=windows-1252',headers={'Content-Disposition':f'attachment; filename="caesar-import-candidate-r{p["version"]}.cii"','X-CAESAR-Profile':PROFILE})
 
     @api.app.patch("/api/v1/projects/{project_id}/results/settings")
     def settings(project_id:str,body:NativeSettings,actor=Depends(api.editor)):

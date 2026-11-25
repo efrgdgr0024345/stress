@@ -28,7 +28,7 @@ def readiness(project):
     expected={identity(project["id"],e["from"],e["to"]) for e in topology(nodes)["edges"]}
     entered={e['id']:e for e in elements}
     complete=sum(all(entered.get(key,{}).get(k) is not None for k in ("dx_mm","dy_mm","dz_mm","od_mm","wall_mm","material_code","temperature_c","pressure_mpa")) for key in expected)
-    gates=[{"gate":"CAESAR import profile","passed":False,"detail":"The documented CAESAR II 15.1 straight-pipe candidate profile still needs an actual application import round trip."},
+    gates=[{"gate":"CAESAR import profile","passed":False,"detail":"The documented CAESAR II 15.1 neutral-file candidate still needs an actual application import round trip."},
            {"gate":"Engineering approval","passed":False,"detail":"This application currently issues engineering-review drafts; lead approval of verified stress input is required."},
            {"gate":"Physical points","passed":bool(nodes),"detail":f"{len(nodes)} model points."},
            {"gate":"Explicit connected graph","passed":bool(nodes) and graph_review['summary']['connected_assigned'] and not graph_review['structural_issues'],"detail":"Every point needs an accepted route; branches must share the existing main-run tee on the same full line. Source changes require topology review."},
@@ -105,6 +105,8 @@ def tables(project):
     result.extend(graph_tables(project))
     from packages.catalogs.project_tables import tables as catalog_tables
     result.extend(catalog_tables(project))
+    from packages.workbooks.native_tables import tables as native_tables
+    result.extend(native_tables(project))
     features=[]
     for feature in project.get('automation',{}).get('feature_proposals',[]):
         sheet=sheets.get(feature['sheet_id'])

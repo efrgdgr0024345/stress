@@ -546,6 +546,34 @@ def export_bundle(project, source_path, output_path):
     with zipfile.ZipFile(output_path, "w", zipfile.ZIP_DEFLATED) as archive:
         from packages.workbooks import workbook
         archive.writestr("engineering-workbook.xlsx",workbook(project))
+        from packages.workbooks.csv_export import csv_bundle
+        with zipfile.ZipFile(io.BytesIO(csv_bundle(project))) as csv_files:
+            for name in csv_files.namelist():archive.writestr('csv/'+name,csv_files.read(name))
+        from packages.workbooks.caesar_neutral import assess,neutral_file
+        native=assess(project)
+        archive.writestr('caesar-readiness.json',json.dumps(native,indent=2))
+        if native['available']:archive.writestr('caesar-import-candidate.cii',neutral_file(project))
+        from packages.physical.stations import solve_stations
+        from packages.engineering.graph_review import audit_graph
+        from packages.physical.source_exceptions import source_exception_report
+        from packages.catalogs.project_review import catalog_review_report
+        from packages.engineering.continuations import source_review_states,source_review_records
+        from packages.workbooks.cii_components import component_report
+        for name,value in (
+            ('station-solution.json',solve_stations(project)),
+            ('topology-review.json',audit_graph(project)),
+            ('source-exceptions.json',source_exception_report(project)),
+            ('catalog-review.json',catalog_review_report(project)),
+            ('native-component-review.json',component_report(project)),
+            ('continuation-review.json',{'links':project.get('continuations',[]),
+                'source_states':source_review_states(project),'source_reviews':source_review_records(project)}),
+            ('numbering-history.json',project.get('numbering_history',[])),
+            ('source-evidence.json',{'sheets':project['sheets'],
+                'point_observations':[{'physical_point_id':n['id'],'source_observation':n.get('source_observation'),
+                    'source_observations':n.get('source_observations',[])} for n in project['nodes']],
+                'material_observations':[{k:m.get(k) for k in ('id','sheet_id','source_sha256','source_bbox','evidence_id','evidence')} for m in project['materials']],
+                'complete_raw_page_evidence':'project.json / automation / evidence_pages'})):
+            archive.writestr(name,json.dumps(value,indent=2))
         if project.get('physical_model'):
             from packages.physical import audit as physical_audit
             from packages.physical.constraints import solve

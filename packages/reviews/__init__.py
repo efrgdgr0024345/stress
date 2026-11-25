@@ -70,11 +70,19 @@ def scopes(project, processing_sources=()):
     sheet_lines={s['id']:s['line_id'] for s in project['sheets']}
     from packages.engineering.graph_review import audit_graph
     graph_state=audit_graph(project)
+    from packages.workbooks.cii_components import native_component_plan
+    native_inputs=project.get('analysis_model',{}).get('native_components',[])
+    native_state=native_component_plan(project) if native_inputs else {'records':[],'issues':[]}
     for line in lines:
         nodes=[{k:n.get(k) for k in ('id','line_id','route','order','takeoff_id','kind','station_mm','coordinates_mm','dimension_input','evidence','verification','component_ports','topology_state','source_observation','source_observations','source_review_reasons','source_exception_reasons','station_proof','manual_station_basis','topology_proof')}
                for n in project['nodes'] if n['line_id']==line]
         point_ids={n['id'] for n in nodes}
         component_ids={c['id'] for c in components if c['line_id']==line}
+        native_records=[r for r in native_state['records'] if r.get('component_id') in component_ids or
+                        r.get('point_id') in point_ids or sheet_lines.get(r.get('source_sheet_id'))==line]
+        native_ids={r['id'] for r in native_records}
+        native_checks=[i for i in native_state['issues'] if i.get('record_id') in native_ids or
+                       i.get('component_id') in component_ids or i.get('point_id') in point_ids]
         relevant_ids={cid for group in dimensional_state['evidence_groups'].values() if point_ids.intersection(group['points']) for cid in group['constraint_ids']}
         dimensional_checks=[i for i in dimensional_state['issues'] if point_ids.intersection(i.get('point_ids',[])) or i.get('constraint_id') in relevant_ids or i['code'] in ('DIMENSION_SOLVER_LIMIT','DIMENSION_SOLUTION_STALE')]
         station_checks=[i for i in station_state['issues'] if point_ids.intersection(i.get('point_ids',[])) or i['code']=='STATION_SOLVER_LIMIT']
@@ -90,6 +98,7 @@ def scopes(project, processing_sources=()):
         missing.extend(i['code'] for i in station_checks)
         missing.extend(i['code'] for i in source_checks if i['active'])
         missing.extend(i['code'] for i in graph_checks)
+        missing.extend(i['code'] for i in native_checks)
         from packages.engineering.continuations import audit as continuation_audit
         continuation_checks=[i for i in continuation_audit(project) if i['line_id']==line]
         missing.extend(i['code'] for i in continuation_checks)
@@ -108,6 +117,11 @@ def scopes(project, processing_sources=()):
               'source_exceptions':source_checks,
               'source_exception_reviews':[r for r in source_exception_state['reviews'] if r['exception_id'] in source_exception_ids],
               'topology_checks':graph_checks,
+              'native_component_records':native_records,
+              'native_component_checks':native_checks,
+              'native_component_history':[r for r in project.get('analysis_model',{}).get('native_component_history',[])
+                  if r.get('record',r).get('component_id') in component_ids or r.get('record',r).get('point_id') in point_ids or
+                     sheet_lines.get(r.get('record',r).get('source_sheet_id'))==line],
               'model_frame':{k:project.get('analysis_model',{}).get(k) for k in ('local_origin_confirmed','origin_point_id','vertical_axis','piping_code_id','ambient_temperature_c')}},
               all(observed(s) for s in project['sheets'] if s['line_id']==line),missing)
     return result

@@ -14,6 +14,7 @@ import { StationControls } from "./stations";
 import { TopologyReviewControls } from "./topology-review";
 import { ProjectCatalogReviewControls } from "./project-catalog-review";
 import { NativePDFLayoutControls } from "./native-pdf-layout";
+import { CIIComponentControls } from "./cii-components";
 import { Dialog } from "./ui";
 import "./results.css";
 
@@ -235,6 +236,7 @@ export function EngineeringResults({
           onUpdate={onUpdate}
           onInspect={(id) => onReview(id, "node")}
         />
+        <CIIComponentControls project={project} onUpdate={onUpdate} />
         <div className="results-formula-bar">
           <span>fx</span>
           <span>
@@ -349,7 +351,7 @@ export function EngineeringResults({
         </summary>
         <p>
           Excel and CSV contain the engineering schedules. The native export
-          targets CAESAR II 15.1 straight pipe and becomes available when its
+          uses a bounded CAESAR II 15.1 profile and becomes available when its
           required inputs are complete. An import in CAESAR and engineering
           review are still required before modelling use.
         </p>
@@ -386,10 +388,11 @@ export function EngineeringResults({
           </button>
         </div>
         <p>
-          Target: {data?.native.target || "CAESAR II 15.1"} · straight-pipe
-          import candidate. Component-specific auxiliaries need their own
-          verified profile. Actual CAESAR import and engineering review remain
-          required.
+          Target: {data?.native.target || "CAESAR II 15.1"} · straight pipe,
+          documented rigid, B31J welding tee and basic translational restraint
+          import candidates. Bend generation remains blocked until the native
+          geometry and field contract is verified. Actual CAESAR import and
+          engineering review remain required.
         </p>
         {!data?.native.available && (
           <ul className="fine-print">

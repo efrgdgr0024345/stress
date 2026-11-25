@@ -256,6 +256,9 @@ def validate(project):
     project["graph"] = topology(project["nodes"])
     issues = list(project.get("automation",{}).get("issues",[]))
     issues.extend(catalog_issues)
+    if project.get('analysis_model',{}).get('native_components'):
+        from packages.workbooks.cii_components import native_component_plan
+        issues.extend(native_component_plan(project)['issues'])
     issues.extend(continuation_issues)
     from packages.physical import audit as physical_audit
     from packages.physical.constraints import apply_geometry_reasons

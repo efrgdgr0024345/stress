@@ -458,15 +458,7 @@ def publish_export(api,project,actor,job=None):
                 archive.writestr("automation-report.json",json.dumps(project["automation"],indent=2))
                 archive.writestr("source-manifest.json",json.dumps([{"sheet_id":s["id"],"sha256":s["sha256"],"page_index":s["page_index"]} for s in project["sheets"]],indent=2))
                 archive.writestr("revision-report.json",json.dumps(project.get("revision_changes",[]),indent=2))
-                from packages.workbooks.csv_export import csv_bundle
-                from packages.workbooks.caesar_neutral import assess,neutral_file
-                import io
-                with zipfile.ZipFile(io.BytesIO(csv_bundle(project))) as csv_files:
-                    for entry in csv_files.infolist():archive.writestr('csv/'+entry.filename,csv_files.read(entry))
-                native_status=assess(project)
-                if native_status['available']:
-                    try:archive.writestr('caesar-import-candidate.cii',neutral_file(project))
-                    except ValueError as error:native_status.update(available=False,missing=[str(error)])
+                native_status=json.loads(archive.read('caesar-readiness.json'))
                 archive.writestr('native-export-status.json',json.dumps(native_status,indent=2))
                 archive.writestr("evidence-index.json",json.dumps(project["automation"].get("evidence_pages",[]),indent=2))
                 required_shas={s["sha256"] for s in project["sheets"]}|{m.get("source_sha256") for m in project["materials"]}|{n.get("source_sha256") for n in project["nodes"]}
