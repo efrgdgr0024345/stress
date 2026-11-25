@@ -174,7 +174,7 @@ def source_binding(project,candidate,solution=None):
     if point:
         solution=solution or solve(project)
         axes=next((v['axes'] for v in solution['coordinates'] if v['point_id']==point_id),{})
-        constraints={c['id'] for axis in axes.values() for c in solution['evidence_groups'].get(axis.get('evidence_group'),{}).get('constraint_ids',[])}
+        constraints={cid for axis in axes.values() for cid in solution['evidence_groups'].get(axis.get('evidence_group'),{}).get('constraint_ids',[])}
         relevant_inputs=[v for v in solution['inputs'] if v['id'] in constraints]
         raw_inputs=[v for v in project.get('physical_model',{}).get('constraints',[])
                     if v.get('from_point_id')==point_id or v.get('to_point_id')==point_id]

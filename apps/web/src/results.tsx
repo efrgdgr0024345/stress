@@ -10,6 +10,7 @@ import { api, type Project } from "./types";
 import { appPath } from "./paths";
 import { PhysicalModelControls, type ModelSelection } from "./physical-model";
 import { ContinuationControls } from "./continuations";
+import { StationControls } from "./stations";
 import { Dialog } from "./ui";
 import "./results.css";
 
@@ -219,6 +220,7 @@ export function EngineeringResults({
             setContinuationSourceSelection(null);
           }}
         />
+        <StationControls project={project} onUpdate={onUpdate} />
         <div className="results-formula-bar">
           <span>fx</span>
           <span>

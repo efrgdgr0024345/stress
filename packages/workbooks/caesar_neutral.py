@@ -23,6 +23,8 @@ def assess(project):
     if any(n.get('source_observation') and not source_location_reviewed(n,{s['id']:s for s in project['sheets']}) or n.get('source_review_reasons') for n in nodes):
         missing.append('Review current source anchors and resolve typed source-interface reasons before native export.')
     if not edges:missing.append('A reviewed connected pipe route is required.')
+    from packages.physical.source_exceptions import source_exception_report
+    if source_exception_report(project)['active']:missing.append('Resolve the current source-linked physical-interface and dimension-witness exceptions before native export.')
     from packages.engineering.continuations import audit as continuation_audit
     if continuation_audit(project):missing.append('Resolve provisional, stale or conflicting continuation identities before native export.')
     from packages.physical import audit as physical_audit
@@ -30,6 +32,10 @@ def assess(project):
     if project.get('physical_model') or project.get('analysis_model'):
         from packages.physical.constraints import solve
         if solve(project)['issues']:missing.append('Resolve all dimensional constraint conflicts, stale sources and stale accepted solutions before native export.')
+    from packages.physical.stations import solve_stations
+    station_model=project.get('physical_model',{})
+    if (station_model.get('station_constraints') or station_model.get('retired_station_constraints') or any(n.get('station_proof') or n.get('manual_station_basis') for n in nodes)) and solve_stations(project)['issues']:
+        missing.append('Resolve unproved station datums, conflicting along-route lengths and stale accepted station proofs before native export.')
     if any(n.get('station_mm') is None or n.get('verification')=='proposed' or not n.get('evidence') for n in nodes):missing.append('Accept the engineering station/evidence for every model point first.')
     unsupported=sorted({n['kind'] for n in nodes if n['kind']!='endpoint'})
     if unsupported:missing.append('This first neutral profile supports straight pipe/endpoints only; component-specific data are required for '+', '.join(unsupported)+'.')

@@ -1,6 +1,6 @@
 """Engineering rules; independent of HTTP and presentation coordinates."""
 
-from decimal import Decimal, InvalidOperation
+from decimal import Decimal, InvalidOperation, localcontext
 from fractions import Fraction
 from copy import deepcopy
 import re
@@ -228,7 +228,9 @@ def compute_reasons(nodes):
         reasons.extend(r for r in node.get('component_review_reasons',[]) if r not in reasons)
         reasons.extend(r for r in node.get('continuation_review_reasons',[]) if r not in reasons)
         reasons.extend(r for r in node.get('geometry_review_reasons',[]) if r not in reasons)
+        reasons.extend(r for r in node.get('station_review_reasons',[]) if r not in reasons)
         reasons.extend(r for r in node.get('source_review_reasons',[]) if r not in reasons)
+        reasons.extend(r for r in node.get('source_exception_reasons',[]) if r not in reasons)
         node["reasons"] = reasons
         node["support_gap_mm"] = None
     eligible = assigned_nodes(nodes)
@@ -245,11 +247,11 @@ def compute_reasons(nodes):
             key=lambda n: (n["order"], n["id"]),
         )
         for first, second in zip(supports, supports[1:]):
-            if all(
-                n.get("station_mm") is not None and n.get("evidence", "").strip()
-                for n in (first, second)
-            ):
-                gap = abs(Decimal(second["station_mm"]) - Decimal(first["station_mm"]))
+            from packages.physical.stations import station_pair_comparable
+            if station_pair_comparable(first, second):
+                with localcontext() as context:
+                    context.prec = 200
+                    gap = abs(Decimal(second["station_mm"]) - Decimal(first["station_mm"]))
                 second["support_gap_mm"] = str(gap)
                 if gap <= Decimal("152.4"):
                     second["reasons"].append("SUPPORT_WITHIN_6_IN")
@@ -263,12 +265,15 @@ def validate(project):
     compute_reasons(project["nodes"])
     project["graph"] = topology(project["nodes"])
     issues = list(project.get("automation",{}).get("issues",[]))
-    issues.extend(project.get('source_review',{}).get('exceptions',[]))
     issues.extend(continuation_issues)
     from packages.physical import audit as physical_audit
     from packages.physical.constraints import apply_geometry_reasons
     issues.extend(physical_audit(project)['issues'])
     issues.extend(apply_geometry_reasons(project))
+    from packages.physical.stations import apply_station_reasons
+    issues.extend(apply_station_reasons(project))
+    from packages.physical.source_exceptions import refresh_source_exceptions
+    issues.extend(refresh_source_exceptions(project))
     compute_reasons(project['nodes'])
     orders = {}
     for node in assigned_nodes(project["nodes"]):

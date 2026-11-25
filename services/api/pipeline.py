@@ -159,6 +159,10 @@ def commit_project(api,conn,job,project,action,preserve_status=False):
     from packages.physical import prepare as prepare_physical
     prepare_physical(project)
     project["numbering_map"]=renumber(project["nodes"])
+    from packages.physical.stations import apply_station_reasons
+    apply_station_reasons(project)
+    from packages.physical.source_exceptions import refresh_source_exceptions
+    refresh_source_exceptions(project)
     compute_reasons(project["nodes"])
     project["version"]+=1;project["updated"]=api.now()
     if not preserve_status:project["status"]="DRAFT"

@@ -22,6 +22,11 @@ def base_observations(project,invalid=None):
         sheet=sheets.get(c.get('sheet_id'))
         if c.get('verification')!='reviewed':
             invalid.append({'code':'DIMENSION_PROPOSAL_REVIEW','constraint_id':c['id'],'message':'A source dimension proposal requires explicit review.'});continue
+        if c.get('source_proposal_id'):
+            from packages.physical.source_coordinates import source_coordinate_current
+            if not source_coordinate_current(project,c):
+                invalid.append({'code':'SOURCE_COORDINATE_REVIEW_STALE','constraint_id':c['id'],'point_ids':[c['from_point_id']],
+                    'message':'The accepted printed coordinate needs current independent source inspection and transcription review.'});continue
         if c.get('sheet_id') and (not sheet or c.get('source_content_hash')!=sheet.get('content_hash')):
             invalid.append({'code':'DIMENSION_SOURCE_STALE','constraint_id':c['id'],'message':'A source dimension refers to a changed or retired drawing page.'});continue
         result.append(dict(c))

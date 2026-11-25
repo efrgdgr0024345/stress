@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { GitBranch, Ruler, CheckCircle2, Loader2 } from "lucide-react";
 import { api, label, pointLabel, type Project } from "./types";
 import { Dialog } from "./ui";
+import { SourceCoordinates } from "./source-coordinates";
+import { SourceExceptions } from "./source-exceptions";
 
 type Port = {
   point_id: string;
@@ -143,6 +145,8 @@ export function PhysicalModelControls({
   );
   return (
     <div className="physical-controls">
+      <SourceCoordinates project={project} onUpdate={onUpdate} />
+      <SourceExceptions project={project} onUpdate={onUpdate} />
       <button
         className="button secondary"
         disabled={busy || !data?.can_edit}
@@ -510,6 +514,9 @@ export function PhysicalModelControls({
                   >
                     <option value="STANDARD">
                       Standard explicit mm / inch / feet and fractions
+                    </option>
+                    <option value="ISO_IN_DOT_FRACTION">
+                      ISO inches dot fraction (2.1/8&quot;)
                     </option>
                     <option value="ISO_FT_IN_DOT_FRACTION">
                       Printed ISO feet/inch fraction (for example 3'10.3/8")

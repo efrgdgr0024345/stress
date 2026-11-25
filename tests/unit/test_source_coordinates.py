@@ -17,6 +17,17 @@ class SourceCoordinateTests(unittest.TestCase):
         self.assertEqual(Decimal(coordinate_value('-2 1/8 in','X')['value_mm']),Decimal('-53.975'))
         self.assertIsNone(coordinate_value('0 mm','Y')['source_direction'])
 
+    def test_bare_iso_inch_fraction_requires_explicit_convention(self):
+        for text,expected in [('2.1/8"','53.975'),('-2.3/4"','-69.85')]:
+            with self.subTest(text=text):
+                with self.assertRaises(ValueError):coordinate_value(text,'X')
+                value=coordinate_value(text,'X','ISO_IN_DOT_FRACTION')
+                self.assertEqual(Decimal(value['value_mm']),Decimal(expected))
+                self.assertEqual(value['source_text'],text)
+        for text in ['2.8/8"','2.1/0"','2.1/8','2.5"']:
+            with self.subTest(text=text),self.assertRaises(ValueError):
+                coordinate_value(text,'X','ISO_IN_DOT_FRACTION')
+
     def test_axis_conflicts_missing_units_and_paper_lengths_are_rejected(self):
         for text,axis in [('E 2 in','Y'),('N 42','Y'),('32 px','X'),('UNKNOWN 3 mm','X'),('12 mm',None),('EL NaN mm','Z')]:
             with self.subTest(text=text),self.assertRaises(ValueError):coordinate_value(text,axis)

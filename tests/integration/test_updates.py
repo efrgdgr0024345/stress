@@ -72,6 +72,8 @@ class ReleaseTests(unittest.TestCase):
             with sqlite3.connect(data/'workspace.sqlite3') as conn:
                 conn.execute('DROP TABLE projects');conn.execute('CREATE TABLE projects (data TEXT)')
             for project in ({'nodes':[{'topology_state':'UNASSIGNED'}]}, {'nodes':[{'source_observation':{'verification':'proposed'}}]},
+                            {'physical_model':{'station_constraints':[{'id':'accepted-source-station'}]}},
+                            {'nodes':[{'station_proof':{'basis':'LOCAL_ORIGIN'}}]},
                             {'materials':[{'connection_profile':{'kind':'TWO_PROCESS_ENDS_CLASSIFICATION_UNCONFIRMED'}}]}):
                 with sqlite3.connect(data/'workspace.sqlite3') as conn:
                     conn.execute('DELETE FROM projects');conn.execute('INSERT INTO projects VALUES (?)',(json.dumps(project),))

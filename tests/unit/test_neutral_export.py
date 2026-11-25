@@ -29,6 +29,15 @@ def numbers(lines):
 
 
 class NeutralTests(unittest.TestCase):
+    def test_stale_station_proof_blocks_otherwise_complete_straight_input(self):
+        p=model()
+        self.assertTrue(assess(p)['available'])
+        p['nodes'][0]['station_proof']={'value_mm':'0','basis':'LOCAL_ORIGIN','basis_id':'retired-source-datum',
+            'line_id':p['line_id'],'route':'main','input_sha256':'stale-source-constraints'}
+        check=assess(p)
+        self.assertFalse(check['available'])
+        self.assertTrue(any('stale accepted station proofs' in message for message in check['missing']))
+
     def test_y_up_target_rotates_canonical_east_north_up_without_reflection(self):
         p=model();p['analysis_model']['vertical_axis']='Y'
         values=numbers(sections(neutral_file(p))['ELEMENTS'][:9])

@@ -83,7 +83,7 @@ class EngineeringTests(unittest.TestCase):
         self.assertEqual(len(nodes[0]["instances"]), 2)
 
     def test_six_inch_rule_inclusive_and_physical(self):
-        for gap, blue in [("50.8", True), ("152.4", True), ("152.4001", False)]:
+        for gap, blue in [("50.8", True), ("152.4", True), ("152.4001", False), ("152.4000000000000000000000000001", False)]:
             nodes = [
                 point(1, station="0", kind="support"),
                 point(2, station=gap, kind="support"),

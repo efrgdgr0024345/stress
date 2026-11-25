@@ -29,6 +29,9 @@ from cod_workflow import exercise_cod
 from pdf_lifecycle import exercise_pdf_lifecycle
 from real_source_review import exercise_real_source_review
 from real_continuation_decisions import exercise_real_continuation_decisions
+from real_source_coordinates import exercise_real_source_coordinates
+from real_station_workflow import exercise_real_stations
+from real_source_exceptions import exercise_real_source_exceptions
 
 Path("/tmp/caesar-screens").mkdir(exist_ok=True)
 
@@ -346,6 +349,9 @@ def run():
                     exercise_source_features(page,context,base)
                     exercise_real_source_review(page,context,base)
                     exercise_real_continuation_decisions(page,context,base)
+                    exercise_real_source_coordinates(page,context,base)
+                    exercise_real_stations(page,context,base)
+                    exercise_real_source_exceptions(page,context,base)
                     exercise_continuations(page,context,base)
                     exercise_cod(page,context,base)
                     exercise_pdf_lifecycle(page,context,base)

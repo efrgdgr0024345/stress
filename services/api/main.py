@@ -409,6 +409,10 @@ def change(project_id, version, actor, action, update):
         apply_reasons(project)
         from packages.physical.constraints import apply_geometry_reasons
         apply_geometry_reasons(project)
+        from packages.physical.stations import apply_station_reasons
+        apply_station_reasons(project)
+        from packages.physical.source_exceptions import refresh_source_exceptions
+        refresh_source_exceptions(project)
         project['contributors'] = sorted(set(project.get('contributors', [])) | {actor['id']})
         compute_reasons(project["nodes"])
         project["version"] += 1
@@ -890,7 +894,7 @@ def apply_node(project, body, node_id=None, actor=None):
             422, "Physical stations require a dimension source / engineering evidence."
         )
     data = {
-        **body.model_dump(exclude={"version", "dimension", "topology_confirmed", "source_location_confirmed"}),
+        **body.model_dump(exclude={"version", "dimension", "topology_confirmed", "source_location_confirmed", "source_location_sheet_id"}),
         'topology_state': topology_state,
         "station_mm": station,
         "dimension_input": body.dimension,
@@ -898,6 +902,8 @@ def apply_node(project, body, node_id=None, actor=None):
     if node and not {'source_feature_id','source_feature_role'} & body.model_fields_set:
         data.update({key:node.get(key) for key in ('source_feature_id','source_feature_role')})
     if node:
+        from packages.physical.stations import manual_station_override
+        manual_station_override(node, station)
         node.update(data)
         if topology_state == 'ASSIGNED':
             node["verification"]="reviewed"
@@ -1232,6 +1238,12 @@ from services.api.physical_model import install as install_physical_model
 install_physical_model(sys.modules[__name__])
 from services.api.source_review import install as install_source_review
 install_source_review(sys.modules[__name__])
+from services.api.source_coordinates import install as install_source_coordinates
+install_source_coordinates(sys.modules[__name__])
+from services.api.source_exceptions import install as install_source_exceptions
+install_source_exceptions(sys.modules[__name__])
+from services.api.stations import install as install_stations
+install_stations(sys.modules[__name__])
 from services.api.continuations import install as install_continuations
 install_continuations(sys.modules[__name__])
 

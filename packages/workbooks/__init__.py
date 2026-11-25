@@ -1,5 +1,5 @@
 """Formatted, editable engineering workbooks; never invent CAESAR input data."""
-from decimal import Decimal
+from decimal import Decimal,localcontext
 import io
 import math
 
@@ -20,6 +20,8 @@ def literal(value):return ILLEGAL_CHARACTERS_RE.sub('',str(value))[:32767]
 
 def readiness(project):
     nodes=project["nodes"];elements=project.get("analysis_model",{}).get("elements",[])
+    from packages.physical.stations import solve_stations
+    station_issues=solve_stations(project)['issues']
     from packages.automation.recognize import identity
     expected={identity(project["id"],e["from"],e["to"]) for e in topology(nodes)["edges"]}
     entered={e['id']:e for e in elements}
@@ -27,7 +29,7 @@ def readiness(project):
     gates=[{"gate":"CAESAR import profile","passed":False,"detail":"The documented CAESAR II 15.1 straight-pipe candidate profile still needs an actual application import round trip."},
            {"gate":"Engineering approval","passed":False,"detail":"This application currently issues engineering-review drafts; lead approval of verified stress input is required."},
            {"gate":"Physical points","passed":bool(nodes),"detail":f"{len(nodes)} model points."},
-           {"gate":"Station evidence","passed":bool(nodes) and all(n.get("station_mm") is not None and n.get("evidence") and n.get("verification")!="proposed" for n in nodes),"detail":"Every required point needs accepted dimensional evidence."},
+           {"gate":"Station evidence","passed":bool(nodes) and not station_issues and all(n.get("station_mm") is not None and n.get("evidence") and n.get("verification")!="proposed" for n in nodes),"detail":"Every required point needs source-current along-centreline evidence and an accepted station datum."},
            {"gate":"Element geometry and properties","passed":bool(expected) and complete==len(expected),"detail":f"{complete} of {len(expected)} active elements have required geometry and properties. Signed XYZ values must come from engineering evidence, never drawing pixels."}]
     return {"status":"ENGINEERING_REVIEW_ONLY","direct_import_ready":False,"format":FORMAT,"gates":gates}
 
@@ -37,8 +39,13 @@ def tables(project):
     def table(name,columns,rows):return {"name":name,"columns":[{"key":key,"label":label,"kind":kind} for key,label,kind in columns],"rows":rows}
     result=[]
     rows=[]
+    from packages.physical.constraints import solve
+    solved={v['point_id']:v['axes'] for v in solve(project)['coordinates']}
     for n in nodes:
-        c=n.get("coordinates_mm") or {}
+        c=dict(n.get('coordinates_mm') or {})
+        for axis in ('X','Y','Z'):
+            value=solved.get(n['id'],{}).get(axis,{}).get('value_mm')
+            if value is not None:c[axis.lower()]=value
         rows.append({"number":n.get("number"),"line":n["line_id"],"route":n["route"],"kind":n["kind"],
             "station":n.get("station_mm"),"x":c.get("x"),"y":c.get("y"),"z":c.get("z"),
             "verification":n.get("verification","engineer-entered"),"reasons":", ".join(n.get("reasons",[])),
@@ -55,7 +62,10 @@ def tables(project):
         for axis in delta:
             ac=a.get("coordinates_mm",{}).get(axis);bc=b.get("coordinates_mm",{}).get(axis)
             if delta[axis] is None and ac is not None and bc is not None:delta[axis]=str(Decimal(bc)-Decimal(ac))
-        distance=abs(Decimal(b["station_mm"])-Decimal(a["station_mm"])) if a.get("station_mm") is not None and b.get("station_mm") is not None else None
+        from packages.physical.stations import station_pair_comparable
+        with localcontext() as context:
+            context.prec=200
+            distance=abs(Decimal(b["station_mm"])-Decimal(a["station_mm"])) if station_pair_comparable(a,b) else None
         elements.append({"from":a.get("number"),"to":b.get("number"),"line":edge["line_id"],"route":edge["route"],"dx":delta['x'],"dy":delta['y'],"dz":delta['z'],
             "route_distance":str(distance) if distance is not None else None,"od":e.get("od_mm"),"wall":e.get("wall_mm"),"corrosion":e.get("corrosion_mm"),
             "material":e.get("material_code"),"temperature":e.get("temperature_c"),"pressure":e.get("pressure_mpa"),"evidence":e.get("evidence",""),
@@ -72,6 +82,8 @@ def tables(project):
     result.append(table("Components",[("item","Item","text"),("page","Page","number"),("family","Family","text"),("description","Source description","text"),("size","Size","text"),("quantity","Listed count","number"),("source_value","Source quantity value","decimal"),("raw_quantity","Raw source quantity","text"),("unit","Quantity unit","text"),("located","Located count","number"),("weight","Weight (N)","decimal"),("half","Half bolting (N)","decimal"),("full","Full bolting (N)","decimal"),("length","Length (mm)","decimal"),("scope","Weight scope","text"),("quality","Catalog source quality","text"),("match","Project match state","text"),("dataset","Dataset ID","text"),("evidence","Evidence","text"),("id","Material ID","text")],components))
     from packages.physical.spreadsheets import tables as physical_tables
     result.extend(physical_tables(project))
+    from packages.physical.station_tables import tables as station_tables
+    result.extend(station_tables(project))
     features=[]
     for feature in project.get('automation',{}).get('feature_proposals',[]):
         sheet=sheets.get(feature['sheet_id'])

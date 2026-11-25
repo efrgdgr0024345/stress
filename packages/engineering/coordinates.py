@@ -35,6 +35,13 @@ def coordinate_value(source,axis=None,source_format='STANDARD'):
         if int(denominator)==0 or not 0<=int(inches)<12 or not 0<int(numerator)<int(denominator):
             raise ValueError('ISO inch/fraction fields are invalid; source values were not normalized by guessing.')
         raw=f'{feet}\' {inches} {numerator}/{denominator}"'
+    elif source_format=='ISO_IN_DOT_FRACTION':
+        printed=raw.strip().replace('″','"')
+        fraction=re.fullmatch(r'([+-]?\s*\d+)\.(\d+)/(\d+)\s*"',printed)
+        if not fraction:raise ValueError('Selected ISO inches format requires an explicit fraction such as 2.1/8".')
+        inches,numerator,denominator=fraction.groups()
+        if int(denominator)==0 or not 0<int(numerator)<int(denominator):raise ValueError('ISO inch fraction is invalid.')
+        raw=f'{inches} {numerator}/{denominator} in'
     elif source_format!='STANDARD':raise ValueError('Unsupported source dimension convention.')
     with localcontext() as context:
         context.prec=50

@@ -63,7 +63,7 @@ def required_security_contract(data):
                 if 'data' in columns:
                     for row in conn.execute('SELECT data FROM projects'):
                         p=json.loads(row[0]);model=p.get('physical_model',{})
-                        if (p.get('source_review') or p.get('continuation_source_reviews') or any(n.get('topology_state')=='UNASSIGNED' or n.get('source_observation') for n in p.get('nodes',[]))
+                        if (p.get('source_review') or p.get('continuation_source_reviews') or model.get('station_constraints') or model.get('retired_station_constraints') or any(n.get('topology_state')=='UNASSIGNED' or n.get('source_observation') or n.get('station_proof') or n.get('manual_station_basis') for n in p.get('nodes',[]))
                             or any(m.get('connection_profile') for m in p.get('materials',[]))):minimum=max(minimum,4)
                         if p.get('continuations') or p.get('point_aliases') or any(c.get('cod_derivation') for c in model.get('constraints',[])):minimum=max(minimum,3)
                         if model.get('components') or model.get('constraints') or any(e.get('geometry_origin')=='constraint-solution' for e in p.get('analysis_model',{}).get('elements',[])):minimum=max(minimum,2)

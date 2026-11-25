@@ -225,18 +225,45 @@ def prepare_source_points(project):
         prepared=True,point_ids=sorted(n['id'] for n in project['nodes'] if n.get('source_observation')),
         source_observation_count=len(observations),observation_points={k:v['id'] for k,v in observation_nodes.items()},engineering_approved=False)
     if matching:
-        exceptions=[]
-        for entry in profile.get('exceptions',[]):
-            sheet=matching.get(entry['page_index'])
-            if not sheet:continue
-            material=next((m for m in project['materials'] if m['sheet_id']==sheet['id'] and m['item_no']==str(entry.get('material_item_no'))),None)
-            if entry['code']=='SOURCE_INVENTORY_METADATA_CORRECTION_REQUIRED' and material and material.get('quantity_unit')=='count' and material.get('quantity')==2:continue
-            exceptions.append({**deepcopy(entry),'id':identity(project['id'],entry['id']),
-                'sheet_id':sheet['id'],'source_sha256':sheet['sha256'],'material_id':material['id'] if material else None,
-                'color':'blue','severity':'critical','status':'REVIEW_REQUIRED','message':entry['evidence']})
-        project['source_review']['exceptions']=exceptions
         _profile_references(project,profile,matching,observation_nodes)
     prepare(project)
     from packages.engineering import refresh_source_locations
     refresh_source_locations(project)
+    from packages.physical.source_exceptions import refresh_source_exceptions
+    refresh_source_exceptions(project)
     return created
+
+
+def station_source_proposals(project):
+    """Actual witnessed source lengths; no signed direction, datum or station is accepted."""
+    from packages.engineering.coordinates import coordinate_value
+    profile=source_profile()
+    if not profile or not project.get('source_review',{}).get('prepared'):return []
+    sheets={s['page_index']:s for s in project['sheets'] if s['sha256']==profile['source_sha256']}
+    points={n['id']:n for n in project['nodes']};mapping=project.get('source_review',{}).get('observation_points',{})
+    aliases=project.get('point_aliases',{})
+    def canonical(uid):
+        seen=set()
+        while uid in aliases:
+            if uid in seen:return None
+            seen.add(uid);uid=aliases[uid]
+        return uid if uid in points else None
+    result=[]
+    for observed in profile.get('station_source_facts',{}).get('usable_constraints',[]):
+        sheet=sheets.get(observed['page_index'])
+        if not sheet:continue
+        a=canonical(mapping.get(observed['endpoint_a_observation_id']));b=canonical(mapping.get(observed['endpoint_b_observation_id']))
+        try:value=coordinate_value(observed['source_text'],'X',observed['source_format'])['value_mm']
+        except ValueError:value=None
+        result.append({'id':identity(project['id'],'source-station-proposal',observed['id']),
+            'source_label':observed['source_label'],'kind':'DELTA','from_point_id':a,'to_point_id':b,
+            'from_label':point_label(points[a]) if a else None,'to_label':point_label(points[b]) if b else None,
+            'source_text':observed['source_text'],'source_format':observed['source_format'],'proposed_distance_mm':value,
+            'sheet_id':sheet['id'],'source_sha256':sheet['sha256'],'source_content_hash':sheet.get('content_hash'),
+            'bbox':deepcopy(observed['bbox']),'source_path_ids':deepcopy(observed['source_path_ids']),
+            'distance_basis':'ALONG_CENTRELINE','unsigned_source_length':True,'signed_direction_accepted':False,
+            'engineering_approved':False,'station_mm':None,'origin_accepted':False,
+            'evidence':observed.get('evidence','Actual printed support gap with traced native dimension witnesses.')+
+                ' Native source path IDs: '+', '.join(str(i) for i in observed['source_path_ids'])+
+                '. Unsigned source length only; explicitly review selected endpoint direction and route datum before applying stations.'})
+    return result

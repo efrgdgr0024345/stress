@@ -37,7 +37,7 @@ class DimensionInput(BaseModel):
     from_point_id:str
     to_point_id:str|None=None
     source_text:str=Field(min_length=1,max_length=100)
-    source_format:Literal['STANDARD','ISO_FT_IN_DOT_FRACTION']='STANDARD'
+    source_format:Literal['STANDARD','ISO_FT_IN_DOT_FRACTION','ISO_IN_DOT_FRACTION']='STANDARD'
     tolerance_text:str=Field(default='0 mm',max_length=100)
     sheet_id:str
     evidence:str=Field(min_length=10,max_length=3000)
