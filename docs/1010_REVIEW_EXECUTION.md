@@ -1,6 +1,7 @@
 # Real 1010 engineering-review execution
 
 Source request: [25 November primary objective](PRIMARY_1010_REVIEW_2026_11_25.txt).
+Remaining execution: [bounded closeout plan](CLOSEOUT_PLAN.md).
 Source PDF: `fixtures/1010/1010 Reviewed.pdf`, SHA-256
 `7b97d44bef3d544c4c98ed0667c29607ce58fa4a401dd2463f66010a9615bb59`.
 The user's latest instruction expressly proceeds without the missing original
@@ -18,7 +19,7 @@ physical distance, coordinate, topology, weight or manufacturer.
 | 3 Dimension/station constraints | Implemented and checked | 61 focused unit/API/review/export tests pass. Printed XYZ requires independent source inspection and an explicit tolerance. Along-route constraints require a signed direction, accepted route and an explicit datum; stale proofs retain saved values and suppress support comparisons. Real 2-inch, half-inch and 2-1/8-inch Chromium/XLSX checks pass, as do printed XYZ and exception retain/reopen browser flows. |
 | 4 Graph/numbering | Implemented and checked | 74 focused cases plus 24 pipeline/workbook cases pass. Real-source Chromium/XLSX proves independently reviewed shared UUID, explicit partial main10/20/30 and tee branch100, 42 retained unassigned points, complete map/retired alias/history and unchanged pure renumber. Invalid takeoffs/ambiguous order never create guessed connections. Local-station proof survives identity merge and requires fresh review. |
 | 5 Catalog/schedules | Implemented and checked | 57 focused/compatibility cases plus scope regression and real Chromium/XLSX pass. Exact supplied 627-row workbook is pinned for CI. Six material rows / 18 flange-valve occurrences receive current exact reference or explicit source-bound N/A; actual RTJ/API/type/bore gaps and absent valve data keep all real weights/lengths N/A. PV stays a separate classification exception. Manufacturer confirmation has an independent explicit history/gate; every flange schedule always shows W_flange/W_half/W_full, with safe bare/assembly scope and unknowns. |
-| 6 Editable PDF | Pending | Native objects, source clearance, NORTH/triad placement, complete round trip |
+| 6 Editable PDF | In progress | Finish the existing collision/native-object checkpoint; see bounded closeout plan. |
 | 7 Exports | Pending | Complete numeric tables/packet and gated supported CII auxiliaries |
 | 8 CI/live proof | Pending | Current real-source tests, live reviewed project, measured evidence |
 | 9 Handoff | Pending | Engineer workflow and reproducible source preparation |
