@@ -271,6 +271,7 @@ class UnassignedIdentityTests(unittest.TestCase):
         p=fixture();stamps=source_stamp(p,{'left','right'})
         from packages.engineering.continuations import coordinate_proof
         keep=merge_identity(p,'left','right')
+        self.assertIs(keep,next(n for n in p['nodes'] if n['id']==keep['id']))
         p['continuations']=[{'id':'accepted','status':'ACCEPTED','point_id':keep['id'],'left_point_id':'left','right_point_id':'right',
             'line_id':keep['line_id'],'source_stamps':stamps,'coordinate_proof_sha256':coordinate_proof(p,{keep['id']})}]
         self.assertEqual(identity_audit(p),[])

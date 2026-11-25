@@ -382,7 +382,9 @@ def merge_identity(project,left_id,right_id,reviewer=None,reviewed_at=None):
     if any(i['code']=='COORDINATE_MISMATCH' for i in solve(project)['issues']):raise ValueError('Merging introduces conflicting coordinate constraints; source values were not accepted.')
     from packages.engineering.graph_review import renumber_project
     renumber_project(project,'Unified reviewed continuation identity and retained every physical numbering alias',reviewer,reviewed_at)
-    return keep
+    # Renumbering atomically replaces the project with its validated copy.
+    # Return that current canonical object, not the detached pre-renumber node.
+    return next(n for n in project['nodes'] if n['id']==left_id)
 
 
 def identity_audit(project):
