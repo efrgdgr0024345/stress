@@ -1,8 +1,8 @@
 {
   "format": 1,
-  "version": "0.7.1",
+  "version": "0.8.0",
   "schema": 2,
   "code_only_compatible": true,
-  "package_sha256": "34e04ac3dd6634f45bba2d03b9425e91ab5bc03900609d7728f34b55c76e8108",
+  "package_sha256": "7225dd9866a883e27fceff7c748e0edc96471926b4a489898584be757480483f",
   "requirements_sha256": "8587d227911f5fd93dbf6cf115232f1636b9acbf3a3a5274622b154073fbf4cd"
 }

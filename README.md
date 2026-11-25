@@ -6,6 +6,15 @@ The interface uses a consistent macOS-inspired appearance. The root [loader.php]
 
 Screenshots: [macOS-style loader and lessons](docs/screenshots/loader.png) · [Excel-style results](docs/screenshots/excel-results.png) · [automatic project flow](docs/screenshots/pipeline-flow.png) · [real 1010 drawing](docs/screenshots/1010-real-drawing.png).
 
+For the exact reviewed drawing, follow [How an engineer finishes 1010](docs/HOW_TO_FINISH_1010.md).
+The current source tree provides 47 provisional source points and 60 interface
+requirements, including five unlocated theoretical CODs. The six flange/valve
+schedule rows retain N/A where the supplied 627-row reference catalog cannot
+prove a match. These are engineering review data, not a completed stress model.
+See [implementation status](docs/IMPLEMENTATION_STATUS.md) for local proof and
+unmet requirements, and [LIVE_VALIDATION.md](LIVE_VALIDATION.md) for actual hosted
+measurements; source changes alone do not prove a live update.
+
 ## Start the website
 
 Requires Node.js 24 and Python 3.12. Run these commands from the repository:
@@ -42,12 +51,12 @@ Alternatively, `docker compose up --build` starts the web and separate no-networ
 ## Daily engineering workflow
 
 1. Create a project with its full line ID and select a PDF (30 MiB / 100 pages per source, 200 active pages per project). **Project flow** tracks registration, evidence/OCR, proposals and review publication. Confirm printed identities in Drawing register. Source bytes and SHA-256 are preserved.
-2. Open Drawing workspace. Every page is rendered inside the website with zoom, pan, page switching and an editable overlay. **Add point** places a provisional marker; assign main/branch order and component type explicitly. Branches reference an existing main-run tee.
-3. Enter engineering stations with explicit units, for example `1200 mm`, `2 1/8 in` or `3' 2"`, and source evidence. Unknown stations stay null and blue. Drag graphic bubbles/anchors separately: paper coordinates never establish a physical dimension.
+2. Open Drawing workspace. Every page is rendered inside the website with zoom, pan and source-linked editing. For the exact reviewed 1010 source, **Locate source interfaces** prepares provisional locations and explicit exceptions. Inspect each current source depiction before accepting any topology; source anchors are not engineering XYZ.
+3. Review signed source XYZ and along-route station evidence separately. Station chains need explicit units, endpoint direction, route and datum; unknown stations stay null and blue. **Review graph and numbering** previews explicit main/branch order and tee takeoffs before atomic application. Paper coordinates and XYZ separation never establish an along-route station.
 4. Use **Drawing annotations** for editable text, rectangles, circles and lines. Click an object on the drawing to edit its text, colour or position. These graphic notes do not change physical stations.
 5. Reconcile materials with the original drawing. Add, correct or remove inventory rows. Match flange/valve specifications against an approved catalog dataset; see the controlled catalog workflow below.
-6. Place axes and schedules in clear areas, inspect all sheets, and review exceptions. The website shows source-derived numbers and quality labels; unsupported values remain N/A.
-7. Open **Excel results** for formatted node/element/support/component/exception/source tables. Enter source-backed signed geometry and properties through an element row. Export editable **XLSX**, **CSV tables**, or a gated **CAESAR II 15.1 neutral CII** straight-pipe candidate. See [output contracts](docs/CAESAR_FORMATS.md).
+6. Use **Review catalogs and schedules** for exact match/N/A decisions and separate manufacturer evidence. Use **Review native PDF layout** to inspect both sheets of the actual native output, then explicitly accept graphical placements only. Engineering unknowns and blue reasons remain.
+7. Open **Excel results** for formatted, evidence-linked schedules and export editable **XLSX** or **CSV tables**. Element rows and **CAESAR component data** accept explicit source properties or incomplete drafts. Conditional **CAESAR II 15.1 CII** supports documented straight pipe, rigid, bounded B31J tee and basic translational-restraint candidates. BEND generation remains blocked pending its verified native geometry/field contract; see [the component contract](docs/CII_151_COMPONENT_CONTRACT.md).
 8. Inspect history, compare revisions, download a model snapshot, or restore an earlier revision as a new draft. Existing snapshots and earlier exports are retained.
 
 The worker publishes an initial review bundle automatically. Corrections create
@@ -65,13 +74,15 @@ The synthetic two-sheet training project is clearly labelled and is not the miss
 4. In Materials, choose **Match catalog** and enter full specification keys. API 6A requires a true API bore separate from pipe NPS. Zero matches and multiple exact candidates are rejected; no nearest-value substitution occurs.
 5. Save a unique match with evidence. A complete source row, original workbook hash, normalized-record hash, dataset approval and match reason are copied into the project revision. Updating a catalog never replaces historical project values.
 
+For the reviewed 1010 project, use **Review catalogs and schedules** for the source-bound decision and history; a legacy reference match does not bypass that review.
+
 The canonical target fields are described by `/api/v1/catalog-schema`. Required fields include `family`, `standard`, `rating`, `nps`, `component_type`, `source`, and `quality`; flanges also need facing, valves need end connection, and API 6A needs API bore. Numeric weights are in N and lengths in mm. Explicit kg/lbf or inch source mappings record the conversion. For `BARE_FLANGE` scope only, supplied studs/nuts/count can derive half and full bolting allowances; assembly-included weights are never bolted twice.
 
 Catalog source quality and actual manufacturer confirmation are separate. Even a manufacturer-confirmed reference row stays **REFERENCE_ONLY** for the project until the drawing/vendor evidence explicitly identifies the matching manufacturer and model. Unknown actuator scope and missing properties remain visible exceptions.
 
 ## Exports and compatibility
 
-ZIP bundles contain the annotated PDF, editable engineering workbook, node CSV, complete project JSON, material schedule, catalog provenance snapshots, exception report, numbering map, native annotation manifest and structural QA report. Each added label, circle, leader, text note, shape, axis primitive, schedule row and border is a native PDF annotation. Original page content streams are compared after serialization. Text and tables that do not fit their boxes fail export rather than disappearing silently.
+Revision ZIP bundles contain the annotated PDF, editable engineering workbook, shared CSV tables, complete project JSON, source/catalog and review histories, exception report, numbering map, native annotation manifest and QA/readiness reports. Native CII is included only when all supported-profile gates pass; an incomplete real model retains explicit readiness evidence. Each added label, circle, leader, text note, shape, axis primitive, schedule row and border is a native PDF annotation. Original encoded and decoded page streams and original annotations are checked after serialization. Source-aware placement protects dimensions, materials and NORTH; unfitted objects remain explicit export-blocking exceptions. The focused local 47-point case produced 285 individual additions and passed every-object library edit/save/reopen checks. This local proof is distinct from hosted or desktop-editor qualification.
 
 The website is the primary drawing editor. Exports use standard annotation types for broad PDF-editor compatibility. Reader/editor capabilities vary; universal editing support across every PDF application cannot be guaranteed. Automated checks exercise native object editing/reopening and actual generated-PDF rendering in the browser. No Adobe-only dependency is imposed.
 
@@ -99,8 +110,8 @@ Private data lives in ignored `.local/` by default; `CAESAR_DATA_DIR` changes th
 
 Local mode (`CAESAR_LOCAL_DEMO=1`, default) supplies a local administrator account without a password. Keep it private. For authenticated mode use `CAESAR_LOCAL_DEMO=0`, `CAESAR_ADMIN_EMAIL`, and a secure `CAESAR_ADMIN_PASSWORD` of at least 12 characters; `CAESAR_SECURE_COOKIE=1` requires HTTPS for cookies. Sessions are opaque, HttpOnly, SameSite=Strict and expire after 12 hours. Every project/artifact/catalog operation checks server-side permissions and tenant scope. The lessons register is deliberately public documentation.
 
-This pilot automates evidence extraction and review drafts; it is not a stress solver or a completed enterprise SaaS. Durable jobs, intake quotas/rates, and the local isolated parser are implemented. Remaining work includes general component/geometry recognition, independent engineering approval, OIDC/MFA/team administration, remote worker transport, malware scanning, production database/object storage, managed backups, monitoring and external-editor/CAESAR qualification. Bounded same-account hosting mode is not a filesystem sandbox.
+This pilot automates evidence extraction and review drafts; it is not a stress solver or a completed enterprise SaaS. Durable jobs, intake quotas/rates, and the local isolated parser are implemented. Independent review/MFA/team controls and scoped remote page transport are implemented, but they do not approve the real model. Remaining boundaries include general automatic engineering recognition, the unresolved native BEND contract, actual target-application qualification, malware scanning, production storage/backup operations and full production security/monitoring. Bounded same-account hosting mode is not a filesystem sandbox.
 
-The planning PDF and reviewed 1010 PDF were supplied. The v1.2 generator, original/golden 1010 source fixture, 13 legacy tests and canonical flange/valve workbooks remain absent. Their numerical and 48/49-node regression gates are unrun. See [implementation status](docs/IMPLEMENTATION_STATUS.md) and [architecture](docs/ARCHITECTURE.md).
+The planning PDF, reviewed 1010 PDF and exact 627-row flange workbook were supplied. The v1.2 generator, original/golden 1010 assets, its 13 legacy tests and canonical valve workbook remain absent. Their numerical and 48/49-node regression gate is separate and unrun; work on the reviewed source proceeds without inventing those assets. Native CII application import and stress analysis have not been performed. See [implementation status](docs/IMPLEMENTATION_STATUS.md) and [architecture](docs/ARCHITECTURE.md).
 
 Resolve PyMuPDF's AGPL/commercial licensing before a proprietary hosted release. The PDF adapter remains isolated for replacement. No production deployment or environment publication is performed by the setup scripts.

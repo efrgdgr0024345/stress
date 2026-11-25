@@ -30,9 +30,17 @@ file and an engineering data handoff, **not a claim that arbitrary `.xlsx` files
 are accepted by CAESAR II**. The user selected two or three useful output types:
 the website provides this workbook, UTF-8 CSV tables in a ZIP, and a gated native
 CAESAR II 15.1 `.cii` import candidate. See [formats and vendor sources](CAESAR_FORMATS.md).
-Direct import is expanded requirement OOS-005. The first native profile supports
-straight pipe/endpoints with complete, explicit engineering input; it does not
-claim full drawing-to-CAESAR conversion or application round-trip qualification.
+The current bounded native profile supports complete explicit straight-pipe,
+rigid valve/flange, B31J welding-tee and basic translational-restraint inputs.
+BEND generation remains an unmet requirement with a named external contract
+blocker. No actual CAESAR application round trip is claimed.
+
+Additional shared tabs expose component ports, dimensions, printed coordinates,
+station constraints/datums, graph edges, numbering history, catalog schedules,
+per-occurrence N/A data, independent manufacturer reviews and native component
+requirements/inputs. Every CSV table is included in the review packet at the
+same project revision. Native input drafts keep their original entered text;
+only finite, in-range values populate their numeric draft cells.
 
 Before an import-ready claim, qualify at least: all active elements represented;
 correct signed deltas/units; actual pipe OD/wall/material and load properties;

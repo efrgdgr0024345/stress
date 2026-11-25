@@ -52,7 +52,7 @@ class NativeObjectRoundtripTests(unittest.TestCase):
         self.assertEqual(len(names),len(manifest))
         self.assertTrue(all('physical_point_id' in r for r in manifest))
         for r in manifest:
-            if r['role'] in ('number','bubble','leader'):self.assertEqual(r['physical_point_id'],point)
+            if r['role'] in ('number','bubble','point-warning') or r['role'].startswith('leader'):self.assertEqual(r['physical_point_id'],point)
             else:self.assertIsNone(r['physical_point_id'])
         edited=set()
         with fitz.open(stream=pdf,filetype='pdf') as doc,fitz.open(SOURCE) as original:

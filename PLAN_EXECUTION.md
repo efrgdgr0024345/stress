@@ -1,5 +1,11 @@
 # Original plan execution and acceptance ledger
 
+Current work follows the [25 November real-1010 execution ledger](docs/1010_REVIEW_EXECUTION.md)
+and [bounded closeout plan](docs/CLOSEOUT_PLAN.md). That request proceeds with
+the reviewed PDF without waiting for missing original/golden assets. The legacy
+gate below remains separate. BEND CII generation is still an unmet original
+requirement; a working review demo must not be labelled full plan completion.
+
 This ledger tracks original requirements, not just successful demonstrations.
 The source is `docs/CODEX_MASTER_PLAN.txt` (the supplied 11-page coding plan).
 No milestone is complete solely because software tests pass.

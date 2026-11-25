@@ -7,9 +7,11 @@ four finite checkpoints.
 
 ## Starting point
 
-Stages 1–5 are implemented and locally checked. The current work is stage 6.
-These changes have not yet been deployed to the live site. The exact reviewed
-PDF and supplied reference workbook are pinned in the repository.
+Stages 1–6 are implemented and locally checked. Stage 7's review packet and
+documented CII subset are checked; BEND serialization remains an unmet original
+requirement, pending a verified vendor contract. The current work is release
+qualification, followed by live proof. These changes have not yet been deployed.
+The exact reviewed PDF and supplied reference workbook are pinned in the repository.
 
 The target is a working engineering-review system. Missing source facts are
 valid blue exceptions, not software defects to solve by guessing. The five
@@ -38,8 +40,10 @@ records may export; missing or unsupported records must block with specific
 reasons. Keep actual CAESAR application-import qualification distinct from
 software tests. Do not claim an application round trip that was not performed.
 
-**Exit:** artifact checks and minimum-component CII tests pass; no export/UI
-expansion beyond the primary request.
+**Exit:** review artifacts and supported-component CII tests pass. Record the
+unmet BEND contract explicitly; it prevents full native-model completion but
+does not prevent delivering the review workflow. Add no export/UI expansion
+beyond the primary request.
 
 ## 3. Release and prove it live — stage 8
 

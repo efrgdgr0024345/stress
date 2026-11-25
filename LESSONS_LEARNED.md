@@ -299,3 +299,43 @@ Use the existing entry format: a unique `LESSON-###` heading, category, status, 
 - Lesson: Live sheet/view changes exposed an unhandled PDF worker-termination error during streaming cleanup even though the engineering controls and Excel downloads passed. Fast local navigation did not expose it.
 - Action: Own the authenticated, abortable PDF download before passing bounded file bytes to the renderer. Cancel obsolete loads and observe teardown promises. Test delayed source/preview cancellation, reopen and genuine HTTP failures; keep actual download errors visible.
 - Evidence: Release 0.7.1 adds this focused browser lifecycle regression to the full workflow. It preserves the drawing pack interface and existing provider processing.
+
+## LESSON-038 — Source observations do not accept engineering interfaces
+
+- Category: Engineering review integrity
+- Status: Adopted
+- Lesson: The real reviewed drawing can supply 47 visible source locations while five theoretical elbow COD requirements still lack dimension proof. A visible symbol or printed angle cannot fill an unlocated theoretical interface.
+- Action: Keep source inspection, port classification, XYZ, stations and route decisions separate. Preserve per-interface blue reasons and source evidence, including the unclassified PV process ends.
+- Evidence: The real 1010 source review and source-exception workflows retain 60 requirements, 55 proposed mappings and five unlocated CODs without fabricated positions.
+
+## LESSON-039 — A printed support gap still needs direction and a datum
+
+- Category: Station evidence
+- Status: Adopted
+- Lesson: A real printed 2.1/8-inch gap is neither a decimal 2.1 value nor an accepted station chain. Correct source witnesses alone do not establish route direction, origin or comparable station bases.
+- Action: Require the explicit source format, reviewed endpoint direction, route and datum before applying along-centreline stations. Keep signed XYZ and Euclidean separation separate from the six-inch support rule.
+- Evidence: The real station browser/API cases cover actual support witnesses, relative-only chains, explicit origins, stale proofs and numeric workbook output with unknowns left blank.
+
+## LESSON-040 — Check rendered native bounds against planned clearance
+
+- Category: Native PDF integrity
+- Status: Adopted
+- Lesson: PyMuPDF expanded a native circle rectangle by one point beyond the reserved layout box. A source-clear plan therefore did not guarantee the same native annotation bounds after serialization.
+- Action: Render inside the reserved bounds, compare the actual native output with source protections, and require preview, graphical acceptance and normal export to retain identical placements. Edit and reopen every generated object while comparing original encoded and decoded streams.
+- Evidence: The focused real 47-point PDF workflow checks 285 individual additions, protected NORTH/dimensions, explicit blue warnings and byte-identical original streams through two library save/reopen cycles.
+
+## LESSON-041 — Explicit N/A is more accurate than a convenient catalog match
+
+- Category: Catalog and manufacturer evidence
+- Status: Adopted
+- Lesson: All 627 supplied flange reference rows retain estimated quality and unspecified facing. Those rows cannot silently prove the drawing's RTJ/type requirements or supply manufacturer-specific valve data.
+- Action: Preserve the exact workbook and limitations, reject unsupported substitutions, and record reversible source-bound N/A decisions. Keep project manufacturer confirmation independent from dataset approval and catalog quality.
+- Evidence: The real catalog workflow qualifies the exact workbook and six source rows covering 18 flange/valve occurrences; unknown weights/lengths stay null and the separate PV classification stays blue.
+
+## LESSON-042 — An unresolved native format contract must block serialization
+
+- Category: Native interchange
+- Status: Adopted
+- Lesson: A physical theoretical COD does not define a CAESAR native bend far-end node, and the published 15.1 BEND field description contains an unresolved count/layout ambiguity. Guessing either contract could emit a plausible but wrong model.
+- Action: Keep BEND generation blocked until authoritative geometry and field-layout evidence is verified. Label documented rigid, tee and restraint output as import candidates, retain incomplete drafts and require actual CAESAR application qualification separately.
+- Evidence: The bounded component contract, software-only positive file fixtures and real 1010 missing-data browser case distinguish valid candidate records from an unproved real model; the real CII download remains blocked.

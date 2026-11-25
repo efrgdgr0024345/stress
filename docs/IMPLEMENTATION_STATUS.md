@@ -1,84 +1,83 @@
-# Implementation status — 0.7.1
+# Implementation status — current source tree
 
-## Implemented review application
+This describes the implemented review workflow and completed focused local
+proofs. It does **not** assert that a new release is installed or live testing
+has finished. [LIVE_VALIDATION.md](../LIVE_VALIDATION.md) records the actual
+hosting release, dates and measurements; older live counts must not be replaced
+by local source-tree results. See [How an engineer finishes 1010](HOW_TO_FINISH_1010.md)
+for the current UI sequence.
 
-The Python/cPanel pilot is at `https://easyai.com.au/stress/`. The configured
-updater installs compatible releases and retains rollback. Check live health
-for the installed release; repository state alone does not prove deployment.
-Version 0.5.0 adds ordinary-upload DigitalOcean page processing, scoped transfers,
-early per-page review in the unchanged project UI, and bounded shared budgets.
-The canonical flange workbook is now registered privately and all 627 records
-are prepared for human dataset approval. This remains an engineering-review
-pilot; original graph/security/application qualification gates are still open.
-Normal cloud processing and actual PDF rendering passed live tests on the real
-two-page source and a larger synthetic three-page file in releases 0.5.0–0.5.1.
-Release 0.5.2 adds scoped reviews, independent sealed engineering-review issues,
-workspace people/roles and authenticator setup. These controls passed actual hosting tests with clearly labelled synthetic accounts and a synthetic source in 0.5.3; evidence is version controlled.
-Version 0.6.0 adds physical interface requirements, reviewed source-port mappings, signed XYZ constraints, shared model spreadsheets and an owner-only recoverable project reset. Its live verification is recorded separately.
-See [execution ledger](../PLAN_EXECUTION.md) and [plan alignment](PLAN_ALIGNMENT.md).
+## Reviewed 1010 scope
 
-Version 0.7.0 adds local continuation reference candidates, signed discrepancy
-checks, reviewed shared physical identity and exact COD proposals/acceptance
-from four proved leg points. All share website/Excel tables and source-change
-invalidation. Patch 0.7.1 fixes PDF load cancellation during navigation.
-Latest authenticated live checks and clean-workspace evidence are recorded in
-[LIVE_VALIDATION.md](../LIVE_VALIDATION.md). On the real source, three continuation
-references remain unresolved, all 56 required ports are unlocated and zero
-physical nodes are proved. See [engineering-core scope](ENGINEERING_CORE_07.md).
+The exact two-page [1010 Reviewed.pdf](../fixtures/1010/README.md) has SHA-256
+`7b97d44bef3d544c4c98ed0667c29607ce58fa4a401dd2463f66010a9615bb59`.
 
-- macOS-inspired React interface and root `loader.php`, with each lesson displayed in a distinct coloured icon card beneath Load project. The Markdown register is version controlled and read dynamically.
-- Same-origin, authenticated project loading directly into the in-browser drawing workspace, with project URLs retained across reloads.
-- Original PDF pages rendered inside the website. Independent node bubble/anchor editing, explicit model order, main/branch topology, shared point representations, exact engineering units, blue/red reasons and inclusive 152.4 mm support checks.
-- Additional native text, rectangle, ellipse and line notes created, edited and removed within the website. Their geometry remains presentation data.
-- Materials inventory correction, reconciliation and removal. Specification-bearing changes invalidate previously saved catalog matches.
-- XLSX source intake, sheet/header/data-range preview, explicit field mapping/constants, unit conversion and normalization, review errors, versioned immutable dataset approval and strict component matching.
-- Per-project catalog row snapshots, workbook and record hashes, approval/match evidence, flange bolting allowances with explicit scope, numeric schedules and N/A for unknown properties.
-- Source manufacturer quality is distinct from actual project manufacturer confirmation. A manufacturer's reference record cannot confirm a drawing's manufacturer without explicit vendor/model constraints and evidence.
-- Generated PDF preview inside the website and downloadable traceability ZIP. Standard native annotation objects and original content-stream integrity checks; no screenshot-only additions.
-- Revision comparison, JSON snapshot download and restoration as a new draft, preserving prior snapshots and exports.
-- Server-side tenant/role checks, sessions, optimistic edit conflicts, source hashes, audit events and version-idempotent artifacts.
-- Content-bound section reviews during processing, explicit exceptions, independent MFA-protected review issues, integrity-checked preserved ZIPs and new drafts after edits. See [review workflow](REVIEW_WORKFLOW.md).
-- Repeatable setup/start scripts, isolated Python environment, npm lockfile, Docker/Compose, CI, API/domain tests and a real Chromium workflow with disposable storage.
-- Administrator Logs sidebar with structured request/browser/PDF/update events, filters, request correlation and privacy-conscious diagnostic downloads. See [capture limits](LOGGING.md).
-- GitHub release checking, staged code-compatible updates, private backups, failed-health rollback and administrator-triggered rollback. Automatic updates require the account-level cron runner and explicit opt-in.
-- The user-provided reviewed 1010 PDF is preserved in GitHub and exercises upload, browser rendering, saved notes and native export in disposable software tests. See [real drawing evidence](REAL_DRAWING_VALIDATION.md).
-- Authenticated asynchronous intake, private quarantine, source hashes, durable stage/page checkpoints, leases/fencing, cancellation, retries, expired-lease recovery, duplicate protection and project serialization.
-- Native text/vector evidence and Tesseract OCR for outlined/low-text pages, evidence-linked BOM/identity/graph proposals, explicit exact-dimension profile, source exclusions and provisional layout. General recognition remains bounded and unverified facts stay null.
-- Separate supervised parser with a tested no-network Docker boundary. Optional Landlock/seccomp fails closed; an explicit resource-limited same-account cPanel pilot mode is available where isolation is unsupported.
-- Automatic PDF/XLSX review publication and transactional correction outbox. Cached refresh retains reviewed objects, manual catalog decisions and deletion tombstones; stale/cancelled workers cannot publish artifacts.
-- Source revision intake preserving other active documents and unique identical pages across reorder, with changed-page edits archived for reconciliation.
-- Excel-style website results with spreadsheet tabs/search, linked drawing/material review, signed element/property editing, native export settings and responsive table scrolling.
-- Real editable, numeric XLSX with exact decimal text and literal user strings; CSV tables; gated CAESAR II 15.1 straight-pipe CII candidate based on the vendor's documented contract. Actual CAESAR application qualification is pending.
-- Intake authentication before body parsing, body/rate/aggregate job/page limits and active-content rejection. Updates wait for the separate drawing runner before replacing code.
+| Capability | Implemented behaviour and bounded proof |
+| --- | --- |
+| Source interfaces | 47 provisional source points, 60 required interfaces, 55 proposed mappings and five explicitly unlocated theoretical CODs. Source inspection, classification and engineering acceptance are separate. |
+| Continuations | Four curated source references, reversible reject/external-boundary/reopen decisions, independent signed XYZ comparisons and explicit exact-identity acceptance. Every shared depiction and retired alias is retained; changed source evidence invalidates reviews. |
+| Dimensions and stations | Explicit signed XYZ/COD constraints and separate along-route station constraints. Real printed gap proposals retain units, unsigned direction and source witnesses; no pixels or Euclidean distance supply stations. Unknown geometry stays null and blue. |
+| Graph and numbering | Source inspection precedes explicit line/route/order/takeoff decisions. Preview/hash-bound atomic apply; main 10/+10, branches next hundred, new lines next thousand. Unassigned points are retained; numbering history preserves physical UUIDs and evidence. |
+| Catalogs | Exact user-provided 627-row workbook retained under fixtures/catalogs. Six classified source rows cover 18 flange/valve occurrences; available data leaves all six technical schedules N/A. PV remains a separate unproved classification, not a fabricated valve. |
+| Manufacturer | Independent source-bound project confirmation/reopen/history. Catalog quality or dataset approval never confirms the installed manufacturer. |
+| Native PDF | Whole-project server-PDF preview and explicit graphical-only acceptance, protected source dimensions/materials/NORTH, native individual labels/bubbles/leaders, axis/moment objects, schedules and blue warnings. The focused 47-point case produced 285 additions. Every object was edited/reopened twice with original raw/decoded streams and original annotations preserved. |
+| Review exports | Shared website/XLSX/CSV tables, numeric cells with blank unknowns, source/evidence links, exceptions and histories. Revision packets include the native PDF/manifest, snapshot, numbering map and component/readiness reports; CII is conditional. |
+| Native component data | Explicit DRAFT/REVIEWED entries for rigid, tee, restraint and bend inputs. Actual 1010 browser proof saves missing BEND data as null and retains the blocked native download. |
 
-## Deliberate review boundaries
+These focused proofs use disposable projects. Real source observations are not
+an engineered golden model. Software-only positive topology/CII fixtures are
+labelled separately and do not insert engineering facts into the live drawing.
+Final combined regression and hosted validation are separate release gates.
 
-- Engineering acceptance is explicit. Automatic exact station proposals are limited to the documented native semantic profile. General vector/OCR-to-pipe recognition and complete automatic component-specific station/COD proof are not complete. Signed XYZ constraints and reviewed source-port rules are implemented.
-- Main/branch order is explicit, with branches referring to a main-run tee. Arbitrary loops, branch-on-branch networks and shared namespaces across different lines need richer engineering contracts. The axis solver reports inconsistent cycles and underdetermined axes.
-- Continuation references and per-axis comparisons are automatic candidates. Exact source-proved identity requires explicit topology/interface review and is invalidated by source changes. General network discovery and independent modelling qualification remain pending.
-- Source-aware provisional layout avoids extracted exclusions where supported. Wrapping/bounds checks prevent truncated native tables/notes. Complete leader/collision qualification remains open and layout requires review.
-- The catalog mapper is general and reviewable, not an assertion that the missing canonical workbooks have been imported. Historical 1010 numeric acceptance gates remain unrun.
-- Engineering-review issues can have explicit independent approval. Verified-for-modelling release, complete target application qualification and production security are not claimed. MFA/people controls are implemented; private seed/key files are permission-protected, not encryption at rest.
-- Standard PDF annotations support broad compatibility. The browser editor is the primary working environment; individual third-party readers may differ in their annotation editing features.
-- SQLite/local files are pilot adapters. Scoped remote page transport is implemented in 0.5.0; PostgreSQL/S3, malware scanning, retention/restore drills and full production monitoring remain open. Local bounded registration/splitting is not a separate filesystem sandbox.
-- ZIP drawing-pack upload, full native CAESAR component export and external annotation re-import are not implemented. The first native export profile blocks unsupported components.
+## Native CII: implemented subset and unmet requirement
 
-## Reference assets
+The profile is `caesar-15.1-reviewed-components-v1`. Complete documented straight
+pipe, rigid valve/flange records, bounded B31J welding tees and basic grounded
+translational restraints can produce import candidates. All supporting source,
+station, topology, signed-vector, property and component gates remain strict.
+Unknown weight, gap, stiffness, geometry or manufacturer data is not zero.
 
-`1010 Reviewed.pdf` has now been supplied and retained at
-[`fixtures/1010/`](../fixtures/1010/README.md). Most engineering lettering is
-outlined vectors and needs recognition beyond the current text parser. This
-reviewed drawing is not the original/golden engineering fixture listed below.
+**BEND generation remains an unmet original requirement.** The verified 15.1
+native field-layout and theoretical-COD/native-node geometry contracts are
+missing/ambiguous. No point mapping, radius entry, note or checkbox bypasses the
+block. [CII_151_COMPONENT_CONTRACT.md](CII_151_COMPONENT_CONTRACT.md) records the
+bounded contract and unresolved bend questions.
 
-The flange workbook has now been supplied (627 rows in four prepared datasets).
-The remaining original reference assets are:
+The actual 1010 drawing still lacks accepted engineering geometry, routes,
+stations, complete component data and manufacturer evidence; its CII remains
+blocked. A real CAESAR II application import/round trip and stress analysis have
+not been performed. `qualified_application_roundtrip` remains false. Native
+serialization tests are not proprietary-application qualification.
+
+## Existing application and operating boundaries
+
+The website retains the macOS-style loader and GitHub lessons register,
+authenticated in-browser drawings, materials/source editing, durable extraction
+jobs, DigitalOcean page processing, audit/log downloads, revision history,
+review controls, updater/rollback and recoverable scoped workspace reset. Page
+splitting is a backend processing detail; the website keeps the project/drawing
+pack experience. Prefer the existing bounded serverless processing path rather
+than adding an always-on VPS for these jobs.
+
+Independent review controls do not automatically approve the real drawing.
+Outputs remain engineering review drafts until an applicable explicit review
+issue is completed. Verified-for-modelling qualification, stress analysis and
+universal desktop-PDF-editor compatibility are not claimed. SQLite/private
+files and bounded same-account cPanel processing remain pilot arrangements;
+local resource limits are not a separate filesystem sandbox. Production
+security, backup/restore and deployment boundaries remain documented in the
+hosting/security guides.
+
+## Separate original/golden regression gate
+
+The reviewed PDF and supplied flange workbook are available. These original
+reference assets remain absent:
 
 1. `CAESAR_II_Integrated_Generator_v1_2_Valve_Database.zip`, including its original 13 tests.
-2. `1010_original.pdf`, authoritative project/annotation blueprints, flange mapping and golden outputs.
+2. `1010_original.pdf`, authoritative engineering/annotation blueprints, flange mapping and golden outputs.
 3. `Valve_Database_Latest.xlsx`.
 
-Import these immutably when available. Pin hashes, retain their original tests, map the actual source schemas and add the documented numeric, 48-unique/49-display and native-object regressions. Synthetic fixtures must never be presented as real 1010 evidence.
-
-The cPanel pilot was installed through operator-run terminal commands; the cloud
-environment was not published by these changes. Keep the pilot access-restricted
-while the documented security and operational work remains unfinished.
+Their historical numeric and 48-unique/49-display regressions remain unrun. Keep
+that gate explicit; do not force these counts onto the reviewed drawing or stop
+its source-review workflow waiting for missing assets. Import future assets
+immutably with pinned hashes, without substituting synthetic fixtures.
