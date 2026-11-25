@@ -2069,21 +2069,29 @@ function Materials({
                         <div>
                           <Badge
                             tone={
-                              m.catalog_match?.status ===
-                              "MANUFACTURER_CONFIRMED"
+                              m.catalog_review_state?.match_current &&
+                              m.project_manufacturer_status === "CONFIRMED"
                                 ? "green"
                                 : "amber"
                             }
                           >
-                            {m.catalog_match
-                              ? label(
-                                  m.catalog_match.status || "REFERENCE_ONLY",
-                                )
-                              : "No exact match"}
+                            {m.catalog_review_state?.status
+                              ? label(m.catalog_review_state.status)
+                              : m.catalog_match
+                                ? `Catalog: ${label(m.catalog_match.record.quality)}`
+                                : "No exact match"}
                           </Badge>
                           <small className="block muted">
+                            Manufacturer:{" "}
+                            {label(
+                              m.project_manufacturer_status || "UNCONFIRMED",
+                            )}
+                          </small>
+                          <small className="block muted">
                             {m.catalog_match
-                              ? `W ${m.catalog_match.record.weight_n ?? "N/A"} N · L ${m.catalog_match.record.length_mm ?? "N/A"} mm`
+                              ? m.catalog_review_state?.match_current === false
+                                ? "Catalog values N/A · review required"
+                                : `Catalog W ${m.catalog_match.record.weight_n ?? "N/A"} N · L ${m.catalog_match.record.length_mm ?? "N/A"} mm · ${m.catalog_match.record.weight_scope || "scope unconfirmed"}`
                               : ""}
                           </small>
                           <button

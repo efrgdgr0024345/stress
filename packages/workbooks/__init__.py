@@ -92,14 +92,19 @@ def tables(project):
     components=[]
     for m in project["materials"]:
         match=m.get("catalog_match") or {};r=match.get("record") or {}
-        components.append({"item":m["item_no"],"page":sheets.get(m["sheet_id"],{}).get("page_index",-1)+1,"family":m["family"],"description":m["description"],"size":m["size"],"quantity":m.get("quantity"),"source_value":m.get("quantity_value"),"raw_quantity":m.get("quantity_raw",""),"unit":m.get("quantity_unit","count"),"located":m.get("observed"),"weight":r.get("weight_n"),"half":r.get("half_weight_n"),"full":r.get("full_weight_n"),"length":r.get("length_mm"),"scope":r.get("weight_scope"),"quality":r.get("quality"),"match":match.get("status","UNMATCHED"),"dataset":match.get("catalog_version_id"),"evidence":m.get("evidence",""),"id":m["id"]})
-    result.append(table("Components",[("item","Item","text"),("page","Page","number"),("family","Family","text"),("description","Source description","text"),("size","Size","text"),("quantity","Listed count","number"),("source_value","Source quantity value","decimal"),("raw_quantity","Raw source quantity","text"),("unit","Quantity unit","text"),("located","Located count","number"),("weight","Weight (N)","decimal"),("half","Half bolting (N)","decimal"),("full","Full bolting (N)","decimal"),("length","Length (mm)","decimal"),("scope","Weight scope","text"),("quality","Catalog source quality","text"),("match","Project match state","text"),("dataset","Dataset ID","text"),("evidence","Evidence","text"),("id","Material ID","text")],components))
+        from packages.catalogs.project_review import record_weight_values
+        state=m.get('catalog_review_state',{})
+        values=record_weight_values(r) if state.get('match_current') is not False else record_weight_values(None)
+        components.append({"item":m["item_no"],"page":sheets.get(m["sheet_id"],{}).get("page_index",-1)+1,"family":m["family"],"description":m["description"],"size":m["size"],"quantity":m.get("quantity"),"source_value":m.get("quantity_value"),"raw_quantity":m.get("quantity_raw",""),"unit":m.get("quantity_unit","count"),"located":m.get("observed"),"weight":values.get("weight_n"),"half":values.get("half_weight_n"),"full":values.get("full_weight_n"),"length":values.get("length_mm"),"scope":r.get("weight_scope"),"quality":r.get("quality"),"match":state.get('status') or match.get("status","UNMATCHED"),"dataset":match.get("catalog_version_id"),"evidence":m.get("evidence",""),"id":m["id"],"assembly":values.get('assembly_weight_n'),'manufacturer_status':m.get('project_manufacturer_status')})
+    result.append(table("Components",[("item","Item","text"),("page","Page","number"),("family","Family","text"),("description","Source description","text"),("size","Size","text"),("quantity","Listed count","number"),("source_value","Source quantity value","decimal"),("raw_quantity","Raw source quantity","text"),("unit","Quantity unit","text"),("located","Located count","number"),("weight","Bare flange / valve weight (N)","decimal"),("half","Flange + half bolting total (N)","decimal"),("full","Flange + full bolting total (N)","decimal"),("length","Length (mm)","decimal"),("scope","Weight scope","text"),("quality","Catalog source quality","text"),("match","Project match state","text"),("dataset","Dataset ID","text"),("evidence","Evidence","text"),("id","Material ID","text"),("assembly","Assembly includes bolting (N)","decimal"),("manufacturer_status","Project manufacturer state","text")],components))
     from packages.physical.spreadsheets import tables as physical_tables
     result.extend(physical_tables(project))
     from packages.physical.station_tables import tables as station_tables
     result.extend(station_tables(project))
     from packages.engineering.graph_tables import tables as graph_tables
     result.extend(graph_tables(project))
+    from packages.catalogs.project_tables import tables as catalog_tables
+    result.extend(catalog_tables(project))
     features=[]
     for feature in project.get('automation',{}).get('feature_proposals',[]):
         sheet=sheets.get(feature['sheet_id'])

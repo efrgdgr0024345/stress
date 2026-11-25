@@ -98,6 +98,8 @@ export interface Material {
   observed_quantity_value?: string | null;
   observed: number;
   evidence: string;
+  project_manufacturer_status?: "UNCONFIRMED" | "CONFIRMED" | "STALE";
+  catalog_review_state?: { match_current: boolean; status: string };
   catalog_match?: {
     status?: string;
     catalog_version_id: string;

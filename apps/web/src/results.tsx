@@ -12,6 +12,7 @@ import { PhysicalModelControls, type ModelSelection } from "./physical-model";
 import { ContinuationControls } from "./continuations";
 import { StationControls } from "./stations";
 import { TopologyReviewControls } from "./topology-review";
+import { ProjectCatalogReviewControls } from "./project-catalog-review";
 import { Dialog } from "./ui";
 import "./results.css";
 
@@ -227,6 +228,7 @@ export function EngineeringResults({
           onUpdate={onUpdate}
           onInspect={(id) => onReview(id, "node")}
         />
+        <ProjectCatalogReviewControls project={project} onUpdate={onUpdate} />
         <div className="results-formula-bar">
           <span>fx</span>
           <span>

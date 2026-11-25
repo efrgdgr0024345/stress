@@ -353,6 +353,14 @@ def install(api):
                 422, "Unknown specification key. Use the explicit catalog match fields."
             )
         spec = {**body.spec, "family": item["family"]}
+        from packages.catalogs.project_review import _specification
+        from packages.catalogs import match_value
+        observed=_specification(p,item)
+        conflicts=[key for key in ('nps','standard','rating','component_type','facing','end_connection','api_bore')
+                   if observed.get(key) and spec.get(key) and match_value(key,observed[key])!=match_value(key,spec[key])]
+        if conflicts:
+            if dry_run:return {'status':'SOURCE_SPEC_CONFLICT','missing':[],'candidates':[],'count':0,'conflicts':conflicts}
+            raise HTTPException(422,'Catalog specification conflicts with current source '+', '.join(conflicts)+'. Correct the material source evidence before selecting a different component.')
         result = exact_match(version["data"]["records"], spec)
         if dry_run:
             return result
@@ -373,15 +381,9 @@ def install(api):
                 "catalog_approval": version["data"]["approval"],
                 "record": deepcopy(result["candidates"][0]),
                 "status": (
-                    "MANUFACTURER_CONFIRMED"
-                    if result["candidates"][0]["quality"] == "MANUFACTURER_CONFIRMED"
-                    and spec.get("vendor", "").strip()
-                    and spec.get("model", "").strip()
-                    else (
-                        "ESTIMATED"
-                        if result["candidates"][0]["quality"] == "ESTIMATED"
-                        else "REFERENCE_ONLY"
-                    )
+                    "ESTIMATED"
+                    if result["candidates"][0]["quality"] == "ESTIMATED"
+                    else "REFERENCE_ONLY"
                 ),
                 "spec": spec,
                 "reason": body.reason,

@@ -15,6 +15,29 @@ class Workflows(unittest.TestCase):
     upload = fixtures.ApiTests.upload
     node = fixtures.ApiTests.node
 
+    def test_exact_catalog_record_cannot_override_the_current_source_size(self):
+        _,dataset,spec=self.dataset()
+        response=self.client.post(f"/api/v1/catalog-versions/{dataset['id']}/approve",json={
+            'reason':'SOFTWARE ONLY source-size conflict guard; this fixture is not real engineering approval.','confirmed':True})
+        self.assertEqual(response.status_code,200,response.text)
+        p=self.client.get('/api/v1/projects').json()[0]
+        item=next(m for m in p['materials'] if m['family']=='flange')
+        body={k:item[k] for k in ('sheet_id','item_no','family','description','quantity','observed')}
+        body.update(version=p['version'],size='2 in',evidence='SOFTWARE ONLY explicit source NPS2 conflicts with the available NPS8 catalog record.')
+        response=self.client.patch(f"/api/v1/projects/{p['id']}/materials/{item['id']}",json=body)
+        self.assertEqual(response.status_code,200,response.text);p=response.json()
+        path=f"/api/v1/projects/{p['id']}/materials/{item['id']}/catalog-match"
+        request={'version':p['version'],'catalog_version_id':dataset['id'],'spec':spec,
+                 'reason':'SOFTWARE ONLY: an exact NPS8 record must never become a mass for a source NPS2 flange.'}
+        preview=self.client.post(path+'?dry_run=true',json=request)
+        self.assertEqual(preview.status_code,200,preview.text)
+        self.assertEqual(preview.json()['status'],'SOURCE_SPEC_CONFLICT')
+        response=self.client.post(path,json=request)
+        self.assertEqual(response.status_code,422,response.text)
+        current=self.client.get(f"/api/v1/projects/{p['id']}").json()
+        self.assertEqual(current['version'],p['version'])
+        self.assertFalse(next(m for m in current['materials'] if m['id']==item['id']).get('catalog_match'))
+
     def dataset(self, duplicate=False, invalid=False, confirmed=False):
         values = {
             "family": "flange",
@@ -237,7 +260,9 @@ class Workflows(unittest.TestCase):
         r = self.client.post(path, json=body)
         self.assertEqual(r.status_code, 200, r.text)
         matched = next(m for m in r.json()["materials"] if m["id"] == item["id"])
-        self.assertEqual(matched["catalog_match"]["status"], "MANUFACTURER_CONFIRMED")
+        self.assertEqual(matched["catalog_match"]["record"]["quality"], "MANUFACTURER_CONFIRMED")
+        self.assertEqual(matched["catalog_match"]["status"], "REFERENCE_ONLY")
+        self.assertTrue(any(i['code']=='MANUFACTURER_UNCONFIRMED' and i.get('material_id')==item['id'] for i in r.json()['issues']))
 
     def test_notes_native_export_and_revision_recovery(self):
         p = self.client.get("/api/v1/projects").json()[0]

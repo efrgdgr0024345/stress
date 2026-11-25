@@ -37,7 +37,11 @@ def scopes(project, processing_sources=()):
             if item.get('quantity_unit','count')=='unresolved' or (item.get('quantity') is None and item.get('quantity_value') is None):missing.append('SOURCE_QUANTITY_UNKNOWN')
             if item['item_no'].startswith('unreadable-'):missing.append('SOURCE_ITEM_NUMBER_UNREADABLE')
             if item['family'] in ('flange','valve') and not item.get('catalog_match'):missing.append('CATALOG_MATCH_UNRESOLVED')
-        add('materials',sheet['id'],title+' · materials',{'sheet':proof,'items':items},observed(sheet),missing)
+        material_ids={m['id'] for m in items}
+        add('materials',sheet['id'],title+' · materials',{'sheet':proof,'items':items,
+            'catalog_reviews':[r for r in project.get('project_catalog_reviews',[]) if r['material_id'] in material_ids],
+            'manufacturer_reviews':[r for r in project.get('project_manufacturer_reviews',[]) if r['material_id'] in material_ids],
+            'catalog_manifest':project.get('catalog_review',{}).get('catalog_manifest',project.get('catalog_reference_manifest'))},observed(sheet),missing)
         graphics=[]
         for node in project['nodes']:
             for instance in node['instances']:
@@ -46,7 +50,7 @@ def scopes(project, processing_sources=()):
         layout=[]
         if sheet.get('axis') is None:layout.append('AXIS_PLACEMENT_UNRESOLVED')
         if any(m['family'] in ('flange','valve') for m in items) and sheet.get('table') is None:layout.append('SCHEDULE_PLACEMENT_UNRESOLVED')
-        visible=[{k:m.get(k) for k in ('item_no','description','size','quantity','quantity_value','quantity_unit','catalog_match')} for m in items]
+        visible=[{k:m.get(k) for k in ('item_no','description','size','quantity','quantity_value','quantity_unit','catalog_match','catalog_review_state','project_manufacturer_status')} for m in items]
         add('layout',sheet['id'],title+' · presentation',{'sheet':proof,'axis':sheet.get('axis'),
              'table':sheet.get('table'),'graphics':graphics,'schedule':visible,
              'notes':[a for a in project.get('annotations',[]) if a['sheet_id']==sheet['id']]},observed(sheet),layout)

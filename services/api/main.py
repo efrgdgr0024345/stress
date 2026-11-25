@@ -384,7 +384,12 @@ def project_read(project_id, actor, conn):
     ).fetchone()
     if not row:
         raise HTTPException(404, "Project not found.")
-    return json.loads(row["data"])
+    project=json.loads(row["data"])
+    if any(m.get('family') in ('flange','valve') for m in project.get('materials',[])):
+        from services.api.project_catalog_review import load_catalog_versions
+        from packages.catalogs.project_review import refresh_project_catalog_reviews
+        refresh_project_catalog_reviews(project,load_catalog_versions(sys.modules[__name__],actor['tenant'],conn))
+    return project
 
 
 def change(project_id, version, actor, action, update):
@@ -413,6 +418,9 @@ def change(project_id, version, actor, action, update):
         apply_station_reasons(project)
         from packages.physical.source_exceptions import refresh_source_exceptions
         refresh_source_exceptions(project)
+        from services.api.project_catalog_review import load_catalog_versions
+        from packages.catalogs.project_review import refresh_project_catalog_reviews
+        refresh_project_catalog_reviews(project,load_catalog_versions(sys.modules[__name__],actor['tenant'],conn))
         from packages.engineering.graph_review import apply_topology_reasons
         apply_topology_reasons(project)
         project['contributors'] = sorted(set(project.get('contributors', [])) | {actor['id']})
@@ -554,6 +562,10 @@ def projects(actor=Depends(user)):
                 (actor["tenant"],),
             )
         ]
+        from services.api.project_catalog_review import load_catalog_versions
+        versions=load_catalog_versions(sys.modules[__name__],actor['tenant'],conn)
+    from packages.catalogs.project_review import refresh_project_catalog_reviews
+    for project in values:refresh_project_catalog_reviews(project,versions)
     return [{**p, "issues": validate(p)} for p in values]
 
 
@@ -1262,6 +1274,8 @@ from services.api.stations import install as install_stations
 install_stations(sys.modules[__name__])
 from services.api.topology_review import install as install_topology_review
 install_topology_review(sys.modules[__name__])
+from services.api.project_catalog_review import install as install_project_catalog_review
+install_project_catalog_review(sys.modules[__name__])
 from services.api.continuations import install as install_continuations
 install_continuations(sys.modules[__name__])
 

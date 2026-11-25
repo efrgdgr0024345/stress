@@ -1,0 +1,2604 @@
+{
+  "schema": "actual-1010-catalog-source-evidence-1",
+  "source_filename": "fixtures/1010/1010 Reviewed.pdf",
+  "source_sha256": "7b97d44bef3d544c4c98ed0667c29607ce58fa4a401dd2463f66010a9615bb59",
+  "status": "SOURCE_OBSERVATIONS_AND_CATALOG_DIAGNOSTICS_ONLY_NO_ACCEPTED_MATCHES",
+  "notes": [
+    "All bboxes/anchors are original PDF points, never physical distances.",
+    "Visual source transcriptions preserve literal printed punctuation.",
+    "Source IDs are actual retained DO OCR evidence IDs; corrections below are source proposals, not human engineering classifications.",
+    "No canonical workbook bytes or authoritative manufacturer dataset is embedded in this JSON."
+  ],
+  "canonical_workbook": {
+    "filename": "PIPE100_Flange_Weights_B16_5_B16_47_API6A_Numbers.xlsx",
+    "source_sha256": "84cc71a66c2f47a3e70f27adf7c286cd346fdf722d5dfcf50158085d2e2d356a",
+    "known_source_hash": true,
+    "total_records": 627,
+    "records_by_sheet": {
+      "B16.5": 348,
+      "B16.47 Series A": 132,
+      "B16.47 Series B": 108,
+      "API 6A": 39
+    },
+    "quality_counts": {
+      "ESTIMATED": 627
+    },
+    "facing_counts": {
+      "UNSPECIFIED": 627
+    },
+    "families": {
+      "flange": 627
+    },
+    "api_record_count": 39,
+    "api_limitations": [
+      "Source types distinguish Companion(supplierapprox) and WeldNeck/Integral(approx), not source WN exact identity.",
+      "Facing UNSPECIFIED for every record; RTJ cannot strict-match.",
+      "10k6BX diagnostic rows explicitly use annular disk only; hub/geometry excluded.",
+      "API NPS absent; API bore separate from pipe NPS and weldneck pipe bore.",
+      "No valve records or manufacturer confirmed records."
+    ]
+  },
+  "material_rows": [
+    {
+      "id": "S1-ITEM-4",
+      "page_index": 0,
+      "material_item_no": "4",
+      "family_proposal": "flange",
+      "quantity_text": "4",
+      "quantity_count": 4,
+      "size_text": "8",
+      "material_row_bbox": [
+        1841.7294921875,
+        395.6666564941406,
+        2481.7294921875,
+        455.37432861328125
+      ],
+      "retained_material_evidence_id": "f6f98b72-3e0b-5a46-ae19-a4e75a7cb349",
+      "source_sha256": "7b97d44bef3d544c4c98ed0667c29607ce58fa4a401dd2463f66010a9615bb59",
+      "visual_transcription": "FLANGE 10000LB RTJWN 6.615\" BORE API 6A\nTYPE 6BX SIZE 7-1.16\" ITCS A694 GR F60\nMODIFIED NACE MRO175 ALLOY 625 OVERLAY\nON RING GROOVE",
+      "source_code_text": "FLWN-10K-RJ:8",
+      "api_size_text": "7-1.16\"",
+      "source_spec_proposal": {
+        "family": "flange",
+        "nps": "8",
+        "rating": "10000",
+        "standard": "API 6A",
+        "component_type": "WN",
+        "facing": "RTJ",
+        "end_connection": null,
+        "material": "ITCS A694 GR F60 MODIFIED NACE MRO175; ALLOY 625 OVERLAY ON RING GROOVE",
+        "vendor": null,
+        "model": null,
+        "code": "FLWN-10K-RJ:8",
+        "api_bore": null
+      },
+      "source_word_evidence": [
+        {
+          "text": "FLANGE",
+          "bbox": [
+            1880.8939208984375,
+            395.9776611328125,
+            1925.0172119140625,
+            405.5942687988281
+          ],
+          "evidence_id": "856c8b7b-0c49-561b-9c24-c12c06ff0e78",
+          "confidence": 0.9261
+        },
+        {
+          "text": "10000LB",
+          "bbox": [
+            1935.76513671875,
+            395.9776611328125,
+            1986.676513671875,
+            405.5942687988281
+          ],
+          "evidence_id": "428f9c03-3891-5e08-9a73-97ed5b0b421e",
+          "confidence": 0.8922
+        },
+        {
+          "text": "RTJWN",
+          "bbox": [
+            1995.7275390625,
+            395.9776611328125,
+            2031.93115234375,
+            405.5942687988281
+          ],
+          "evidence_id": "5ca9c9c5-8b6f-50f5-a018-6c0998321d66",
+          "confidence": 0.8922
+        },
+        {
+          "text": "6.615\u201d",
+          "bbox": [
+            2041.5477294921875,
+            395.9776611328125,
+            2084.53955078125,
+            405.5942687988281
+          ],
+          "evidence_id": "c8b887a9-1f3d-58a8-9e6f-d4144dfc4951",
+          "confidence": 0.6878
+        },
+        {
+          "text": "BORE",
+          "bbox": [
+            2095.28759765625,
+            395.9776611328125,
+            2124.137451171875,
+            405.5942687988281
+          ],
+          "evidence_id": "1e6b3ec1-23f1-56a1-897d-76eb3205e8b6",
+          "confidence": 0.9608
+        },
+        {
+          "text": "API",
+          "bbox": [
+            2132.62255859375,
+            395.9776611328125,
+            2152.9873046875,
+            405.5942687988281
+          ],
+          "evidence_id": "bd173163-8e7b-5486-a1ef-d5bfa2ceba3d",
+          "confidence": 0.9552
+        },
+        {
+          "text": "6A",
+          "bbox": [
+            2164.30078125,
+            395.9776611328125,
+            2178.44287109375,
+            405.5942687988281
+          ],
+          "evidence_id": "e5188aaf-e997-511c-8213-4314c72ebff9",
+          "confidence": 0.9623
+        },
+        {
+          "text": "FLWN-10K-RJ:8",
+          "bbox": [
+            2305.721435546875,
+            395.9776611328125,
+            2403.58447265625,
+            405.5942687988281
+          ],
+          "evidence_id": "761e49a3-fa41-578e-8458-e6fbc133585b",
+          "confidence": 0.8434
+        },
+        {
+          "text": "TYPE",
+          "bbox": [
+            1880.8939208984375,
+            410.6854248046875,
+            1909.7437744140625,
+            420.3020324707031
+          ],
+          "evidence_id": "fb9744e0-2742-5fa1-84eb-5d253208b4dc",
+          "confidence": 0.9272
+        },
+        {
+          "text": "6BX",
+          "bbox": [
+            1918.794677734375,
+            410.6854248046875,
+            1940.8563232421875,
+            420.3020324707031
+          ],
+          "evidence_id": "50f49486-f32a-598a-b44a-cf7943bd586a",
+          "confidence": 0.9134
+        },
+        {
+          "text": "SIZE",
+          "bbox": [
+            1949.341552734375,
+            410.6854248046875,
+            1978.1912841796875,
+            420.3020324707031
+          ],
+          "evidence_id": "ffc5d98b-910c-5a63-818c-e6c92abf1720",
+          "confidence": 0.8794
+        },
+        {
+          "text": "7-1.16\"",
+          "bbox": [
+            1987.8079833984375,
+            410.6854248046875,
+            2038.7193603515625,
+            420.3020324707031
+          ],
+          "evidence_id": "07883bd1-8501-51b1-b15a-ceee057ea1de",
+          "confidence": 0.8794
+        },
+        {
+          "text": "ITCS",
+          "bbox": [
+            2051.164306640625,
+            410.6854248046875,
+            2078.8828125,
+            420.3020324707031
+          ],
+          "evidence_id": "dc519928-ac3a-5721-8316-2f7212a90c67",
+          "confidence": 0.9146
+        },
+        {
+          "text": "A694",
+          "bbox": [
+            2086.80224609375,
+            410.6854248046875,
+            2116.783447265625,
+            420.3020324707031
+          ],
+          "evidence_id": "cabfd2a7-7f48-5629-b5b8-84e66c47afef",
+          "confidence": 0.9433
+        },
+        {
+          "text": "GR",
+          "bbox": [
+            2125.268798828125,
+            410.6854248046875,
+            2139.410888671875,
+            420.3020324707031
+          ],
+          "evidence_id": "fa7a7da2-b5fa-51e1-83f9-ee2bd23796b4",
+          "confidence": 0.9181
+        },
+        {
+          "text": "F60",
+          "bbox": [
+            2149.02734375,
+            410.6854248046875,
+            2169.957763671875,
+            420.3020324707031
+          ],
+          "evidence_id": "e8b3ea77-86da-5f6b-a8c5-b8e254cacb91",
+          "confidence": 0.7834
+        },
+        {
+          "text": "MODIFIED",
+          "bbox": [
+            1880.8939208984375,
+            425.9588317871094,
+            1940.8563232421875,
+            435.575439453125
+          ],
+          "evidence_id": "37a1b740-761b-5d88-aeb5-0625d7779a4b",
+          "confidence": 0.967
+        },
+        {
+          "text": "NACE",
+          "bbox": [
+            1949.9072265625,
+            425.9588317871094,
+            1978.7569580078125,
+            435.575439453125
+          ],
+          "evidence_id": "302795b4-e28b-5087-b08d-51df38498890",
+          "confidence": 0.9323
+        },
+        {
+          "text": "MRO175",
+          "bbox": [
+            1987.8079833984375,
+            425.9588317871094,
+            2032.496826171875,
+            435.575439453125
+          ],
+          "evidence_id": "3bb495b8-2a54-5172-8496-ef23d7499ead",
+          "confidence": 0.8059
+        },
+        {
+          "text": "ALLOY",
+          "bbox": [
+            2040.9820556640625,
+            425.9588317871094,
+            2078.8828125,
+            435.575439453125
+          ],
+          "evidence_id": "b6db3717-97ac-51f6-9eab-e45c52b7eb64",
+          "confidence": 0.9682
+        },
+        {
+          "text": "625",
+          "bbox": [
+            2087.367919921875,
+            425.9588317871094,
+            2109.4296875,
+            435.575439453125
+          ],
+          "evidence_id": "7bc14ee6-ab7e-595a-a0e7-d607a62616c0",
+          "confidence": 0.9609
+        },
+        {
+          "text": "OVERLAY",
+          "bbox": [
+            2117.34912109375,
+            425.9588317871094,
+            2170.5234375,
+            435.575439453125
+          ],
+          "evidence_id": "ad081b02-030d-51d5-9383-1aa5ce4e1a3e",
+          "confidence": 0.9609
+        },
+        {
+          "text": "ON",
+          "bbox": [
+            1880.3282470703125,
+            440.6665954589844,
+            1894.4703369140625,
+            450.2831726074219
+          ],
+          "evidence_id": "a74d2423-53b9-53d0-ab63-3efe3d21cb43",
+          "confidence": 0.9641
+        },
+        {
+          "text": "RING",
+          "bbox": [
+            1904.0869140625,
+            440.6665954589844,
+            1932.936767578125,
+            450.2831726074219
+          ],
+          "evidence_id": "c77acc75-4e82-557d-900f-6df6620a8e10",
+          "confidence": 0.9641
+        },
+        {
+          "text": "GROOVE",
+          "bbox": [
+            1941.9876708984375,
+            440.6665954589844,
+            1986.11083984375,
+            450.2831726074219
+          ],
+          "evidence_id": "546935d4-015e-57d6-94d7-9e200d4bd949",
+          "confidence": 0.9646
+        },
+        {
+          "text": "4",
+          "bbox": [
+            1841.7294921875,
+            396.0,
+            1848.7294921875,
+            405.3333435058594
+          ],
+          "evidence_id": "b7e8fccc-b2d0-5371-a6f8-b510bdbb17f0",
+          "confidence": 0.7488
+        },
+        {
+          "text": "8",
+          "bbox": [
+            2204.7294921875,
+            395.6666564941406,
+            2211.396240234375,
+            405.6666564941406
+          ],
+          "evidence_id": "45e6d582-e672-5dbf-aa9c-ec6a756c739b",
+          "confidence": 0.8308
+        },
+        {
+          "text": "4",
+          "bbox": [
+            2475.06298828125,
+            396.0,
+            2481.7294921875,
+            405.3333435058594
+          ],
+          "evidence_id": "a17c339b-388e-5479-a2aa-65da933d1266",
+          "confidence": 0.9688
+        }
+      ],
+      "occurrences": [
+        {
+          "feature_id": "961b9cb1-ba48-5674-83a9-32b276faf18b",
+          "occurrence": 1,
+          "flange_face": [
+            881.9932861328125,
+            413.39013671875
+          ],
+          "opposite_pipe_dot": [
+            896.8652648925781,
+            404.92999267578125
+          ],
+          "bbox": [
+            873.0444946289062,
+            400.678955078125,
+            904.0972900390625,
+            418.4991455078125
+          ],
+          "source_path_ids": [
+            4160,
+            4190
+          ]
+        },
+        {
+          "feature_id": "992baa76-1523-5a1e-b8fa-d93639030790",
+          "occurrence": 2,
+          "flange_face": [
+            1238.0999755859375,
+            557.9261474609375
+          ],
+          "opposite_pipe_dot": [
+            1238.1000366210938,
+            540.4722290039062
+          ],
+          "bbox": [
+            1229.1929931640625,
+            534.095703125,
+            1247.0069580078125,
+            563.03662109375
+          ],
+          "source_path_ids": [
+            4407,
+            4405
+          ]
+        },
+        {
+          "feature_id": "c5a7cb14-e325-561f-9a2a-d0d9fa5db342",
+          "occurrence": 3,
+          "flange_face": [
+            1238.0999755859375,
+            612.3314208984375
+          ],
+          "opposite_pipe_dot": [
+            1238.1000366210938,
+            629.7435913085938
+          ],
+          "bbox": [
+            1229.1929931640625,
+            607.2628173828125,
+            1247.0069580078125,
+            636.1201171875
+          ],
+          "source_path_ids": [
+            4468,
+            4481
+          ]
+        },
+        {
+          "feature_id": "7f81ac9c-fee3-5c9e-a2d4-35e57ebcdaf0",
+          "occurrence": 4,
+          "flange_face": [
+            889.0205993652344,
+            1317.9669189453125
+          ],
+          "opposite_pipe_dot": [
+            904.0986633300781,
+            1309.424560546875
+          ],
+          "bbox": [
+            880.3182373046875,
+            1305.173583984375,
+            911.2903442382812,
+            1323.077392578125
+          ],
+          "source_path_ids": [
+            4706,
+            4704
+          ]
+        }
+      ],
+      "strict_catalog_result": {
+        "status": "INCOMPLETE_SPEC",
+        "missing": [
+          "api_bore"
+        ],
+        "count": 0
+      },
+      "diagnostic_candidates": [
+        {
+          "purpose": "DIAGNOSTIC_ONLY_NOT_AN_EXACT_MATCH_OR_ACCEPTED_WEIGHT",
+          "id": "f3fe0a940969c78588ef5f5b",
+          "source_sheet": "API 6A",
+          "source_row": 30,
+          "standard": "API 6A",
+          "api_bore": "7 1/16",
+          "rating": "10000",
+          "component_type": "Weld Neck / Integral (approx)",
+          "facing": "UNSPECIFIED",
+          "quality": "ESTIMATED",
+          "api_type": "6BX",
+          "weight_basis": "ESTIMATE: annular disk only; hub/geometry not included",
+          "weight_scope": "BARE_FLANGE",
+          "vendor": null,
+          "model": null,
+          "source_sha256": "84cc71a66c2f47a3e70f27adf7c286cd346fdf722d5dfcf50158085d2e2d356a",
+          "incompatible_fields": [
+            "component_type",
+            "facing",
+            "unconfirmed_source_api_bore"
+          ]
+        }
+      ],
+      "required_value_display": {
+        "length_mm": null,
+        "weight_n": null,
+        "half_weight_n": null,
+        "full_weight_n": null
+      },
+      "uncertainties": [
+        "API_SIZE_TEXT_AMBIGUOUS: source literally prints 7-1.16\"; do not convert its dot to a slash or use pipe bore 6.615 as API bore.",
+        "MANUFACTURER_NOT_PRINTED",
+        "SOURCE_MATERIAL_SPEC_IS_NOT_MANUFACTURER_CONFIRMATION",
+        "NO_EXACT_CATALOG_TYPE_OR_FACING_MATCH"
+      ],
+      "review_state": "SOURCE_PROPOSAL_ONLY",
+      "manufacturer_confirmed": false,
+      "engineering_approved": false
+    },
+    {
+      "id": "S1-ITEM-6",
+      "page_index": 0,
+      "material_item_no": "6",
+      "family_proposal": "valve",
+      "quantity_text": "1",
+      "quantity_count": 1,
+      "size_text": "8",
+      "material_row_bbox": [
+        1842.0628662109375,
+        579.6666870117188,
+        2479.06298828125,
+        604.1488037109375
+      ],
+      "retained_material_evidence_id": "85b701e7-ce4c-595d-be40-28f405ea4533",
+      "source_sha256": "7b97d44bef3d544c4c98ed0667c29607ce58fa4a401dd2463f66010a9615bb59",
+      "visual_transcription": "BALL VALVE FULL BORE 10000 PSI RTJ TYPE\n6BX G.O. BA9901",
+      "source_code_text": "BA9901X:8",
+      "api_size_text": null,
+      "source_spec_proposal": {
+        "family": "valve",
+        "nps": "8",
+        "rating": "10000",
+        "standard": null,
+        "component_type": "BALL",
+        "facing": null,
+        "end_connection": "RTJ",
+        "material": null,
+        "vendor": null,
+        "model": null,
+        "code": "BA9901X:8"
+      },
+      "source_word_evidence": [
+        {
+          "text": "BALL",
+          "bbox": [
+            1880.8939208984375,
+            579.824462890625,
+            1909.7437744140625,
+            589.4410400390625
+          ],
+          "evidence_id": "4ae9f310-ca39-5165-bcc6-18e2e33effac",
+          "confidence": 0.9505
+        },
+        {
+          "text": "VALVE",
+          "bbox": [
+            1918.22900390625,
+            579.824462890625,
+            1955.5640869140625,
+            589.4410400390625
+          ],
+          "evidence_id": "3ffc1f04-0032-54b9-9807-8c0694b0d00f",
+          "confidence": 0.964
+        },
+        {
+          "text": "FULL",
+          "bbox": [
+            1965.1806640625,
+            579.824462890625,
+            1994.0303955078125,
+            589.4410400390625
+          ],
+          "evidence_id": "fb05ca19-d566-567c-86c5-58f7c5f36f71",
+          "confidence": 0.9624
+        },
+        {
+          "text": "BORE",
+          "bbox": [
+            2003.081298828125,
+            579.824462890625,
+            2031.93115234375,
+            589.4410400390625
+          ],
+          "evidence_id": "df582adc-9bed-5a84-9ada-fbede6669571",
+          "confidence": 0.9624
+        },
+        {
+          "text": "10000",
+          "bbox": [
+            2042.6790771484375,
+            579.824462890625,
+            2078.317138671875,
+            589.4410400390625
+          ],
+          "evidence_id": "6aa7033f-6c2c-5481-88b9-a781516701da",
+          "confidence": 0.968
+        },
+        {
+          "text": "PSI",
+          "bbox": [
+            2087.367919921875,
+            579.824462890625,
+            2107.1669921875,
+            589.4410400390625
+          ],
+          "evidence_id": "6ae54323-0860-5a9c-b47c-19536365158b",
+          "confidence": 0.91
+        },
+        {
+          "text": "RTJ",
+          "bbox": [
+            2118.48046875,
+            579.824462890625,
+            2138.84521484375,
+            589.4410400390625
+          ],
+          "evidence_id": "1d7dace6-c3ef-5086-9bd9-109e86c501c7",
+          "confidence": 0.91
+        },
+        {
+          "text": "TYPE",
+          "bbox": [
+            2148.461669921875,
+            579.824462890625,
+            2177.877197265625,
+            589.4410400390625
+          ],
+          "evidence_id": "92f1392e-73e2-5deb-b1fc-5db8cdefce36",
+          "confidence": 0.9624
+        },
+        {
+          "text": "BA9901X:8",
+          "bbox": [
+            2305.721435546875,
+            579.824462890625,
+            2373.03759765625,
+            589.4410400390625
+          ],
+          "evidence_id": "ed3465f7-5a8d-5cd1-9d8e-57734de4e2a4",
+          "confidence": 0.8831
+        },
+        {
+          "text": "6BX",
+          "bbox": [
+            1880.8939208984375,
+            594.5321655273438,
+            1902.389892578125,
+            604.1488037109375
+          ],
+          "evidence_id": "176694b3-3b3f-5a08-9c82-22f753fdba08",
+          "confidence": 0.8767
+        },
+        {
+          "text": "G.O.",
+          "bbox": [
+            1911.4407958984375,
+            594.5321655273438,
+            1938.02783203125,
+            604.1488037109375
+          ],
+          "evidence_id": "c0305908-f6f1-5eb0-8f55-4ec057b93d90",
+          "confidence": 0.5902
+        },
+        {
+          "text": "BA9901",
+          "bbox": [
+            1949.9072265625,
+            594.5321655273438,
+            1991.7677001953125,
+            604.1488037109375
+          ],
+          "evidence_id": "ce564fd4-7419-5c5e-b706-73a7bc1b00bc",
+          "confidence": 0.9158
+        },
+        {
+          "text": "6",
+          "bbox": [
+            1842.0628662109375,
+            579.6666870117188,
+            1848.396240234375,
+            589.3333129882812
+          ],
+          "evidence_id": "ebfeaaf7-598e-50d5-bd6d-0afcae570dc3",
+          "confidence": 0.8251
+        },
+        {
+          "text": "8",
+          "bbox": [
+            2204.7294921875,
+            579.6666870117188,
+            2211.396240234375,
+            589.3333129882812
+          ],
+          "evidence_id": "68d4cf3a-837c-5d5b-ac65-952e8fe31733",
+          "confidence": 0.7815
+        },
+        {
+          "text": "1",
+          "bbox": [
+            2476.396240234375,
+            580.0,
+            2479.06298828125,
+            589.0
+          ],
+          "evidence_id": "3d70aa93-05e1-573b-b05b-668117af5abc",
+          "confidence": 0.9669
+        }
+      ],
+      "occurrences": [
+        {
+          "occurrence": 1,
+          "source_ports": [
+            {
+              "id": "3491cbf8-ea5f-58a7-b8e1-f5459958a644",
+              "source_label": "S1-BALL6-IN",
+              "port": "process_in",
+              "anchor": [
+                889.0205993652344,
+                1317.9669189453125
+              ],
+              "bbox": [
+                877.0205993652344,
+                1305.9669189453125,
+                901.0205993652344,
+                1329.9669189453125
+              ]
+            },
+            {
+              "id": "8e1b26ba-2ded-5db9-8d58-cb4f48d18f7a",
+              "source_label": "S1-BALL6-OUT-DASHED",
+              "port": "process_out",
+              "anchor": [
+                850.85546875,
+                1340.4073486328125
+              ],
+              "bbox": [
+                834,
+                1331,
+                863,
+                1351
+              ],
+              "source_interface_uncertain": true
+            }
+          ]
+        }
+      ],
+      "strict_catalog_result": {
+        "status": "INCOMPLETE_SPEC",
+        "missing": [
+          "standard"
+        ],
+        "count": 0
+      },
+      "diagnostic_candidates": [],
+      "required_value_display": {
+        "length_mm": null,
+        "weight_n": null,
+        "half_weight_n": null,
+        "full_weight_n": null
+      },
+      "uncertainties": [
+        "STANDARD_NOT_EXPLICITLY_PRINTED_ON_VALVE_ROW",
+        "MANUFACTURER_AND_WEIGHT_AND_LENGTH_NOT_PRINTED",
+        "DRAWING_IDENTIFIER_OR_COMMODITY_CODE_NOT_PROVEN_VENDOR_MODEL",
+        "NO_VALVE_RECORDS_IN_SUPPLIED_FLANGE_WORKBOOK"
+      ],
+      "review_state": "SOURCE_PROPOSAL_ONLY",
+      "manufacturer_confirmed": false,
+      "engineering_approved": false
+    },
+    {
+      "id": "S2-ITEM-5",
+      "page_index": 1,
+      "material_item_no": "5",
+      "family_proposal": "flange",
+      "quantity_text": "6",
+      "quantity_count": 6,
+      "size_text": "8",
+      "material_row_bbox": [
+        1841.7294921875,
+        426.3333435058594,
+        2481.7294921875,
+        486.4868469238281
+      ],
+      "retained_material_evidence_id": "84398cc5-8b55-56ae-8ea1-3537d74d1114",
+      "source_sha256": "7b97d44bef3d544c4c98ed0667c29607ce58fa4a401dd2463f66010a9615bb59",
+      "visual_transcription": "FLANGE 10000LB RTJWN 6.615\" BORE API 6A\nTYPE 6BX SIZE 7-1.16\" ITCS A694 GR F60\nMODIFIED NACE MRO175 ALLOY 625 OVERLAY\nON RING GROOVE",
+      "source_code_text": "FLWN-10K-RJ:8",
+      "api_size_text": "7-1.16\"",
+      "source_spec_proposal": {
+        "family": "flange",
+        "nps": "8",
+        "rating": "10000",
+        "standard": "API 6A",
+        "component_type": "WN",
+        "facing": "RTJ",
+        "end_connection": null,
+        "material": "ITCS A694 GR F60 MODIFIED NACE MRO175; ALLOY 625 OVERLAY ON RING GROOVE",
+        "vendor": null,
+        "model": null,
+        "code": "FLWN-10K-RJ:8",
+        "api_bore": null
+      },
+      "source_word_evidence": [
+        {
+          "text": "FLANGE",
+          "bbox": [
+            1880.8939208984375,
+            426.5245361328125,
+            1925.0172119140625,
+            436.14111328125
+          ],
+          "evidence_id": "de08cb3e-44c2-5734-860b-0599a0793349",
+          "confidence": 0.9225
+        },
+        {
+          "text": "10000LB",
+          "bbox": [
+            1935.76513671875,
+            426.5245361328125,
+            1986.676513671875,
+            436.14111328125
+          ],
+          "evidence_id": "1cc5b5bb-7caf-5ef9-b679-2b7a2e5a9da7",
+          "confidence": 0.9204
+        },
+        {
+          "text": "RTJWN",
+          "bbox": [
+            1995.7275390625,
+            426.5245361328125,
+            2031.93115234375,
+            436.14111328125
+          ],
+          "evidence_id": "37cf4779-c6d9-5cee-96c6-12ecf837d002",
+          "confidence": 0.8918
+        },
+        {
+          "text": "6.615\u201d",
+          "bbox": [
+            2041.5477294921875,
+            426.5245361328125,
+            2084.53955078125,
+            436.14111328125
+          ],
+          "evidence_id": "8836fda4-4870-5654-b74b-de44e7002d2a",
+          "confidence": 0.7786
+        },
+        {
+          "text": "BORE",
+          "bbox": [
+            2095.28759765625,
+            426.5245361328125,
+            2124.137451171875,
+            436.14111328125
+          ],
+          "evidence_id": "9259f1d6-dec4-514f-930b-25ee5cbf44f9",
+          "confidence": 0.956
+        },
+        {
+          "text": "API",
+          "bbox": [
+            2133.188232421875,
+            426.5245361328125,
+            2152.9873046875,
+            436.14111328125
+          ],
+          "evidence_id": "c86c464f-9421-586f-9778-179de247104f",
+          "confidence": 0.937
+        },
+        {
+          "text": "6A",
+          "bbox": [
+            2164.30078125,
+            426.5245361328125,
+            2178.44287109375,
+            436.14111328125
+          ],
+          "evidence_id": "84f5dd3d-9603-5197-a3ae-63d93ceda33d",
+          "confidence": 0.937
+        },
+        {
+          "text": "FLWN-10K-RJ:8",
+          "bbox": [
+            2305.721435546875,
+            426.5245361328125,
+            2403.58447265625,
+            436.14111328125
+          ],
+          "evidence_id": "86a75882-5673-540e-b52f-a088f926c17a",
+          "confidence": 0.8185
+        },
+        {
+          "text": "TYPE",
+          "bbox": [
+            1880.8939208984375,
+            441.2322692871094,
+            1909.7437744140625,
+            451.41455078125
+          ],
+          "evidence_id": "be0bd131-d0f2-5b24-933d-136700ec74ad",
+          "confidence": 0.9173
+        },
+        {
+          "text": "6BX",
+          "bbox": [
+            1919.3603515625,
+            441.2322692871094,
+            1940.8563232421875,
+            451.41455078125
+          ],
+          "evidence_id": "338c1007-b1ae-5827-8491-be01703c0459",
+          "confidence": 0.9173
+        },
+        {
+          "text": "SIZE",
+          "bbox": [
+            1949.341552734375,
+            441.2322692871094,
+            1978.1912841796875,
+            451.41455078125
+          ],
+          "evidence_id": "a3fbd09b-3cce-5d9e-b01b-ee86fa0ba6e1",
+          "confidence": 0.8627
+        },
+        {
+          "text": "7-1.16\"",
+          "bbox": [
+            1987.8079833984375,
+            441.2322692871094,
+            2038.7193603515625,
+            451.41455078125
+          ],
+          "evidence_id": "1da9e4e2-2ef9-580d-b11b-476919c1d2bd",
+          "confidence": 0.8627
+        },
+        {
+          "text": "ITCS",
+          "bbox": [
+            2051.164306640625,
+            441.2322692871094,
+            2078.8828125,
+            451.41455078125
+          ],
+          "evidence_id": "361f29d1-862c-511e-8e08-2a6daf716582",
+          "confidence": 0.9199
+        },
+        {
+          "text": "A694",
+          "bbox": [
+            2086.80224609375,
+            441.2322692871094,
+            2116.783447265625,
+            451.41455078125
+          ],
+          "evidence_id": "80c79aea-813e-5c93-a00b-0845d43c739b",
+          "confidence": 0.9454
+        },
+        {
+          "text": "GR",
+          "bbox": [
+            2125.83447265625,
+            441.2322692871094,
+            2139.410888671875,
+            451.41455078125
+          ],
+          "evidence_id": "971e36dd-15b9-5b18-841b-0aa4e7ef83aa",
+          "confidence": 0.9031
+        },
+        {
+          "text": "F60",
+          "bbox": [
+            2149.02734375,
+            441.2322692871094,
+            2169.957763671875,
+            451.41455078125
+          ],
+          "evidence_id": "2a91fb87-a1ab-5c90-a6b8-450bd22ce5d2",
+          "confidence": 0.8676
+        },
+        {
+          "text": "MODIFIED",
+          "bbox": [
+            1880.8939208984375,
+            456.5057067871094,
+            1940.8563232421875,
+            466.1222839355469
+          ],
+          "evidence_id": "bbfc7a90-2604-55eb-92b8-dfe9242caea6",
+          "confidence": 0.9647
+        },
+        {
+          "text": "NACE",
+          "bbox": [
+            1949.9072265625,
+            456.5057067871094,
+            1978.7569580078125,
+            466.1222839355469
+          ],
+          "evidence_id": "197cdddf-04af-5ad6-be44-043d4d7e7023",
+          "confidence": 0.9325
+        },
+        {
+          "text": "MRO175",
+          "bbox": [
+            1987.8079833984375,
+            456.5057067871094,
+            2032.496826171875,
+            466.1222839355469
+          ],
+          "evidence_id": "493d50bc-e91c-50b3-97e3-25ce8ba1a67a",
+          "confidence": 0.8271
+        },
+        {
+          "text": "ALLOY",
+          "bbox": [
+            2040.9820556640625,
+            456.5057067871094,
+            2078.8828125,
+            466.1222839355469
+          ],
+          "evidence_id": "6530c748-acbd-5f40-a354-cd8d355b7b9a",
+          "confidence": 0.9584
+        },
+        {
+          "text": "625",
+          "bbox": [
+            2087.367919921875,
+            456.5057067871094,
+            2109.4296875,
+            466.1222839355469
+          ],
+          "evidence_id": "88f5a483-2eec-5cc6-8b99-dd20fd8f36de",
+          "confidence": 0.9575
+        },
+        {
+          "text": "OVERLAY",
+          "bbox": [
+            2117.914794921875,
+            456.5057067871094,
+            2170.5234375,
+            466.1222839355469
+          ],
+          "evidence_id": "e070fbd9-9b03-5a24-8bdc-52c04ca647f3",
+          "confidence": 0.9575
+        },
+        {
+          "text": "ON",
+          "bbox": [
+            1880.3282470703125,
+            471.77911376953125,
+            1893.9046630859375,
+            481.3957214355469
+          ],
+          "evidence_id": "82868f31-56de-5866-a309-55dbb20ba48b",
+          "confidence": 0.9623
+        },
+        {
+          "text": "RING",
+          "bbox": [
+            1904.0869140625,
+            471.77911376953125,
+            1932.936767578125,
+            481.3957214355469
+          ],
+          "evidence_id": "49f13fcb-143f-58fe-8362-528df6650b2b",
+          "confidence": 0.9623
+        },
+        {
+          "text": "GROOVE",
+          "bbox": [
+            1941.9876708984375,
+            471.77911376953125,
+            1986.11083984375,
+            481.3957214355469
+          ],
+          "evidence_id": "16867a19-0c6a-58af-b6d1-b6cdbab573fa",
+          "confidence": 0.9659
+        },
+        {
+          "text": "5",
+          "bbox": [
+            1841.7294921875,
+            426.3333435058594,
+            1848.396240234375,
+            436.0
+          ],
+          "evidence_id": "955980d0-e500-5fcf-9fab-7f25c205a696",
+          "confidence": 0.9613
+        },
+        {
+          "text": "8",
+          "bbox": [
+            2204.7294921875,
+            426.3333435058594,
+            2211.396240234375,
+            436.3333435058594
+          ],
+          "evidence_id": "d8666839-9e8d-5582-b359-349ab48ca330",
+          "confidence": 0.7611
+        },
+        {
+          "text": "6",
+          "bbox": [
+            2475.396240234375,
+            426.6666564941406,
+            2481.7294921875,
+            436.0
+          ],
+          "evidence_id": "40c3df47-5953-5a1e-b16d-9918a5db2075",
+          "confidence": 0.9693
+        }
+      ],
+      "occurrences": [
+        {
+          "feature_id": "5e17ea23-8183-5cfb-acd6-82e4221da489",
+          "occurrence": 1,
+          "flange_face": [
+            1627.753173828125,
+            417.6412353515625
+          ],
+          "opposite_pipe_dot": [
+            1612.88134765625,
+            426.18505859375
+          ],
+          "bbox": [
+            1605.689697265625,
+            412.5322265625,
+            1636.66162109375,
+            430.43603515625
+          ],
+          "source_path_ids": [
+            4967,
+            4995
+          ]
+        },
+        {
+          "feature_id": "79010076-a2bd-52d9-a69e-f1f96e732034",
+          "occurrence": 2,
+          "flange_face": [
+            1255.7107543945312,
+            632.728515625
+          ],
+          "opposite_pipe_dot": [
+            1270.8292236328125,
+            624.2669067382812
+          ],
+          "bbox": [
+            1247.0069580078125,
+            620.015869140625,
+            1278.0626220703125,
+            637.8389892578125
+          ],
+          "source_path_ids": [
+            5394,
+            5392
+          ]
+        },
+        {
+          "feature_id": "de6e9daf-8f2e-510a-b1df-4fe064ced03d",
+          "occurrence": 3,
+          "flange_face": [
+            1218.119384765625,
+            654.841552734375
+          ],
+          "opposite_pipe_dot": [
+            1203.2445678710938,
+            663.3450317382812
+          ],
+          "bbox": [
+            1196.0125732421875,
+            649.77294921875,
+            1227.0682373046875,
+            667.5960693359375
+          ],
+          "source_path_ids": [
+            5512,
+            5540
+          ]
+        },
+        {
+          "feature_id": "87d606f1-ec00-5bf0-bc41-c897b38063cb",
+          "occurrence": 4,
+          "flange_face": [
+            868.5902099609375,
+            856.31787109375
+          ],
+          "opposite_pipe_dot": [
+            883.7086791992188,
+            847.8576049804688
+          ],
+          "bbox": [
+            859.8864135742188,
+            843.6065673828125,
+            890.9420776367188,
+            861.4268798828125
+          ],
+          "source_path_ids": [
+            5950,
+            5948
+          ]
+        },
+        {
+          "feature_id": "82408665-c609-5261-8e89-ffcc2c1c4e07",
+          "occurrence": 5,
+          "flange_face": [
+            831.0376892089844,
+            878.4323425292969
+          ],
+          "opposite_pipe_dot": [
+            816.1239318847656,
+            886.9329528808594
+          ],
+          "bbox": [
+            808.8919067382812,
+            873.3637084960938,
+            839.9447021484375,
+            891.1839599609375
+          ],
+          "source_path_ids": [
+            6022,
+            6050
+          ]
+        },
+        {
+          "feature_id": "8e8807d9-bc01-5ddc-ba6f-0f99860b0443",
+          "occurrence": 6,
+          "flange_face": [
+            514.6471862792969,
+            1060.7775268554688
+          ],
+          "opposite_pipe_dot": [
+            529.76708984375,
+            1052.31591796875
+          ],
+          "bbox": [
+            505.94342041015625,
+            1048.06494140625,
+            536.9990844726562,
+            1065.887939453125
+          ],
+          "source_path_ids": [
+            6383,
+            6381
+          ]
+        }
+      ],
+      "strict_catalog_result": {
+        "status": "INCOMPLETE_SPEC",
+        "missing": [
+          "api_bore"
+        ],
+        "count": 0
+      },
+      "diagnostic_candidates": [
+        {
+          "purpose": "DIAGNOSTIC_ONLY_NOT_AN_EXACT_MATCH_OR_ACCEPTED_WEIGHT",
+          "id": "f3fe0a940969c78588ef5f5b",
+          "source_sheet": "API 6A",
+          "source_row": 30,
+          "standard": "API 6A",
+          "api_bore": "7 1/16",
+          "rating": "10000",
+          "component_type": "Weld Neck / Integral (approx)",
+          "facing": "UNSPECIFIED",
+          "quality": "ESTIMATED",
+          "api_type": "6BX",
+          "weight_basis": "ESTIMATE: annular disk only; hub/geometry not included",
+          "weight_scope": "BARE_FLANGE",
+          "vendor": null,
+          "model": null,
+          "source_sha256": "84cc71a66c2f47a3e70f27adf7c286cd346fdf722d5dfcf50158085d2e2d356a",
+          "incompatible_fields": [
+            "component_type",
+            "facing",
+            "unconfirmed_source_api_bore"
+          ]
+        }
+      ],
+      "required_value_display": {
+        "length_mm": null,
+        "weight_n": null,
+        "half_weight_n": null,
+        "full_weight_n": null
+      },
+      "uncertainties": [
+        "API_SIZE_TEXT_AMBIGUOUS: source literally prints 7-1.16\"; do not convert its dot to a slash or use pipe bore 6.615 as API bore.",
+        "MANUFACTURER_NOT_PRINTED",
+        "SOURCE_MATERIAL_SPEC_IS_NOT_MANUFACTURER_CONFIRMATION",
+        "NO_EXACT_CATALOG_TYPE_OR_FACING_MATCH"
+      ],
+      "review_state": "SOURCE_PROPOSAL_ONLY",
+      "manufacturer_confirmed": false,
+      "engineering_approved": false
+    },
+    {
+      "id": "S2-ITEM-6",
+      "page_index": 1,
+      "material_item_no": "6",
+      "family_proposal": "flange",
+      "quantity_text": "3",
+      "quantity_count": 3,
+      "size_text": "2",
+      "material_row_bbox": [
+        1842.0628662109375,
+        485.3554992675781,
+        2481.7294921875,
+        542.4894409179688
+      ],
+      "retained_material_evidence_id": "68520348-b14e-56ef-afcd-ecaa97ffd018",
+      "source_sha256": "7b97d44bef3d544c4c98ed0667c29607ce58fa4a401dd2463f66010a9615bb59",
+      "visual_transcription": "FLANGE 10000LB RTJWN SCH XXS API 6A TYPE\n6BX SIZE 2-1/16\" ITCS A694 GR F60\nMODIFIED NACE MRO175 ALLOY 625 OVERLAY\nON RING GROOVE",
+      "source_code_text": "FLWN-10K-RJ:2",
+      "api_size_text": "2-1/16\"",
+      "source_spec_proposal": {
+        "family": "flange",
+        "nps": "2",
+        "rating": "10000",
+        "standard": "API 6A",
+        "component_type": "WN",
+        "facing": "RTJ",
+        "end_connection": null,
+        "material": "ITCS A694 GR F60 MODIFIED NACE MRO175; ALLOY 625 OVERLAY ON RING GROOVE",
+        "vendor": null,
+        "model": null,
+        "code": "FLWN-10K-RJ:2",
+        "api_bore": "2 1/16"
+      },
+      "source_word_evidence": [
+        {
+          "text": "FLANGE",
+          "bbox": [
+            1880.8939208984375,
+            487.61822509765625,
+            1925.0172119140625,
+            497.2348327636719
+          ],
+          "evidence_id": "02316c40-cb67-5c81-bdd2-0e3fe14e0be4",
+          "confidence": 0.9242
+        },
+        {
+          "text": "10000LB",
+          "bbox": [
+            1935.199462890625,
+            487.61822509765625,
+            1986.676513671875,
+            497.2348327636719
+          ],
+          "evidence_id": "2873531d-5aa1-5c02-8c38-f8da6931d157",
+          "confidence": 0.902
+        },
+        {
+          "text": "RTJWN",
+          "bbox": [
+            1995.7275390625,
+            487.61822509765625,
+            2031.93115234375,
+            497.2348327636719
+          ],
+          "evidence_id": "ef448f5d-e4dd-50c3-894b-367ea6cb2131",
+          "confidence": 0.902
+        },
+        {
+          "text": "SCH",
+          "bbox": [
+            2041.5477294921875,
+            487.61822509765625,
+            2062.47802734375,
+            497.2348327636719
+          ],
+          "evidence_id": "e8a61097-d0bb-5d00-8af9-6acaa952dc24",
+          "confidence": 0.9327
+        },
+        {
+          "text": "XXS",
+          "bbox": [
+            2072.0947265625,
+            487.61822509765625,
+            2094.15625,
+            497.2348327636719
+          ],
+          "evidence_id": "925095f8-d486-5798-8235-3e02f2ce9056",
+          "confidence": 0.9198
+        },
+        {
+          "text": "API",
+          "bbox": [
+            2102.07568359375,
+            487.61822509765625,
+            2122.4404296875,
+            497.2348327636719
+          ],
+          "evidence_id": "1db798f3-ea3b-5a48-b751-13324deb90af",
+          "confidence": 0.9599
+        },
+        {
+          "text": "6A",
+          "bbox": [
+            2133.75390625,
+            487.61822509765625,
+            2147.89599609375,
+            497.2348327636719
+          ],
+          "evidence_id": "0a6ead8f-a266-5f01-abb7-4a5daedb84b8",
+          "confidence": 0.9599
+        },
+        {
+          "text": "TYPE",
+          "bbox": [
+            2156.38134765625,
+            487.61822509765625,
+            2185.231201171875,
+            497.2348327636719
+          ],
+          "evidence_id": "95b61dc2-e7c0-59a6-b4de-2d205d5a8030",
+          "confidence": 0.9633
+        },
+        {
+          "text": "FLWN-10K-RJ",
+          "bbox": [
+            2305.721435546875,
+            487.61822509765625,
+            2403.58447265625,
+            497.8005065917969
+          ],
+          "evidence_id": "b3491818-986c-5c22-8b31-ecac6d0af3f8",
+          "confidence": 0.3891
+        },
+        {
+          "text": ":2",
+          "bbox": [
+            2391.139404296875,
+            485.3554992675781,
+            2405.84716796875,
+            502.89166259765625
+          ],
+          "evidence_id": "653dd0ae-0d97-5844-a842-093070d9dffa",
+          "confidence": 0.3891
+        },
+        {
+          "text": "6BX",
+          "bbox": [
+            1880.8939208984375,
+            502.89166259765625,
+            1902.389892578125,
+            512.5082397460938
+          ],
+          "evidence_id": "5a9881cd-86ca-553d-93d7-c8a02b2b20da",
+          "confidence": 0.9224
+        },
+        {
+          "text": "SIZE",
+          "bbox": [
+            1911.4407958984375,
+            502.89166259765625,
+            1940.2906494140625,
+            512.5082397460938
+          ],
+          "evidence_id": "2180b0ea-9524-53c1-8f0b-cdd264192f8b",
+          "confidence": 0.9041
+        },
+        {
+          "text": "2-1/16\"",
+          "bbox": [
+            1949.341552734375,
+            502.89166259765625,
+            2000.2529296875,
+            515.336669921875
+          ],
+          "evidence_id": "768f1425-afd6-5881-a1bd-3d60d4cc08cb",
+          "confidence": 0.9041
+        },
+        {
+          "text": "ITCS",
+          "bbox": [
+            2012.697998046875,
+            502.89166259765625,
+            2040.4163818359375,
+            512.5082397460938
+          ],
+          "evidence_id": "425c1e11-fe0a-591f-9e83-fc0ed3c44e07",
+          "confidence": 0.9193
+        },
+        {
+          "text": "A694",
+          "bbox": [
+            2048.901611328125,
+            502.89166259765625,
+            2078.317138671875,
+            512.5082397460938
+          ],
+          "evidence_id": "c745f50b-903d-5578-8021-99c8ccd14437",
+          "confidence": 0.9598
+        },
+        {
+          "text": "GR",
+          "bbox": [
+            2087.367919921875,
+            502.89166259765625,
+            2101.510009765625,
+            512.5082397460938
+          ],
+          "evidence_id": "e13f65a2-9f51-5e6d-b16c-5673e310b655",
+          "confidence": 0.9269
+        },
+        {
+          "text": "F60",
+          "bbox": [
+            2110.56103515625,
+            502.89166259765625,
+            2131.4912109375,
+            512.5082397460938
+          ],
+          "evidence_id": "c26561c2-7d5f-5810-b8a9-40a6ac558f2b",
+          "confidence": 0.9157
+        },
+        {
+          "text": "MODIFIED",
+          "bbox": [
+            1880.8939208984375,
+            517.599365234375,
+            1940.8563232421875,
+            527.2160034179688
+          ],
+          "evidence_id": "7f40b82f-3b7a-50f7-a83c-75b80fd43b01",
+          "confidence": 0.9651
+        },
+        {
+          "text": "NACE",
+          "bbox": [
+            1949.9072265625,
+            517.599365234375,
+            1978.1912841796875,
+            527.2160034179688
+          ],
+          "evidence_id": "0c5d483a-677d-5c29-88f4-141f36c9709b",
+          "confidence": 0.9324
+        },
+        {
+          "text": "MRO175",
+          "bbox": [
+            1987.8079833984375,
+            517.599365234375,
+            2032.496826171875,
+            527.2160034179688
+          ],
+          "evidence_id": "4f6b08d7-b122-58e6-a9e9-d856b84a6f76",
+          "confidence": 0.8455
+        },
+        {
+          "text": "ALLOY",
+          "bbox": [
+            2040.9820556640625,
+            517.599365234375,
+            2078.8828125,
+            527.2160034179688
+          ],
+          "evidence_id": "07cd4098-1be0-5505-b9b1-8996b485146c",
+          "confidence": 0.9583
+        },
+        {
+          "text": "625",
+          "bbox": [
+            2087.367919921875,
+            517.599365234375,
+            2109.4296875,
+            527.7816772460938
+          ],
+          "evidence_id": "0d67a79e-b21d-5c45-a512-a71d72033b2c",
+          "confidence": 0.9583
+        },
+        {
+          "text": "OVERLAY",
+          "bbox": [
+            2117.914794921875,
+            517.599365234375,
+            2170.5234375,
+            527.2160034179688
+          ],
+          "evidence_id": "b5c52da0-d8dc-5891-a15a-10f017b0bd20",
+          "confidence": 0.9652
+        },
+        {
+          "text": "ON",
+          "bbox": [
+            1880.3282470703125,
+            532.872802734375,
+            1893.9046630859375,
+            542.4894409179688
+          ],
+          "evidence_id": "486bd007-a113-5a84-ab04-87cd37c77301",
+          "confidence": 0.9638
+        },
+        {
+          "text": "RING",
+          "bbox": [
+            1904.0869140625,
+            532.872802734375,
+            1932.936767578125,
+            542.4894409179688
+          ],
+          "evidence_id": "f44bdbfb-7df7-58b9-b92b-54323f5e116f",
+          "confidence": 0.9554
+        },
+        {
+          "text": "GROOVE",
+          "bbox": [
+            1941.9876708984375,
+            532.872802734375,
+            1986.11083984375,
+            542.4894409179688
+          ],
+          "evidence_id": "1ddc0173-5fa2-5e94-a522-cfbf04dea157",
+          "confidence": 0.9696
+        },
+        {
+          "text": "6",
+          "bbox": [
+            1842.0628662109375,
+            488.0,
+            1848.396240234375,
+            497.3333435058594
+          ],
+          "evidence_id": "f7ae2e6c-c814-5f9a-aad0-37f56dfa5f30",
+          "confidence": 0.9679
+        },
+        {
+          "text": "2",
+          "bbox": [
+            2205.06298828125,
+            487.6666564941406,
+            2211.396240234375,
+            497.3333435058594
+          ],
+          "evidence_id": "b4c2bf54-5028-5393-86eb-db5c4a8a26ac",
+          "confidence": 0.8377
+        },
+        {
+          "text": "FLWN-10K-RJ:2",
+          "bbox": [
+            2305.7294921875,
+            487.6666564941406,
+            2403.396240234375,
+            497.3333435058594
+          ],
+          "evidence_id": "b0335254-141a-50f9-9e50-de9ab2034832",
+          "confidence": 0.692
+        },
+        {
+          "text": "3",
+          "bbox": [
+            2475.06298828125,
+            487.6666564941406,
+            2481.7294921875,
+            497.3333435058594
+          ],
+          "evidence_id": "dc9ec398-7fde-5e2a-9f60-9516c446a7a7",
+          "confidence": 0.9602
+        }
+      ],
+      "occurrences": [
+        {
+          "feature_id": "dd14c1b9-e982-5b8d-bacf-8c32de676a45",
+          "occurrence": 1,
+          "flange_face": [
+            1420.8316650390625,
+            754.2919921875
+          ],
+          "opposite_pipe_dot": [
+            1435.7051391601562,
+            762.7955017089844
+          ],
+          "bbox": [
+            1420.8316650390625,
+            744.1143798828125,
+            1439.5452880859375,
+            770.030029296875
+          ],
+          "source_path_ids": [
+            5171,
+            5169
+          ]
+        },
+        {
+          "feature_id": "8145468d-aef9-5af8-8c12-bb48ebfa0873",
+          "occurrence": 2,
+          "flange_face": [
+            1011.1546020507812,
+            972.7723388671875
+          ],
+          "opposite_pipe_dot": [
+            1026.0697326660156,
+            981.3161315917969
+          ],
+          "bbox": [
+            1011.1546020507812,
+            962.5543212890625,
+            1029.8709716796875,
+            988.5506591796875
+          ],
+          "source_path_ids": [
+            5710,
+            5708
+          ]
+        },
+        {
+          "feature_id": "756dd732-3251-5aaa-9508-06d49f2ed7ef",
+          "occurrence": 3,
+          "flange_face": [
+            588.8109130859375,
+            822.3096923828125
+          ],
+          "opposite_pipe_dot": [
+            588.8109130859375,
+            839.76220703125
+          ],
+          "bbox": [
+            579.9038696289062,
+            817.20068359375,
+            597.7179565429688,
+            846.1387329101562
+          ],
+          "source_path_ids": [
+            6188,
+            6186
+          ]
+        }
+      ],
+      "strict_catalog_result": {
+        "status": "NO_EXACT_MATCH",
+        "missing": [],
+        "count": 0
+      },
+      "diagnostic_candidates": [
+        {
+          "purpose": "DIAGNOSTIC_ONLY_NOT_AN_EXACT_MATCH_OR_ACCEPTED_WEIGHT",
+          "id": "05d96dd8dccc8f4a84bf4c13",
+          "source_sheet": "API 6A",
+          "source_row": 26,
+          "standard": "API 6A",
+          "api_bore": "2 1/16",
+          "rating": "10000",
+          "component_type": "Weld Neck / Integral (approx)",
+          "facing": "UNSPECIFIED",
+          "quality": "ESTIMATED",
+          "api_type": "6BX",
+          "weight_basis": "ESTIMATE: annular disk only; hub/geometry not included",
+          "weight_scope": "BARE_FLANGE",
+          "vendor": null,
+          "model": null,
+          "source_sha256": "84cc71a66c2f47a3e70f27adf7c286cd346fdf722d5dfcf50158085d2e2d356a",
+          "incompatible_fields": [
+            "component_type",
+            "facing"
+          ]
+        }
+      ],
+      "required_value_display": {
+        "length_mm": null,
+        "weight_n": null,
+        "half_weight_n": null,
+        "full_weight_n": null
+      },
+      "uncertainties": [
+        "MANUFACTURER_NOT_PRINTED",
+        "SOURCE_MATERIAL_SPEC_IS_NOT_MANUFACTURER_CONFIRMATION",
+        "NO_EXACT_CATALOG_TYPE_OR_FACING_MATCH"
+      ],
+      "review_state": "SOURCE_PROPOSAL_ONLY",
+      "manufacturer_confirmed": false,
+      "engineering_approved": false
+    },
+    {
+      "id": "S2-ITEM-9",
+      "page_index": 1,
+      "material_item_no": "9",
+      "family_proposal": "valve",
+      "quantity_text": "3",
+      "quantity_count": 3,
+      "size_text": "2 x 3/4",
+      "material_row_bbox": [
+        1840,
+        700,
+        2484,
+        728
+      ],
+      "retained_material_evidence_id": "93f4ea4c-5d5a-51cb-bd3e-37d730f4709f",
+      "source_sha256": "7b97d44bef3d544c4c98ed0667c29607ce58fa4a401dd2463f66010a9615bb59",
+      "visual_transcription": "VALVE DBB 10000LB RTJ x FNPT W/ PLUG\nDB3902",
+      "source_code_text": "E:DB3902:2x.75",
+      "api_size_text": null,
+      "source_spec_proposal": {
+        "family": "valve",
+        "nps": "2 x 3/4",
+        "rating": "10000",
+        "standard": null,
+        "component_type": "DBB",
+        "facing": null,
+        "end_connection": "RTJ x FNPT",
+        "material": null,
+        "vendor": null,
+        "model": null,
+        "code": "E:DB3902:2x.75"
+      },
+      "source_word_evidence": [
+        {
+          "text": "9",
+          "bbox": [
+            1841.86181640625,
+            702.0118408203125,
+            1848.0843505859375,
+            711.6284790039062
+          ],
+          "evidence_id": "f25e2eb4-d0e5-5240-ba9d-c455cc12b96f",
+          "confidence": 0.9523
+        },
+        {
+          "text": "VALVE",
+          "bbox": [
+            1880.3282470703125,
+            702.0118408203125,
+            1917.09765625,
+            712.1941528320312
+          ],
+          "evidence_id": "0170a2a5-d0e3-5324-a7b2-696441c5b4c5",
+          "confidence": 0.9261
+        },
+        {
+          "text": "DBB",
+          "bbox": [
+            1926.7142333984375,
+            702.0118408203125,
+            1948.210205078125,
+            712.1941528320312
+          ],
+          "evidence_id": "a3657e96-2d2e-595a-9300-8412c3d0bb0d",
+          "confidence": 0.8628
+        },
+        {
+          "text": "10000LB",
+          "bbox": [
+            1958.3924560546875,
+            702.0118408203125,
+            2009.3038330078125,
+            712.1941528320312
+          ],
+          "evidence_id": "71e44f27-94ee-5dcd-8f6e-5bfb5f8dfa9a",
+          "confidence": 0.8628
+        },
+        {
+          "text": "RTJ",
+          "bbox": [
+            2018.92041015625,
+            702.0118408203125,
+            2038.7193603515625,
+            712.1941528320312
+          ],
+          "evidence_id": "08164d6c-0474-51a1-b580-27dfc29e9719",
+          "confidence": 0.9077
+        },
+        {
+          "text": "x",
+          "bbox": [
+            2049.46728515625,
+            705.4059448242188,
+            2055.1240234375,
+            711.6284790039062
+          ],
+          "evidence_id": "80224ea8-7a95-5611-b323-69eed6f49bd2",
+          "confidence": 0.9325
+        },
+        {
+          "text": "FNPT",
+          "bbox": [
+            2064.74072265625,
+            702.0118408203125,
+            2093.590576171875,
+            712.1941528320312
+          ],
+          "evidence_id": "078ecdbf-ff92-5f53-b08c-8353e47de1b2",
+          "confidence": 0.9321
+        },
+        {
+          "text": "W/",
+          "bbox": [
+            2102.07568359375,
+            702.5775146484375,
+            2117.34912109375,
+            714.4568481445312
+          ],
+          "evidence_id": "8e150d94-5c05-50a6-a754-89ec4fb859ff",
+          "confidence": 0.9268
+        },
+        {
+          "text": "PLUG",
+          "bbox": [
+            2125.83447265625,
+            702.0118408203125,
+            2155.25,
+            712.1941528320312
+          ],
+          "evidence_id": "46b7c56a-b4ef-59e9-a2a0-fab34e9f1bf0",
+          "confidence": 0.9692
+        },
+        {
+          "text": "2",
+          "bbox": [
+            2205.030029296875,
+            702.0118408203125,
+            2211.25244140625,
+            712.1941528320312
+          ],
+          "evidence_id": "2af8df1f-257a-54a9-b466-0338531252c7",
+          "confidence": 0.959
+        },
+        {
+          "text": "x",
+          "bbox": [
+            2220.869140625,
+            705.9716186523438,
+            2225.960205078125,
+            711.6284790039062
+          ],
+          "evidence_id": "405c8754-4a4b-5746-bc4b-d5fb45fe53c4",
+          "confidence": 0.9362
+        },
+        {
+          "text": "3/4",
+          "bbox": [
+            2235.576904296875,
+            702.0118408203125,
+            2257.638427734375,
+            714.4568481445312
+          ],
+          "evidence_id": "a076c6e8-e14c-5e68-956c-b8a0e2b0a7f1",
+          "confidence": 0.9544
+        },
+        {
+          "text": "\u00a3:DB3902:2x.75",
+          "bbox": [
+            2305.721435546875,
+            702.0118408203125,
+            2411.504150390625,
+            712.1941528320312
+          ],
+          "evidence_id": "3df69fee-0f19-5e9c-a622-2cd7132c6614",
+          "confidence": 0.5663
+        },
+        {
+          "text": "DB3902",
+          "bbox": [
+            1880.8939208984375,
+            717.2852783203125,
+            1925.0172119140625,
+            726.90185546875
+          ],
+          "evidence_id": "95def2e0-d1e2-5467-9db4-732b0e248a1d",
+          "confidence": 0.9143
+        },
+        {
+          "text": "E:DB3902:2x.75",
+          "bbox": [
+            2305.7294921875,
+            702.3333129882812,
+            2411.396240234375,
+            712.0
+          ],
+          "evidence_id": "891a5127-a430-5051-a91f-f90f962f9a5d",
+          "confidence": 0.7776
+        },
+        {
+          "text": "3",
+          "bbox": [
+            2475.06298828125,
+            702.3333129882812,
+            2481.7294921875,
+            712.0
+          ],
+          "evidence_id": "c30c1841-292e-55cd-bc93-ccd0e965ad51",
+          "confidence": 0.9619
+        }
+      ],
+      "occurrences": [
+        {
+          "occurrence": 1,
+          "source_ports": [
+            {
+              "id": "9c60ad07-dd2e-5fba-a925-c7ca6d540fdd",
+              "source_label": "S2-DBB9-1-FLANGED",
+              "port": "process_in",
+              "anchor": [
+                1420.8316650390625,
+                754.2919921875
+              ],
+              "bbox": [
+                1408.8316650390625,
+                742.2919921875,
+                1432.8316650390625,
+                766.2919921875
+              ]
+            },
+            {
+              "id": "f700c914-d641-5a4d-a647-942a05d6c0be",
+              "source_label": "S2-DBB9-1-FNPT",
+              "port": "process_out",
+              "anchor": [
+                1387.2447509765625,
+                734.7125244140625
+              ],
+              "bbox": [
+                1375.2447509765625,
+                722.7125244140625,
+                1399.2447509765625,
+                746.7125244140625
+              ]
+            }
+          ]
+        },
+        {
+          "occurrence": 2,
+          "source_ports": [
+            {
+              "id": "0787ba60-2d40-5224-95e6-cc91b367bc76",
+              "source_label": "S2-DBB9-2-FLANGED",
+              "port": "process_in",
+              "anchor": [
+                1011.1546020507812,
+                972.7723388671875
+              ],
+              "bbox": [
+                999.1546020507812,
+                960.7723388671875,
+                1023.1546020507812,
+                984.7723388671875
+              ]
+            },
+            {
+              "id": "ecdc908d-0a9e-5fbf-a7db-0eabc4af9e59",
+              "source_label": "S2-DBB9-2-FNPT",
+              "port": "process_out",
+              "anchor": [
+                977.6483154296875,
+                953.2331848144531
+              ],
+              "bbox": [
+                965.6483154296875,
+                941.2331848144531,
+                989.6483154296875,
+                965.2331848144531
+              ]
+            }
+          ]
+        },
+        {
+          "occurrence": 3,
+          "source_ports": [
+            {
+              "id": "f6f4e47a-f99e-594b-9cf4-b254376a22ae",
+              "source_label": "S2-DBB9-3-FLANGED",
+              "port": "process_in",
+              "anchor": [
+                588.8109130859375,
+                822.3096923828125
+              ],
+              "bbox": [
+                576.8109130859375,
+                810.3096923828125,
+                600.8109130859375,
+                834.3096923828125
+              ]
+            },
+            {
+              "id": "46c47055-80a5-58ce-bf11-d33aa4bd4fa3",
+              "source_label": "S2-DBB9-3-FNPT",
+              "port": "process_out",
+              "anchor": [
+                588.8109130859375,
+                783.1925659179688
+              ],
+              "bbox": [
+                576.8109130859375,
+                771.1925659179688,
+                600.8109130859375,
+                795.1925659179688
+              ]
+            }
+          ]
+        }
+      ],
+      "strict_catalog_result": {
+        "status": "INCOMPLETE_SPEC",
+        "missing": [
+          "standard"
+        ],
+        "count": 0
+      },
+      "diagnostic_candidates": [],
+      "required_value_display": {
+        "length_mm": null,
+        "weight_n": null,
+        "half_weight_n": null,
+        "full_weight_n": null
+      },
+      "uncertainties": [
+        "STANDARD_NOT_EXPLICITLY_PRINTED_ON_VALVE_ROW",
+        "MANUFACTURER_AND_WEIGHT_AND_LENGTH_NOT_PRINTED",
+        "DRAWING_IDENTIFIER_OR_COMMODITY_CODE_NOT_PROVEN_VENDOR_MODEL",
+        "NO_VALVE_RECORDS_IN_SUPPLIED_FLANGE_WORKBOOK",
+        "MIXED_END_SIZES_2_x_3/4_AND_RTJ_x_FNPT_MUST_NOT_BE_REDUCED_TO_ONE_NPS_OR_RTJ_ONLY"
+      ],
+      "review_state": "SOURCE_PROPOSAL_ONLY",
+      "manufacturer_confirmed": false,
+      "engineering_approved": false
+    },
+    {
+      "id": "S2-ITEM-10",
+      "page_index": 1,
+      "material_item_no": "10",
+      "family_proposal": "valve",
+      "quantity_text": "1",
+      "quantity_count": 1,
+      "size_text": "8",
+      "material_row_bbox": [
+        1835.639404296875,
+        733.0,
+        2479.06298828125,
+        760.2771606445312
+      ],
+      "retained_material_evidence_id": "824152ac-4567-56bf-ace8-b783956ae6f0",
+      "source_sha256": "7b97d44bef3d544c4c98ed0667c29607ce58fa4a401dd2463f66010a9615bb59",
+      "visual_transcription": "BALL VALVE FULL BORE 10000 PSI RTJ TYPE\n6BX G.O. BA9901",
+      "source_code_text": "BA9901X:8",
+      "api_size_text": null,
+      "source_spec_proposal": {
+        "family": "valve",
+        "nps": "8",
+        "rating": "10000",
+        "standard": null,
+        "component_type": "BALL",
+        "facing": null,
+        "end_connection": "RTJ",
+        "material": null,
+        "vendor": null,
+        "model": null,
+        "code": "BA9901X:8"
+      },
+      "source_word_evidence": [
+        {
+          "text": "10",
+          "bbox": [
+            1835.639404296875,
+            733.1243896484375,
+            1848.0843505859375,
+            742.740966796875
+          ],
+          "evidence_id": "c959f07d-03c6-54cc-85d6-8168c6c6ef7a",
+          "confidence": 0.9645
+        },
+        {
+          "text": "BALL",
+          "bbox": [
+            1880.8939208984375,
+            733.1243896484375,
+            1909.7437744140625,
+            742.740966796875
+          ],
+          "evidence_id": "20c5cc06-90f6-5a56-bfcb-3d3dd919f0c8",
+          "confidence": 0.9586
+        },
+        {
+          "text": "VALVE",
+          "bbox": [
+            1918.22900390625,
+            733.1243896484375,
+            1955.5640869140625,
+            742.740966796875
+          ],
+          "evidence_id": "e9984106-8b5a-5e6b-aef1-cee853474cf7",
+          "confidence": 0.9586
+        },
+        {
+          "text": "FULL",
+          "bbox": [
+            1965.1806640625,
+            733.1243896484375,
+            1994.0303955078125,
+            742.740966796875
+          ],
+          "evidence_id": "a33c0b89-3a07-57af-98fc-b6f02ea72c47",
+          "confidence": 0.9448
+        },
+        {
+          "text": "BORE",
+          "bbox": [
+            2003.6470947265625,
+            733.1243896484375,
+            2031.93115234375,
+            742.740966796875
+          ],
+          "evidence_id": "ba637136-1717-57d5-9137-00e1283b5f24",
+          "confidence": 0.9448
+        },
+        {
+          "text": "10000",
+          "bbox": [
+            2042.6790771484375,
+            733.1243896484375,
+            2078.317138671875,
+            742.740966796875
+          ],
+          "evidence_id": "a803c65d-3a0e-5f2b-a908-253e8f5efa0a",
+          "confidence": 0.9662
+        },
+        {
+          "text": "PSI",
+          "bbox": [
+            2087.367919921875,
+            733.1243896484375,
+            2107.1669921875,
+            742.740966796875
+          ],
+          "evidence_id": "36398779-b55f-5bf0-80b4-b62e9c381021",
+          "confidence": 0.9017
+        },
+        {
+          "text": "RTJ",
+          "bbox": [
+            2118.48046875,
+            733.1243896484375,
+            2138.279541015625,
+            742.740966796875
+          ],
+          "evidence_id": "483608bf-9896-5f02-b2ad-d8662a0bfa92",
+          "confidence": 0.9017
+        },
+        {
+          "text": "TYPE",
+          "bbox": [
+            2148.461669921875,
+            733.1243896484375,
+            2177.3115234375,
+            742.740966796875
+          ],
+          "evidence_id": "25a55119-99a0-541b-9104-9baf7f421c2f",
+          "confidence": 0.9673
+        },
+        {
+          "text": "BA9901X:8",
+          "bbox": [
+            2305.721435546875,
+            733.1243896484375,
+            2373.03759765625,
+            742.740966796875
+          ],
+          "evidence_id": "33722312-57ad-5819-9b9e-20eecc6777b2",
+          "confidence": 0.8838
+        },
+        {
+          "text": "6BX",
+          "bbox": [
+            1880.8939208984375,
+            747.8321533203125,
+            1902.389892578125,
+            757.44873046875
+          ],
+          "evidence_id": "5c34ce9a-54e1-5896-9f7a-b9cb1bb65c18",
+          "confidence": 0.8752
+        },
+        {
+          "text": "G.O.",
+          "bbox": [
+            1911.4407958984375,
+            747.8321533203125,
+            1938.02783203125,
+            757.44873046875
+          ],
+          "evidence_id": "e74a3f8f-2cdb-5947-bfc0-4338303de94c",
+          "confidence": 0.7162
+        },
+        {
+          "text": "BA9901",
+          "bbox": [
+            1949.9072265625,
+            747.8321533203125,
+            1991.7677001953125,
+            757.44873046875
+          ],
+          "evidence_id": "e4668659-4791-5380-8d25-9595f1ec3746",
+          "confidence": 0.9113
+        },
+        {
+          "text": "8",
+          "bbox": [
+            2204.7294921875,
+            733.0,
+            2211.396240234375,
+            742.6666870117188
+          ],
+          "evidence_id": "4b5ecf72-2508-50db-a996-ea4a22518da8",
+          "confidence": 0.8106
+        },
+        {
+          "text": "1",
+          "bbox": [
+            2476.396240234375,
+            733.3333129882812,
+            2479.06298828125,
+            742.3333129882812
+          ],
+          "evidence_id": "64e78d43-f8f2-54d1-ab29-ae956b0a6e96",
+          "confidence": 0.955
+        }
+      ],
+      "occurrences": [
+        {
+          "occurrence": 1,
+          "source_ports": [
+            {
+              "id": "a2553a2b-d56a-5f03-adb5-f93fb6138557",
+              "source_label": "S2-BALL10-IN",
+              "port": "process_in",
+              "anchor": [
+                1255.7107543945312,
+                632.728515625
+              ],
+              "bbox": [
+                1243.7107543945312,
+                620.728515625,
+                1267.7107543945312,
+                644.728515625
+              ]
+            },
+            {
+              "id": "78b7b485-22bb-5860-bbf7-09b6364b04ec",
+              "source_label": "S2-BALL10-OUT",
+              "port": "process_out",
+              "anchor": [
+                1218.119384765625,
+                654.841552734375
+              ],
+              "bbox": [
+                1206.119384765625,
+                642.841552734375,
+                1230.119384765625,
+                666.841552734375
+              ]
+            }
+          ]
+        }
+      ],
+      "strict_catalog_result": {
+        "status": "INCOMPLETE_SPEC",
+        "missing": [
+          "standard"
+        ],
+        "count": 0
+      },
+      "diagnostic_candidates": [],
+      "required_value_display": {
+        "length_mm": null,
+        "weight_n": null,
+        "half_weight_n": null,
+        "full_weight_n": null
+      },
+      "uncertainties": [
+        "STANDARD_NOT_EXPLICITLY_PRINTED_ON_VALVE_ROW",
+        "MANUFACTURER_AND_WEIGHT_AND_LENGTH_NOT_PRINTED",
+        "DRAWING_IDENTIFIER_OR_COMMODITY_CODE_NOT_PROVEN_VENDOR_MODEL",
+        "NO_VALVE_RECORDS_IN_SUPPLIED_FLANGE_WORKBOOK"
+      ],
+      "review_state": "SOURCE_PROPOSAL_ONLY",
+      "manufacturer_confirmed": false,
+      "engineering_approved": false
+    },
+    {
+      "id": "S2-ITEM-11",
+      "page_index": 1,
+      "material_item_no": "11",
+      "family_proposal": "other",
+      "quantity_text": "1",
+      "quantity_count": 1,
+      "size_text": "8",
+      "material_row_bbox": [
+        1835.639404296875,
+        809.4915161132812,
+        2479.06298828125,
+        819.3333129882812
+      ],
+      "retained_material_evidence_id": "4d788552-0b94-5367-a022-6d28814f8396",
+      "source_sha256": "7b97d44bef3d544c4c98ed0667c29607ce58fa4a401dd2463f66010a9615bb59",
+      "visual_transcription": "PV-7680 PV 7680",
+      "source_code_text": null,
+      "api_size_text": null,
+      "source_spec_proposal": {
+        "family": "other",
+        "nps": "8",
+        "rating": null,
+        "standard": null,
+        "component_type": null,
+        "facing": null,
+        "end_connection": null,
+        "material": null,
+        "vendor": null,
+        "model": null,
+        "code": null
+      },
+      "source_word_evidence": [
+        {
+          "text": "11",
+          "bbox": [
+            1835.639404296875,
+            809.4915161132812,
+            1845.8216552734375,
+            819.1080932617188
+          ],
+          "evidence_id": "01de121f-d39a-5ff7-9a03-507f6bbe0a60",
+          "confidence": 0.9076
+        },
+        {
+          "text": "PV-7680",
+          "bbox": [
+            1880.8939208984375,
+            809.4915161132812,
+            1932.936767578125,
+            819.1080932617188
+          ],
+          "evidence_id": "8bcc785b-c1b3-5d6f-b18f-1eec8fcf67ca",
+          "confidence": 0.9219
+        },
+        {
+          "text": "PV",
+          "bbox": [
+            1941.9876708984375,
+            809.4915161132812,
+            1956.6954345703125,
+            819.1080932617188
+          ],
+          "evidence_id": "359a35cb-bd87-58e7-a833-90ccb4ca2a27",
+          "confidence": 0.9643
+        },
+        {
+          "text": "7680",
+          "bbox": [
+            1965.1806640625,
+            809.4915161132812,
+            1994.0303955078125,
+            819.1080932617188
+          ],
+          "evidence_id": "ceb4d1a2-4b09-51b4-a0cb-0db4c0942af3",
+          "confidence": 0.9643
+        },
+        {
+          "text": "8",
+          "bbox": [
+            2204.7294921875,
+            809.6666870117188,
+            2211.396240234375,
+            819.3333129882812
+          ],
+          "evidence_id": "9bc5777f-0227-56d1-9636-60fb9ca3730a",
+          "confidence": 0.9531
+        },
+        {
+          "text": "1",
+          "bbox": [
+            2476.396240234375,
+            809.6666870117188,
+            2479.06298828125,
+            819.0
+          ],
+          "evidence_id": "1b637c0e-7ad3-526f-8c4d-78dc014bb783",
+          "confidence": 0.9615
+        }
+      ],
+      "occurrences": [
+        {
+          "occurrence": 1,
+          "source_ports": [
+            {
+              "id": "85a15297-32bc-5133-9c7d-b51aad294f0d",
+              "source_label": "S2-PV7680-IN",
+              "port": "process_in",
+              "anchor": [
+                868.5902099609375,
+                856.31787109375
+              ],
+              "bbox": [
+                856.5902099609375,
+                844.31787109375,
+                880.5902099609375,
+                868.31787109375
+              ]
+            },
+            {
+              "id": "6e0fa0dd-fb97-5940-a00f-61393dc2f2b7",
+              "source_label": "S2-PV7680-OUT",
+              "port": "process_out",
+              "anchor": [
+                831.0376892089844,
+                878.4323425292969
+              ],
+              "bbox": [
+                819.0376892089844,
+                866.4323425292969,
+                843.0376892089844,
+                890.4323425292969
+              ]
+            }
+          ]
+        }
+      ],
+      "strict_catalog_result": {
+        "status": "CLASSIFICATION_REQUIRED",
+        "missing": [],
+        "count": 0
+      },
+      "diagnostic_candidates": [],
+      "required_value_display": {
+        "length_mm": null,
+        "weight_n": null,
+        "half_weight_n": null,
+        "full_weight_n": null
+      },
+      "uncertainties": [
+        "PV_CLASSIFICATION_REQUIRED: item is listed under INSTRUMENTS and only PV-7680 tag is printed; no valve/catalog classification accepted.",
+        "STANDARD_RATING_MATERIAL_MANUFACTURER_WEIGHT_LENGTH_NOT_PRINTED"
+      ],
+      "review_state": "SOURCE_PROPOSAL_ONLY",
+      "manufacturer_confirmed": false,
+      "engineering_approved": false
+    }
+  ],
+  "source_corrections_as_proposals": [
+    {
+      "page_index": 1,
+      "material_item_no": "6",
+      "field": "description/API size",
+      "text": "2-1/16\"",
+      "source_word_evidence_id": "768f1425-afd6-5881-a1bd-3d60d4cc08cb",
+      "bbox": [
+        1949.341552734375,
+        502.89166259765625,
+        2000.2529296875,
+        515.336669921875
+      ],
+      "reason": "Retained material description dropped visually explicit delayed-line API size."
+    },
+    {
+      "page_index": 1,
+      "material_item_no": "9",
+      "field": "description",
+      "text": "DB3902",
+      "source_word_evidence_id": "95def2e0-d1e2-5467-9db4-732b0e248a1d",
+      "bbox": [
+        1880.8939208984375,
+        717.2852783203125,
+        1925.0172119140625,
+        726.90185546875
+      ],
+      "reason": "Retained material description dropped final second line; this identifier does not establish vendor/model."
+    }
+  ],
+  "schedule_audit": {
+    "units": {
+      "length": "mm",
+      "weights": "N"
+    },
+    "expected_material_row_schedule_entries_by_page": {
+      "0": 2,
+      "1": 4
+    },
+    "expected_physical_occurrences_by_page": {
+      "0": 5,
+      "1": 13
+    },
+    "expected_flange_occurrences": 13,
+    "expected_classified_valve_occurrences": 5,
+    "additional_unclassified_pv_occurrences": 1,
+    "expected_each_flange_row_labels": [
+      "Wflange (N): N/A",
+      "W_half = flange + half studs + one nut per stud (N): N/A",
+      "W_full = flange + all studs + two nuts per stud (N): N/A"
+    ],
+    "existing_problems": [
+      "Unmatched flange rows omit W_half/W_full entirely because labels are emitted only when catalog_match exists.",
+      "Generic W label should clearly distinguish flange bare weight from totals.",
+      "Workbook Half bolting/Full bolting labels describe flange+bolting totals, not bolting-only mass.",
+      "No strict match may be promoted from API near-candidate or manufacturer-unconfirmed diagnostic data."
+    ]
+  }
+}

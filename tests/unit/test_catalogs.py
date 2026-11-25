@@ -23,6 +23,16 @@ def row(**changes):
 
 
 class CatalogRules(unittest.TestCase):
+    def test_schedule_never_presents_an_assembly_weight_as_a_bare_flange(self):
+        from packages.catalogs import schedule_lines
+        # Explicit pure software record, not source/golden 1010 evidence.
+        record=normalize_record(row(weight_scope='ASSEMBLY_INCLUDES_BOLTING',weight_n='140'))
+        lines=schedule_lines([{'item_no':'SOFTWARE','family':'flange','size':'8','quantity':1,
+            'catalog_match':{'record':record,'catalog_version_id':'software-only-dataset','status':'REFERENCE_ONLY'}}])
+        self.assertTrue(any('W_flange: N/A N' in line for line in lines))
+        self.assertTrue(any('W_assembly: 140 N' in line for line in lines))
+        self.assertTrue(any('W_half: N/A N | W_full: N/A N' in line for line in lines))
+
     def test_pipe_bore_is_not_silently_used_as_api_flange_bore(self):
         from packages.automation.recognize import specifications
         spec=specifications('FLANGE 10000LB RTJWN 6.615" BORE API 6A TYPE 6BX SIZE 7-1.16','8','flange')

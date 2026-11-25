@@ -248,11 +248,14 @@ def compute_reasons(nodes):
 
 def validate(project):
     refresh_source_locations(project)
+    from packages.catalogs.project_review import refresh_project_catalog_reviews
+    catalog_issues=refresh_project_catalog_reviews(project)
     from packages.engineering.continuations import apply_reasons
     continuation_issues=apply_reasons(project)
     compute_reasons(project["nodes"])
     project["graph"] = topology(project["nodes"])
     issues = list(project.get("automation",{}).get("issues",[]))
+    issues.extend(catalog_issues)
     issues.extend(continuation_issues)
     from packages.physical import audit as physical_audit
     from packages.physical.constraints import apply_geometry_reasons
@@ -349,13 +352,14 @@ def validate(project):
                 )
             else:
                 record = match["record"]
-                if match.get("status") != "MANUFACTURER_CONFIRMED":
+                from packages.catalogs.project_review import manufacturer_confirmed
+                if not manufacturer_confirmed(project,item):
                     issues.append(
                         {
                             "code": "MANUFACTURER_UNCONFIRMED",
                             "severity": "critical",
                             "material_id": item["id"],
-                            "message": f"Item {item['item_no']}: catalog values are {record.get('quality','unconfirmed')}; confirm actual manufacturer data before final modelling.",
+                            "message": f"Item {item['item_no']}: catalog quality is {record.get('quality','unconfirmed')}; separate project manufacturer evidence is required before final modelling.",
                         }
                     )
                 for key in ["weight_n"] + (

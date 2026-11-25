@@ -245,30 +245,35 @@ def schedule_lines(materials):
     for item in materials:
         match = item.get("catalog_match")
         record = match.get("record", {}) if match else {}
+        state=item.get('catalog_review_state',{})
+        from packages.catalogs.project_review import record_weight_values
+        values=record_weight_values(record) if record and state.get('match_current') is not False else {}
 
         def value(key):
-            return record.get(key) if record.get(key) is not None else "N/A"
+            return values.get(key) if values.get(key) is not None else "N/A"
 
+        weight_label='W_flange' if item['family']=='flange' else 'W_valve'
         lines.append(
-            f"{item['item_no']}  {item['family'].upper()}  {item['size']}  QTY {item['quantity'] if item.get('quantity') is not None else 'N/A'} | L: {value('length_mm')} mm | W: {value('weight_n')} N"
+            f"{item['item_no']}  {item['family'].upper()}  {item['size']}  QTY {item['quantity'] if item.get('quantity') is not None else 'N/A'} | L: {value('length_mm')} mm | {weight_label}: {value('weight_n')} N"
         )
+        if item['family']=='flange':
+            lines.append(f"W_half: {value('half_weight_n')} N | W_full: {value('full_weight_n')} N | {record.get('weight_scope') or 'SCOPE UNCONFIRMED'}")
+            if values.get('assembly_weight_n') is not None:lines.append(f"W_assembly: {value('assembly_weight_n')} N | INCLUDES BOLTING; NOT BARE FLANGE")
+        lines.append('PROJECT MANUFACTURER: '+item.get('project_manufacturer_status','UNCONFIRMED'))
         if match:
             lines.append(
                 f"{record.get('standard','')} / {record.get('rating','')} / {record.get('component_type','')} | {match.get('status','REFERENCE_ONLY')}"
             )
-            if item["family"] == "flange":
-                lines.append(
-                    f"W_half: {value('half_weight_n')} N | W_full: {value('full_weight_n')} N | {record.get('weight_scope') or 'SCOPE UNCONFIRMED'}"
-                )
             lines.append(
                 f"SOURCE: {record.get('source','')} | DATASET {match['catalog_version_id'][:8]} / ROW {record.get('source_row','?')}"
             )
             if item["family"] == "valve":
                 lines.append(
-                    f"VENDOR: {record.get('vendor') or 'UNCONFIRMED'} / {record.get('model') or 'UNCONFIRMED'} | OPERATOR: {record.get('operator_scope') or 'UNKNOWN'}"
+                    f"CATALOG VENDOR: {record.get('vendor') or 'UNCONFIRMED'} / {record.get('model') or 'UNCONFIRMED'} | OPERATOR: {record.get('operator_scope') or 'UNKNOWN'}"
                 )
         else:
             lines.append("NO EXACT CATALOG MATCH. UNKNOWN VALUES ARE NOT ZERO.")
+        if state.get('reason_codes'):lines.append('REVIEW: '+', '.join(state['reason_codes']))
     if any(item["family"] == "valve" for item in materials):
         lines += [
             "VALVE DATA MAY BE MANUFACTURER-SPECIFIC OR ESTIMATED.",

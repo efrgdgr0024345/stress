@@ -164,6 +164,9 @@ def commit_project(api,conn,job,project,action,preserve_status=False):
     apply_station_reasons(project)
     from packages.physical.source_exceptions import refresh_source_exceptions
     refresh_source_exceptions(project)
+    from services.api.project_catalog_review import load_catalog_versions
+    from packages.catalogs.project_review import refresh_project_catalog_reviews
+    refresh_project_catalog_reviews(project,load_catalog_versions(api,job['tenant'],conn))
     from packages.engineering.graph_review import apply_topology_reasons
     apply_topology_reasons(project)
     compute_reasons(project["nodes"])
