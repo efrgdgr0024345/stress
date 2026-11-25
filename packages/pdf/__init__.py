@@ -64,10 +64,12 @@ def create_sample(path):
 
         page.draw_rect(fitz.Rect(25, 25, 1075, 735), color=faint, width=0.6)
         text(46, 49, "SYNTHETIC TRAINING DRAWING  /  NOT FOR ENGINEERING USE", 9, faint)
-        text(895, 53, "N", 12)
-        line((900, 113), (900, 68), 1.3)
-        line((900, 68), (895, 80))
-        line((900, 68), (905, 80))
+        # Keep the synthetic endpoint at (920, 100) outside the protected
+        # NORTH glyph/arrow region, just as a readable source drawing should.
+        text(1025, 53, "N", 12)
+        line((1030, 113), (1030, 68), 1.3)
+        line((1030, 68), (1025, 80))
+        line((1030, 68), (1035, 80))
         coords = (
             [(160, 485), (340, 381), (500, 473), (500, 282), (710, 161), (885, 262)]
             if index == 0
