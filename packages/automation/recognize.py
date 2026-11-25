@@ -108,7 +108,13 @@ def materials(page, sheet, source_sha):
                 current["item_no"]=number["text"]
                 raw_qty=" ".join(w["text"] for w in qty)
                 current["quantity_raw"]=raw_qty
-                current["quantity"]=int(raw_qty) if re.fullmatch(r"\d{1,5}",raw_qty) and min([w["confidence"] for w in qty] or [0])>=.8 else None
+                current["quantity"]=int(raw_qty) if current["family"]!='pipe' and re.fullmatch(r"\d{1,5}",raw_qty) and min([w["confidence"] for w in qty] or [0])>=.8 else None
+                # A number/quantity can arrive on a later OCR row than its
+                # description. Repair the complete source-quantity contract;
+                # retaining "unresolved" here silently dropped real elbow
+                # occurrences despite a recognized integral count.
+                current["quantity_unit"]="count" if current["quantity"] is not None else "unresolved"
+                current["quantity_value"]=raw_qty if re.fullmatch(r'\d+(?:\.\d+)?',raw_qty) else None
                 issues[:]=[i for i in issues if not (i.get("evidence_id")==current["evidence_id"] and i["code"] in ("UNREADABLE_ITEM_NUMBER","UNRESOLVED_QUANTITY"))]
                 if current["quantity"] is None:issues.append({"code":"UNRESOLVED_QUANTITY","sheet_id":sheet["id"],"evidence_id":current["evidence_id"]})
                 is_start=False

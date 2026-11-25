@@ -1,0 +1,46 @@
+{
+  "format": "real-pdf-material-observation-1",
+  "source_filename": "1010 Reviewed.pdf",
+  "source_sha256": "7b97d44bef3d544c4c98ed0667c29607ce58fa4a401dd2463f66010a9615bb59",
+  "page_index": 1,
+  "provenance": "Material observation reconstructed from the retained authenticated DigitalOcean OCR callback on the real source. Not a golden model or engineering approval.",
+  "width": 2590.865966796875,
+  "height": 1729.133056640625,
+  "material_observation": {
+    "id": "a00efa33-70d4-5329-bc12-9bac7d6139f7",
+    "sheet_id": "real-source-page-2-observation",
+    "item_no": "11",
+    "family": "other",
+    "description": "PV-7680 PV 7680",
+    "size": "8",
+    "quantity": 1,
+    "observed": 0,
+    "quantity_raw": "1",
+    "quantity_unit": "count",
+    "quantity_value": "1",
+    "evidence": "Unreviewed source extraction; evidence 4d788552-0b94-5367-a022-6d28814f8396",
+    "evidence_id": "4d788552-0b94-5367-a022-6d28814f8396",
+    "source_bbox": [
+      1835.639404296875,
+      809.4915161132812,
+      2479.06298828125,
+      819.3333129882812
+    ],
+    "source_sha256": "7b97d44bef3d544c4c98ed0667c29607ce58fa4a401dd2463f66010a9615bb59",
+    "word_evidence_ids": [
+      "01de121f-d39a-5ff7-9a03-507f6bbe0a60",
+      "8bcc785b-c1b3-5d6f-b18f-1eec8fcf67ca",
+      "359a35cb-bd87-58e7-a833-90ccb4ca2a27",
+      "ceb4d1a2-4b09-51b4-a0cb-0db4c0942af3",
+      "9bc5777f-0227-56d1-9636-60fb9ca3730a",
+      "1b637c0e-7ad3-526f-8c4d-78dc014bb783"
+    ],
+    "recognition_confidence": 0.9076,
+    "verification": "proposed",
+    "origin": "automation",
+    "spec_proposal": {
+      "family": "other",
+      "nps": "8"
+    }
+  }
+}
