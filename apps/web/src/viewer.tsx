@@ -38,6 +38,7 @@ import {
   type NodeInstance,
   type Point,
   label,
+  pointLabel,
   api,
   type DrawingNote,
 } from "./types";
@@ -52,7 +53,7 @@ type Mutation = (
 ) => Promise<Project | undefined>;
 type Draft = Omit<PipeNode, "id" | "number" | "reasons" | "support_gap_mm"> & {
   id?: string;
-  number?: number;
+  number?: number | null;
   dimension: string;
   _version?: number;
 };
@@ -206,6 +207,8 @@ export function DrawingEditor({
     if (node) {
       setDraft({
         ...structuredClone(node),
+        topology_confirmed: false,
+        source_location_confirmed: false,
         _version: project.version,
         dimension:
           node.dimension_input ||
@@ -241,6 +244,17 @@ export function DrawingEditor({
     Math.max(14, Math.min(sheet.height - 14, y)),
   ];
   const current = project.nodes.find((n) => n.id === selected);
+  const sourceProof = draft?.source_observation?.review_proof;
+  const inspectedInstance = draft?.instances.find(
+    (instance) => instance.sheet_id === sourceProof?.sheet_id,
+  );
+  const sourceLocationCurrent =
+    draft?.source_observation?.verification === "reviewed" &&
+    !!sourceProof &&
+    !!inspectedInstance &&
+    sourceProof.anchor.every(
+      (value, index) => value === inspectedInstance.anchor[index],
+    );
   useEffect(() => {
     if (!dirty) return;
     const warn = (event: BeforeUnloadEvent) => {
@@ -257,7 +271,21 @@ export function DrawingEditor({
     (m) => m.sheet_id === sheet.id && ["valve", "flange"].includes(m.family),
   );
   const patch = (changes: Partial<Draft>) => {
-    setDraft((d) => (d ? { ...d, ...changes } : null));
+    setDraft((d) => {
+      if (!d) return null;
+      const anchorChanged = changes.instances?.some((instance) => {
+        const old = d.instances.find((i) => i.sheet_id === instance.sheet_id);
+        return (
+          !old ||
+          old.anchor.some((value, index) => value !== instance.anchor[index])
+        );
+      });
+      return {
+        ...d,
+        ...changes,
+        ...(anchorChanged ? { source_location_confirmed: false } : {}),
+      };
+    });
     setDirty(true);
   };
   const proposeFeature = (
@@ -292,7 +320,7 @@ export function DrawingEditor({
           0,
           ...project.nodes
             .filter((n) => n.line_id === sheet.line_id && n.route === "main")
-            .map((n) => n.order),
+            .map((n) => n.order ?? 0),
         ) + 1,
       kind: "flange",
       station_mm: null,
@@ -330,7 +358,7 @@ export function DrawingEditor({
             0,
             ...project.nodes
               .filter((n) => n.route === "main")
-              .map((n) => n.order),
+              .map((n) => n.order ?? 0),
           ) + 1,
         kind: "endpoint",
         station_mm: null,
@@ -361,6 +389,9 @@ export function DrawingEditor({
       setTimeout(() => {
         setDraft({
           ...structuredClone(n),
+          _version: project.version,
+          topology_confirmed: false,
+          source_location_confirmed: false,
           dimension:
             n.dimension_input ||
             (n.station_mm === null ? "" : `${n.station_mm} mm`),
@@ -417,6 +448,9 @@ export function DrawingEditor({
     if (selected !== node.id)
       setDraft({
         ...structuredClone(node),
+        _version: project.version,
+        topology_confirmed: false,
+        source_location_confirmed: false,
         dimension:
           node.dimension_input ||
           (node.station_mm === null ? "" : `${node.station_mm} mm`),
@@ -431,6 +465,9 @@ export function DrawingEditor({
       d
         ? {
             ...d,
+            ...(drag.current!.what === "anchor"
+              ? { source_location_confirmed: false }
+              : {}),
             instances: d.instances.map((v) =>
               v.sheet_id === sheet.id
                 ? { ...v, [drag.current!.what]: point }
@@ -449,6 +486,9 @@ export function DrawingEditor({
       route: draft.route,
       takeoff_id: draft.takeoff_id || null,
       order: draft.order,
+      topology_state: draft.topology_state ?? "ASSIGNED",
+      topology_confirmed: draft.topology_confirmed ?? false,
+      source_location_confirmed: draft.source_location_confirmed ?? false,
       kind: draft.kind,
       dimension: draft.dimension,
       evidence: draft.evidence,
@@ -464,6 +504,17 @@ export function DrawingEditor({
     if (p) {
       const id = draft.id || p.nodes[p.nodes.length - 1].id;
       onSelect(id);
+      const saved = p.nodes.find((point) => point.id === id);
+      if (saved)
+        setDraft({
+          ...structuredClone(saved),
+          _version: p.version,
+          topology_confirmed: false,
+          source_location_confirmed: false,
+          dimension:
+            saved.dimension_input ||
+            (saved.station_mm === null ? "" : `${saved.station_mm} mm`),
+        });
       setDirty(false);
       notify("Point saved. Engineering reasons and route numbering updated.");
     }
@@ -472,7 +523,7 @@ export function DrawingEditor({
     if (!draft?.id) return;
     if (
       !window.confirm(
-        `Delete physical point ${draft.number} and all its sheet representations?`,
+        `Delete physical point ${pointLabel(draft)} and all its sheet representations?`,
       )
     )
       return;
@@ -494,7 +545,8 @@ export function DrawingEditor({
           {
             ...draft,
             id: draft.id || "new",
-            number: draft.number || "?",
+            number: draft.number ?? null,
+            review_label: draft.review_label || (draft.id ? "Unnumbered" : "+"),
             reasons:
               draft.dimension && draft.evidence
                 ? current?.reasons || []
@@ -555,7 +607,7 @@ export function DrawingEditor({
             fontSize={8}
             fontFamily="Arial, sans-serif"
           >
-            {n.number}
+            {pointLabel(n)}
           </text>
         </g>
         {isSelected && (
@@ -733,7 +785,7 @@ export function DrawingEditor({
                   )
                   .map((n) => (
                     <option value={n.id} key={n.id}>
-                      Node {n.number} · {n.kind}
+                      {pointLabel(n)} · {n.kind}
                     </option>
                   ))}
               </select>
@@ -1186,6 +1238,8 @@ export function DrawingEditor({
                     if (current)
                       setDraft({
                         ...structuredClone(current),
+                        topology_confirmed: false,
+                        source_location_confirmed: false,
                         _version: project.version,
                         dimension:
                           current.dimension_input ||
@@ -1305,13 +1359,18 @@ export function DrawingEditor({
             <div className="node-heading">
               <span
                 className={`node-big ${current?.reasons.length || !draft.id ? "blue" : "red"}`}
+                style={
+                  draft.number == null && draft.review_label
+                    ? { fontSize: 18 }
+                    : undefined
+                }
               >
-                {draft.number || "+"}
+                {draft.id ? pointLabel(draft) : "+"}
               </span>
               <div>
                 <h3>{draft.id ? "Physical point" : "New physical point"}</h3>
                 <span>
-                  {label(draft.kind)} · {draft.route}
+                  {label(draft.kind)} · {draft.route ?? "Unassigned topology"}
                 </span>
               </div>
             </div>
@@ -1333,6 +1392,60 @@ export function DrawingEditor({
                 </span>
               </div>
             ))}
+            {draft.source_observation && (
+              <div className="field-section">
+                <span className="eyebrow">SOURCE LOCATION</span>
+                <p className="fine-print">
+                  Observed feature:{" "}
+                  {label(draft.source_observation.kind || draft.kind)}.
+                  {draft.source_observation.material_item_no != null &&
+                    ` Source item ${draft.source_observation.material_item_no}.`}
+                </p>
+                {draft.source_observation.evidence && (
+                  <p className="fine-print">
+                    {draft.source_observation.evidence}
+                  </p>
+                )}
+                <div className="notice amber">
+                  <span>
+                    {sourceLocationCurrent
+                      ? "A source-location inspection is recorded. Bubble edits keep this review."
+                      : "This source location needs inspection against the original drawing."}
+                  </span>
+                </div>
+                {draft.source_observation.reason_codes
+                  ?.filter((reason) => !current?.reasons.includes(reason))
+                  .map((reason) => (
+                    <div className="reason" key={reason}>
+                      <CircleHelp size={13} />
+                      <span>{label(reason)}</span>
+                    </div>
+                  ))}
+                {draft.source_observation.review_invalidated_reason && (
+                  <p className="fine-print">
+                    Previous review invalidated:{" "}
+                    {label(draft.source_observation.review_invalidated_reason)}.
+                  </p>
+                )}
+                <label className="checkbox-field">
+                  <input
+                    type="checkbox"
+                    aria-label="Confirm current source feature and visual anchor"
+                    checked={draft.source_location_confirmed ?? false}
+                    onChange={(e) =>
+                      patch({ source_location_confirmed: e.target.checked })
+                    }
+                  />
+                  I have inspected this feature and anchor in the original
+                  drawing
+                </label>
+                <p className="fine-print">
+                  Confirms the source location only. Route order, physical
+                  station, component associations and source exceptions require
+                  their own evidence.
+                </p>
+              </div>
+            )}
             <div className="field-section">
               <span className="eyebrow">PHYSICAL MODEL</span>
               <label className="form-field">
@@ -1368,11 +1481,20 @@ export function DrawingEditor({
                 <label className="form-field">
                   Route
                   <select
-                    value={draft.route}
+                    value={draft.route ?? ""}
                     onChange={(e) =>
-                      patch({ route: e.target.value, takeoff_id: null })
+                      patch({
+                        route: e.target.value || null,
+                        takeoff_id: null,
+                        topology_state: e.target.value
+                          ? "ASSIGNED"
+                          : "UNASSIGNED",
+                        topology_confirmed: false,
+                        order: e.target.value ? draft.order : null,
+                      })
                     }
                   >
+                    <option value="">Unassigned — source review point</option>
                     <option value="main">Main run</option>
                     {Array.from(
                       { length: 9 },
@@ -1389,18 +1511,40 @@ export function DrawingEditor({
                   <input
                     type="number"
                     min={0}
-                    value={draft.order}
-                    onChange={(e) => patch({ order: +e.target.value })}
+                    value={draft.order ?? ""}
+                    disabled={!draft.route}
+                    onChange={(e) =>
+                      patch({
+                        order: e.target.value === "" ? null : +e.target.value,
+                        topology_confirmed: false,
+                      })
+                    }
                   />
                 </label>
               </div>
-              {draft.route !== "main" && (
+              {current?.topology_state === "UNASSIGNED" &&
+                draft.topology_state === "ASSIGNED" && (
+                  <label className="checkbox-field">
+                    <input
+                      type="checkbox"
+                      checked={draft.topology_confirmed ?? false}
+                      onChange={(e) =>
+                        patch({ topology_confirmed: e.target.checked })
+                      }
+                    />
+                    I confirm this route and physical sequence from the source
+                  </label>
+                )}
+              {!!draft.route && draft.route !== "main" && (
                 <label className="form-field">
                   Shared main-run tee
                   <select
                     value={draft.takeoff_id || ""}
                     onChange={(e) =>
-                      patch({ takeoff_id: e.target.value || null })
+                      patch({
+                        takeoff_id: e.target.value || null,
+                        topology_confirmed: false,
+                      })
                     }
                   >
                     <option value="">Unconfirmed takeoff</option>
@@ -1413,7 +1557,7 @@ export function DrawingEditor({
                       )
                       .map((n) => (
                         <option key={n.id} value={n.id}>
-                          Node {n.number} · Order {n.order}
+                          {pointLabel(n)} · Order {n.order ?? "unassigned"}
                         </option>
                       ))}
                   </select>
@@ -1557,21 +1701,24 @@ export function DrawingEditor({
             <div className="node-list">
               {nodes
                 .filter((n) =>
-                  `${n.number} ${n.kind} ${n.route}`.includes(
-                    nodeQuery.toLowerCase(),
-                  ),
+                  `${pointLabel(n)} ${n.kind} ${n.route ?? "unassigned"}`
+                    .toLowerCase()
+                    .includes(nodeQuery.toLowerCase()),
                 )
                 .map((n) => (
                   <button key={n.id} onClick={() => onSelect(n.id)}>
                     <span
                       className={`node-mini ${n.reasons.length ? "blue" : "red"}`}
                     >
-                      {n.number}
+                      {pointLabel(n)}
                     </span>
                     <span>
                       <b>{label(n.kind)}</b>
                       <small>
-                        {n.route === "main" ? "Main run" : n.route} ·{" "}
+                        {n.route === "main"
+                          ? "Main run"
+                          : (n.route ?? "Unassigned topology")}{" "}
+                        ·{" "}
                         {n.station_mm === null
                           ? "Unverified station"
                           : `${n.station_mm} mm`}

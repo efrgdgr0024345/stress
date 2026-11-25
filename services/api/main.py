@@ -5,6 +5,7 @@ from datetime import datetime, timezone
 from decimal import Decimal
 import hashlib
 import json
+from copy import deepcopy
 import os
 from pathlib import Path
 import secrets
@@ -13,6 +14,7 @@ import subprocess
 import sys
 import threading
 import time
+from typing import Literal
 from uuid import uuid4
 
 from fastapi import Depends, FastAPI, File, HTTPException, Request, Response, UploadFile
@@ -21,7 +23,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.exceptions import RequestValidationError
 from pydantic import BaseModel, ConfigDict, Field
 
-from packages.engineering import compute_reasons, dimension_mm, renumber, validate
+from packages.engineering import compute_reasons, dimension_mm, renumber, validate, topology_assigned, source_location_reviewed, refresh_source_locations
 from packages.pdf import create_sample, export_bundle
 from services.api import diagnostics as diag
 
@@ -400,6 +402,7 @@ def change(project_id, version, actor, action, update):
                 409, "This project changed in another session. Reload before saving."
             )
         update(project)
+        refresh_source_locations(project)
         from packages.physical import prepare as prepare_physical
         prepare_physical(project)
         from packages.engineering.continuations import apply_reasons
@@ -763,9 +766,12 @@ class Instance(BaseModel):
 class NodeInput(Version):
     model_config = ConfigDict(extra="forbid")
     line_id: str = Field(min_length=1, max_length=150)
-    route: str = Field(pattern=r"^(main|branch-\d{2})$")
+    route: str | None = Field(default=None, pattern=r"^(main|branch-\d{2})$")
     takeoff_id: str | None = None
-    order: int = Field(ge=0, le=100000)
+    order: int | None = Field(default=None, ge=0, le=100000)
+    topology_state: Literal['ASSIGNED','UNASSIGNED'] = 'ASSIGNED'
+    topology_confirmed: bool = False
+    source_location_confirmed: bool = False
     kind: str = Field(
         pattern=r"^(endpoint|flange|tee|elbow|support|valve|instrument|continuation)$"
     )
@@ -776,7 +782,7 @@ class NodeInput(Version):
     instances: list[Instance] = Field(min_length=1, max_length=200)
 
 
-def apply_node(project, body, node_id=None):
+def apply_node(project, body, node_id=None, actor=None):
     node = (
         next((n for n in project["nodes"] if n["id"] == node_id), None)
         if node_id
@@ -784,6 +790,37 @@ def apply_node(project, body, node_id=None):
     )
     if node_id and not node:
         raise HTTPException(404, "Physical point not found.")
+    sheets = {s['id']: s for s in project['sheets']}
+    observation = node.get('source_observation') if node else None
+    location_preview = {**node, 'instances': [i.model_dump() for i in body.instances]} if node else None
+    topology_state = body.topology_state
+    if node and not topology_assigned(node) and 'topology_state' not in body.model_fields_set and not body.topology_confirmed:
+        topology_state = 'UNASSIGNED'
+    if topology_state == 'UNASSIGNED':
+        if body.route is not None or body.order is not None or body.takeoff_id:
+            raise HTTPException(422, 'Unassigned source points have no route/order/takeoff. Explicitly confirm topology before assigning an engineering route.')
+    else:
+        if body.route is None or body.order is None:
+            raise HTTPException(422, 'An assigned model point needs an explicit route and physical sequence order.')
+        if node and not topology_assigned(node) and not body.topology_confirmed:
+            raise HTTPException(422, 'Explicit topology confirmation is required before promoting an unassigned source point into the ordered model.')
+        if observation and not body.source_location_confirmed and not source_location_reviewed(location_preview, sheets):
+            raise HTTPException(422, 'Review the actual source location separately before accepting this source point into an ordered route.')
+    source_review_proof = None
+    if body.source_location_confirmed:
+        if not observation or not actor:
+            raise HTTPException(422, 'Source-location confirmation requires an existing source observation and an authorised reviewer.')
+        sheet = sheets.get(observation.get('sheet_id'))
+        current = bool(sheet and (observation.get('content_hash') == sheet.get('content_hash')
+            if observation.get('content_hash') else observation.get('source_sha256') == sheet.get('sha256')))
+        instance = next((i for i in body.instances if sheet and i.sheet_id == sheet['id']), None)
+        if not current or not instance:
+            raise HTTPException(409, 'The original source observation changed or is no longer depicted. Refresh its source evidence before confirming a location.')
+        if len(body.evidence.strip()) < 10:
+            raise HTTPException(422, 'Describe the source feature and location evidence before confirming its inspection.')
+        source_review_proof = {'sheet_id': sheet['id'], 'source_sha256': sheet['sha256'],
+            'content_hash': sheet.get('content_hash'), 'anchor': list(instance.anchor),
+            'evidence': body.evidence, 'reviewed_by': actor['id'], 'reviewed_at': now()}
     if bool(body.source_feature_id)!=bool(body.source_feature_role):
         raise HTTPException(422,'A source feature needs both its identity and interface role.')
     if body.source_feature_id:
@@ -804,6 +841,7 @@ def apply_node(project, body, node_id=None):
             or tee["kind"] != "tee"
             or tee["route"] != "main"
             or tee["line_id"] != body.line_id
+            or not topology_assigned(tee)
         ):
             raise HTTPException(
                 422, "Branch takeoff must be an existing main-run tee on the same line."
@@ -841,7 +879,8 @@ def apply_node(project, body, node_id=None):
             422, "Physical stations require a dimension source / engineering evidence."
         )
     data = {
-        **body.model_dump(exclude={"version", "dimension"}),
+        **body.model_dump(exclude={"version", "dimension", "topology_confirmed", "source_location_confirmed"}),
+        'topology_state': topology_state,
         "station_mm": station,
         "dimension_input": body.dimension,
     }
@@ -849,10 +888,27 @@ def apply_node(project, body, node_id=None):
         data.update({key:node.get(key) for key in ('source_feature_id','source_feature_role')})
     if node:
         node.update(data)
-        node["verification"]="reviewed"
+        if topology_state == 'ASSIGNED':
+            node["verification"]="reviewed"
+        else:
+            node.setdefault('verification', 'proposed')
     else:
-        project["nodes"].append({**data, "id": uid(), "number": None, "verification":"reviewed"})
-    if body.route != "main":
+        point_id = uid()
+        project["nodes"].append({**data, "id": point_id, "number": None,
+            'review_label': 'P-'+point_id[:8],
+            "verification":"reviewed" if topology_state == 'ASSIGNED' else 'proposed'})
+    if topology_state == 'UNASSIGNED':
+        target = node or project['nodes'][-1]
+        target.update(route=None, order=None, takeoff_id=None, number=None)
+        target.setdefault('review_label', 'P-'+target['id'][:8])
+    if source_review_proof:
+        target = node or project['nodes'][-1]
+        observation = target['source_observation']
+        if observation.get('verification') == 'reviewed' and observation.get('review_proof'):
+            observation.setdefault('review_history', []).append(deepcopy(observation['review_proof']))
+        observation.update(verification='reviewed', review_proof=source_review_proof)
+        observation.pop('review_invalidated_reason', None)
+    if topology_state == 'ASSIGNED' and body.route != "main":
         for member in project["nodes"]:
             if member["line_id"] == body.line_id and member["route"] == body.route:
                 member["takeoff_id"] = body.takeoff_id
@@ -870,7 +926,7 @@ def add_node(project_id: str, body: NodeInput, actor=Depends(editor)):
         body.version,
         actor,
         "Added physical point",
-        lambda p: apply_node(p, body),
+        lambda p: apply_node(p, body, actor=actor),
     )
 
 
@@ -881,7 +937,7 @@ def patch_node(project_id: str, node_id: str, body: NodeInput, actor=Depends(edi
         body.version,
         actor,
         "Updated physical point / presentation",
-        lambda p: apply_node(p, body, node_id),
+        lambda p: apply_node(p, body, node_id, actor=actor),
     )
 
 
@@ -1167,6 +1223,8 @@ from services.api.results import install as install_results
 install_results(sys.modules[__name__])
 from services.api.physical_model import install as install_physical_model
 install_physical_model(sys.modules[__name__])
+from services.api.source_review import install as install_source_review
+install_source_review(sys.modules[__name__])
 from services.api.continuations import install as install_continuations
 install_continuations(sys.modules[__name__])
 

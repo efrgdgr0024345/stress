@@ -27,6 +27,7 @@ from source_features_workflow import exercise_source_features
 from continuation_workflow import exercise_continuations
 from cod_workflow import exercise_cod
 from pdf_lifecycle import exercise_pdf_lifecycle
+from real_source_review import exercise_real_source_review
 
 Path("/tmp/caesar-screens").mkdir(exist_ok=True)
 
@@ -342,6 +343,7 @@ def run():
                     exercise_real_drawing(page, context, base, tmp)
                     exercise_physical_model(page,context,base)
                     exercise_source_features(page,context,base)
+                    exercise_real_source_review(page,context,base)
                     exercise_continuations(page,context,base)
                     exercise_cod(page,context,base)
                     exercise_pdf_lifecycle(page,context,base)

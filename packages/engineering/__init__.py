@@ -2,6 +2,7 @@
 
 from decimal import Decimal, InvalidOperation
 from fractions import Fraction
+from copy import deepcopy
 import re
 
 
@@ -50,12 +51,66 @@ def next_boundary(number, block):
     return (number // block + 1) * block
 
 
+def topology_assigned(node):
+    """A located source feature is not an accepted place in an ordered route.
+
+    Old explicit-route records predate this state and retain their behavior.
+    New unassigned source points remain visible without creating adjacency.
+    """
+    return (node.get('topology_state', 'ASSIGNED') == 'ASSIGNED'
+            and bool(re.fullmatch(r'main|branch-\d{2}', node.get('route') or ''))
+            and isinstance(node.get('order'), int) and not isinstance(node.get('order'), bool))
+
+
+def assigned_nodes(nodes):
+    return [node for node in nodes if topology_assigned(node)]
+
+
+def source_location_reviewed(node, sheets=None):
+    """Source inspection and route assignment are independent review facts."""
+    observation = node.get('source_observation') or {}
+    proof = observation.get('review_proof') or {}
+    anchor = proof.get('anchor')
+    if not isinstance(anchor, (list, tuple)) or len(anchor) != 2:
+        return False
+    if observation.get('verification') != 'reviewed' or not proof.get('reviewed_by') or not proof.get('evidence'):
+        return False
+    instance = next((i for i in node.get('instances', []) if i['sheet_id'] == proof.get('sheet_id')), None)
+    if not instance or list(instance['anchor']) != list(anchor):
+        return False
+    if sheets is not None:
+        sheet = sheets.get(proof.get('sheet_id'))
+        if not sheet:
+            return False
+        if proof.get('content_hash'):
+            if proof['content_hash'] != sheet.get('content_hash'):
+                return False
+        elif proof.get('source_sha256') != sheet.get('sha256'):
+            return False
+    return True
+
+
+def refresh_source_locations(project):
+    """Invalidate stale inspections without losing their evidence/history."""
+    sheets = {s['id']: s for s in project.get('sheets', [])}
+    for node in project['nodes']:
+        observation = node.get('source_observation')
+        if not observation or observation.get('verification') != 'reviewed':
+            continue
+        if not source_location_reviewed(node, sheets):
+            if observation.get('review_proof'):
+                observation.setdefault('review_history', []).append(deepcopy(observation['review_proof']))
+            observation['verification'] = 'proposed'
+            observation['review_invalidated_reason'] = 'SOURCE_CONTENT_OR_ANCHOR_CHANGED'
+
+
 def renumber(nodes):
     """Route order is explicitly engineer-entered; sheets never set numbering order."""
-    lines = list(dict.fromkeys(n["line_id"] for n in nodes))
+    eligible = assigned_nodes(nodes)
+    lines = list(dict.fromkeys(n["line_id"] for n in eligible))
     mapping, previous_max = [], 0
     for line_index, line in enumerate(lines):
-        group = [n for n in nodes if n["line_id"] == line]
+        group = [n for n in eligible if n["line_id"] == line]
         main = sorted(
             [n for n in group if n["route"] == "main"],
             key=lambda n: (n["order"], n["id"]),
@@ -93,18 +148,24 @@ def renumber(nodes):
             )
             node["number"] = number
         previous_max = max(number for _, number in assigned)
+    for node in nodes:
+        if not topology_assigned(node):
+            mapping.append({'point_id': node['id'], 'old': node.get('number'), 'new': None})
+            node['number'] = None
     return mapping
 
 
 def topology(nodes):
     """Build directed route edges from explicit model order and shared main-run tees."""
     edges = []
-    for line, route in sorted(set((n["line_id"], n["route"]) for n in nodes)):
+    eligible = assigned_nodes(nodes)
+    eligible_ids = {node['id'] for node in eligible}
+    for line, route in sorted(set((n["line_id"], n["route"]) for n in eligible)):
         ordered = sorted(
-            [n for n in nodes if n["line_id"] == line and n["route"] == route],
+            [n for n in eligible if n["line_id"] == line and n["route"] == route],
             key=lambda n: (n["order"], n["id"]),
         )
-        if route != "main" and ordered and ordered[0].get("takeoff_id"):
+        if route != "main" and ordered and ordered[0].get("takeoff_id") in eligible_ids:
             edges.append(
                 {
                     "from": ordered[0]["takeoff_id"],
@@ -119,6 +180,7 @@ def topology(nodes):
         ]
     return {
         "points": [n["id"] for n in nodes],
+        "unassigned_points": [n['id'] for n in nodes if not topology_assigned(n)],
         "edges": edges,
         "source": "engineer-entered route order; not inferred from drawing pixels",
     }
@@ -127,8 +189,16 @@ def topology(nodes):
 def compute_reasons(nodes):
     for node in nodes:
         reasons = []
+        if not topology_assigned(node):
+            reasons.append('TOPOLOGY_UNASSIGNED')
         if node.get("origin")=="automation" and node.get("verification")!="reviewed":
             reasons.append("SOURCE_PROPOSAL_REVIEW")
+        if node.get('source_observation') and not source_location_reviewed(node):
+            reasons.append('SOURCE_LOCATION_REVIEW_REQUIRED')
+            if node['source_observation'].get('source_interface_uncertain'):
+                reasons.append('SOURCE_INTERFACE_UNCERTAIN')
+        elif node.get('origin') == 'source-review-profile' and not node.get('source_observation'):
+            reasons.append('SOURCE_LOCATION_REVIEW_REQUIRED')
         if node.get("station_mm") is None or not node.get("evidence", "").strip():
             reasons.append("UNVERIFIED_DIMENSION")
         if node.get("kind") == "continuation" and len(node["instances"]) < 2:
@@ -136,14 +206,16 @@ def compute_reasons(nodes):
         reasons.extend(r for r in node.get('component_review_reasons',[]) if r not in reasons)
         reasons.extend(r for r in node.get('continuation_review_reasons',[]) if r not in reasons)
         reasons.extend(r for r in node.get('geometry_review_reasons',[]) if r not in reasons)
+        reasons.extend(r for r in node.get('source_review_reasons',[]) if r not in reasons)
         node["reasons"] = reasons
         node["support_gap_mm"] = None
-    routes = set((n["line_id"], n["route"]) for n in nodes)
+    eligible = assigned_nodes(nodes)
+    routes = set((n["line_id"], n["route"]) for n in eligible)
     for line, route in routes:
         supports = sorted(
             [
                 n
-                for n in nodes
+                for n in eligible
                 if n["line_id"] == line
                 and n["route"] == route
                 and (n["kind"] == "support" or any(p['kind']=='support' for p in n.get('component_ports',[])))
@@ -163,11 +235,13 @@ def compute_reasons(nodes):
 
 
 def validate(project):
+    refresh_source_locations(project)
     from packages.engineering.continuations import apply_reasons
     continuation_issues=apply_reasons(project)
     compute_reasons(project["nodes"])
     project["graph"] = topology(project["nodes"])
     issues = list(project.get("automation",{}).get("issues",[]))
+    issues.extend(project.get('source_review',{}).get('exceptions',[]))
     issues.extend(continuation_issues)
     from packages.physical import audit as physical_audit
     from packages.physical.constraints import apply_geometry_reasons
@@ -175,7 +249,7 @@ def validate(project):
     issues.extend(apply_geometry_reasons(project))
     compute_reasons(project['nodes'])
     orders = {}
-    for node in project["nodes"]:
+    for node in assigned_nodes(project["nodes"]):
         key = (node["line_id"], node["route"], node["order"])
         orders[key] = orders.get(key, 0) + 1
     for (line, route, order), count in orders.items():
@@ -195,7 +269,7 @@ def validate(project):
                 "message": "Upload a source PDF to begin.",
             }
         )
-    if not project["nodes"]:
+    if not assigned_nodes(project["nodes"]):
         issues.append(
             {
                 "code": "NO_REVIEWED_ROUTE",
@@ -204,7 +278,7 @@ def validate(project):
             }
         )
     for node in project["nodes"]:
-        if node["route"] != "main" and not node.get("takeoff_id"):
+        if topology_assigned(node) and node["route"] != "main" and not node.get("takeoff_id"):
             issues.append(
                 {
                     "code": "BRANCH_TAKEOFF_REQUIRED",

@@ -8,7 +8,7 @@ from decimal import Decimal,InvalidOperation,localcontext
 import math
 
 from packages.automation.recognize import identity
-from packages.engineering import topology
+from packages.engineering import topology,topology_assigned,source_location_reviewed
 
 PROFILE='caesar-15.1-straight-pipe-v1'
 REQUIRED=('dx_mm','dy_mm','dz_mm','od_mm','wall_mm','corrosion_mm','material_code','temperature_c','pressure_mpa',
@@ -19,6 +19,9 @@ OPTIONAL_SECTIONS=('NODENAME','BEND','RIGID','EXPJT','RESTRANT','DISPLMNT','FORC
 
 def assess(project):
     model=project.get('analysis_model',{});nodes=project['nodes'];edges=topology(nodes)['edges'];by_id={n['id']:n for n in nodes};entered={e['id']:e for e in model.get('elements',[])};missing=[]
+    if any(not topology_assigned(n) for n in nodes):missing.append('Every source point needs explicit accepted route/order; unassigned locations cannot be omitted from the native model.')
+    if any(n.get('source_observation') and not source_location_reviewed(n,{s['id']:s for s in project['sheets']}) or n.get('source_review_reasons') for n in nodes):
+        missing.append('Review current source anchors and resolve typed source-interface reasons before native export.')
     if not edges:missing.append('A reviewed connected pipe route is required.')
     from packages.engineering.continuations import audit as continuation_audit
     if continuation_audit(project):missing.append('Resolve provisional, stale or conflicting continuation identities before native export.')

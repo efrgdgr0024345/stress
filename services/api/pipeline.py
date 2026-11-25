@@ -154,6 +154,8 @@ def actor_for(api,job,conn):
 
 def commit_project(api,conn,job,project,action,preserve_status=False):
     fenced(conn,job)
+    from packages.engineering import refresh_source_locations
+    refresh_source_locations(project)
     from packages.physical import prepare as prepare_physical
     prepare_physical(project)
     project["numbering_map"]=renumber(project["nodes"])
@@ -362,7 +364,8 @@ def compose(api,job,progress):
         if not nodes and not any(any(v["sheet_id"]==sheet["id"] for v in n["instances"]) for n in working["nodes"]):issues.append({"code":"PHYSICAL_ROUTE_REVIEW_REQUIRED","sheet_id":sheet["id"]})
     existing_ids={m["id"] for m in working["materials"]}
     excluded_materials=set(working.get("automation_tombstones",{}).get("material_ids",[]))
-    working["materials"].extend(m for m in new_materials if m["id"] not in existing_ids|excluded_materials)
+    from packages.physical.source_review import incoming_materials
+    working["materials"].extend(m for m in incoming_materials(working,new_materials) if m["id"] not in existing_ids|excluded_materials)
     existing_nodes={n["id"] for n in working["nodes"]}
     # Explicit source route/order profiles can prepare a model; generic centreline
     # candidates stay separate until an engineer establishes route identity/order.

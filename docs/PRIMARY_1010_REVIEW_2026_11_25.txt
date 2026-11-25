@@ -1,0 +1,97 @@
+PRIMARY OBJECTIVE (do not stop until complete)
+Make the single real drawing “1010 Reviewed.pdf” (SHA-256: 7b97d44bef3d544c4c98ed0667c29607ce58fa4a401dd2463f66010a9615bb59) fully usable as an engineering-review project.  
+At the end of your work an authorised engineer must be able to:
+
+1. Open the live project for this exact PDF.
+2. See every required physical interface located or explicitly marked with a blue reason + evidence.
+3. Have all continuation references resolved or explicitly rejected with reasons.
+4. Have every flange, valve, tee, elbow, support and instrument given correct physical points according to the node-placement rules.
+5. Enter or accept signed XYZ / station evidence so that the model produces a connected graph with deterministic CAESAR node numbers.
+6. Generate a native annotated PDF in which every added object (node bubble, leader, axis triad, schedule boxes, warnings) is individually selectable and editable, original content streams remain unchanged, and no original dimension or NORTH symbol is covered.
+7. Export a complete, numeric, evidence-linked XLSX + CSV that contains every node, element, support, component, exception and source reference.
+8. Produce a gated CAESAR II 15.1 neutral CII file for every component type that now has complete data (straight pipe + bends + tees + rigids/supports at minimum). Unsupported or incomplete items must still block, never invent values.
+9. All red/blue reasons, six-inch support flags, catalog matches and manufacturer-confirmation status must be correct and persistent.
+10. Every change must be covered by unit, integration and real-drawing tests that pass in CI. Live validation on the real PDF must be re-run and recorded.
+
+NON-NEGOTIABLE RULES
+- Physical station ≠ PDF XY. Never derive length or station from pixels, paper scale or visual appearance.
+- Unknown weight, length, station or manufacturer = null / N/A / blue. Never zero, never guess.
+- Catalog match ≠ project manufacturer confirmation.
+- Renumbering never changes physical_point_id, station, evidence or colour reason.
+- Original PDF content streams must remain byte-identical after export.
+- Synthetic data may never be presented as real 1010 evidence.
+- All outputs remain “engineering review draft” until an explicit lead-engineer approval gate is implemented and used.
+
+CURRENT STATE YOU MUST BUILD ON
+- Live site already processes the real PDF and produces material proposals, flange symbols, face+dot proposals and three unresolved continuation references.
+- Zero physical nodes are currently proved; 56 required interfaces are unlocated.
+- Continuation candidates, signed discrepancy checks, shared physical identity and theoretical bend COD from four leg points already exist (0.7.x).
+- Native PDF annotations, Excel/CSV export, straight-pipe CII candidate, versioned catalogs and the six-inch support rule already exist.
+- Golden original assets are still missing — do not wait for them. Work exclusively with the real 1010 Reviewed.pdf that is already in fixtures/1010/.
+
+ORDER OF WORK (strict sequence – finish each stage before moving on)
+
+Stage 1 – Locate and classify every required physical interface on the real PDF
+- Enumerate every flange face, black-dot, tee intersection, elbow COD, support station, valve end, instrument process end and continuation point that the materials list and drawing callouts require.
+- Create provisional physical points (blue) with visual anchors only when the feature is clearly present. Unlocatable required features become explicit exceptions (no fabricated position).
+- Implement or complete the exact node-placement rules:
+  • Flange → face + opposite black-dot on centreline
+  • Tee → single node at main × branch centreline intersection (belongs to main series)
+  • Elbow → theoretical COD only from accepted dimension chain
+  • Support → distinct station; merge only when truly coincident
+  • Valve / inline instrument → process ends; share interface node with adjacent flange
+  • Single-ended instrument → one process end only
+  • Continuation → same physical_point_id + same node number on every sheet
+
+Stage 2 – Resolve continuations
+- Drive the existing continuation matcher to a conclusive state on the three references present in the real PDF.
+- For every pair: compare full line ID, size, topology and independent XYZ.  
+  ≥ 1 inch (25.4 mm) on any axis → blue “MATCH TO BE CONFIRMED”.  
+  Exact match → unify physical ID and repeat node number.  
+  Impossible match → unresolved endpoint exception.
+- All decisions must be reviewable, reversible and invalidated by source changes.
+
+Stage 3 – Dimension & station engine
+- Accept only explicit engineering dimensions or verified coordinates.
+- Build the constraint graph; solve only when fully constrained.
+- Populate along-route stations (not Euclidean) for the six-inch support rule.
+- Keep every unproved station null and blue with a typed reason code.
+
+Stage 4 – Deterministic numbering & graph
+- Number the complete main run first (start 10, +10), then branches (next hundred), then any new lines (next thousand).
+- Continuation points keep the same number.
+- Persist old→new map, physical_point_id and all sheet instances atomically.
+
+Stage 5 – Catalog & schedules
+- Ensure every flange and valve on the real drawing is matched (or explicitly N/A) against the already-registered flange workbook and any available valve data.
+- Produce per-sheet editable native schedule boxes with correct W_flange / W_half / W_full (N) and valve length/weight (or N/A).
+- Manufacturer confirmation remains separate from catalog quality.
+
+Stage 6 – Native editable PDF
+- Every node, leader, axis triad (X/Y/Z + Mx/My/Mz next to NORTH, never covering it), schedule row and warning is a true native annotation with stable /NM.
+- Collision solver must never obscure original dimensions, materials or NORTH.
+- Full round-trip test: export → reopen in library → edit every object type → save → reopen → original streams still identical.
+- Annotation manifest must list physical_point_id for every point-related object.
+
+Stage 7 – Exports
+- Complete numeric XLSX + CSV containing every node, element, support, component, exception, continuation and source evidence.
+- Extend the CII writer to the component types now fully data-complete (minimum: straight pipe, bends, tees, supports/rigids). Keep the readiness gate strict.
+- ZIP bundle must contain annotated PDF, workbook, CSVs, JSON snapshot, annotation manifest, exception report and numbering map.
+
+Stage 8 – Tests & live proof
+- Add or extend unit tests for every node rule, continuation decision, six-inch flag, COD calculation and numbering case used on this drawing.
+- Integration + Chromium e2e tests that exercise the real 1010 PDF end-to-end.
+- Re-run live validation on the hosted site, record exact counts, and update LIVE_VALIDATION.md and the evidence JSON.
+- CI must be green. The original golden gate may stay red (assets still missing); all other gates for this drawing must pass.
+
+Stage 9 – Documentation & hand-off
+- Update IMPLEMENTATION_STATUS.md, ENGINEERING_CORE docs and LESSONS_LEARNED.md with the final state of the real 1010 project.
+- Write a short “How an engineer finishes this drawing” guide that assumes the current UI.
+- Ensure a clean, reproducible path from a fresh clone to a fully reviewed 1010 project.
+
+OPERATING RULES FOR YOU
+- Work only on the real 1010 Reviewed.pdf and the code paths it exercises. Do not invent new synthetic fixtures that pretend to be the golden 1010.
+- Prefer small, reviewable commits with clear test coverage.
+- Never claim a station, weight or connection is verified unless evidence is present and accepted.
+- If a required piece of data cannot be obtained from the drawing, leave it null/blue and document the exception; do not fabricate.
+- Continue until every item in the PRIMARY OBJECTIVE list is true and demonstrated by tests + live validation. Do not stop at “most of it works”.

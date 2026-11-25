@@ -87,7 +87,7 @@ export function EngineeringResults({
   >(null);
   const firstMain = project.nodes
     .filter((n) => n.route === "main")
-    .sort((a, b) => a.order - b.order)[0];
+    .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))[0];
   useEffect(() => {
     let alive = true;
     api<Results>(`/projects/${project.id}/results`)

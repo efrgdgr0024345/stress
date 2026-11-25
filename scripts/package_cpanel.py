@@ -17,6 +17,7 @@ def build():
     )]
     for directory in ("services", "packages"):
         paths.extend((ROOT / directory).rglob("*.py"))
+    paths.extend((ROOT / 'packages/physical/profiles').glob('*.json'))
     paths.append(ROOT / 'serverless/digitalocean/project.yml')
     paths.extend((ROOT / 'serverless/digitalocean/function').glob('*.py'))
     paths.extend(p for p in (ROOT / "dist").rglob("*") if p.is_file())

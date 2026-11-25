@@ -26,13 +26,47 @@ export interface NodeInstance {
   anchor: Point;
   bubble: Point;
 }
+export interface SourceLocationReviewProof {
+  sheet_id: string;
+  source_sha256: string;
+  content_hash?: string[] | string | null;
+  anchor: Point;
+  evidence: string;
+  reviewed_by: string;
+  reviewed_at: string;
+}
+export interface SourceObservation {
+  id: string;
+  sheet_id: string;
+  kind?: string;
+  anchor: Point;
+  bbox: [number, number, number, number];
+  evidence?: string;
+  reason_codes?: string[];
+  verification?: "proposed" | "reviewed";
+  source_sha256: string;
+  content_hash?: string[] | string | null;
+  coordinate_space?: string;
+  material_item_no?: string | number;
+  occurrence?: number;
+  port?: string;
+  review_proof?: SourceLocationReviewProof;
+  review_history?: SourceLocationReviewProof[];
+  review_invalidated_reason?: string;
+}
 export interface PipeNode {
   id: string;
-  number: number;
+  number: number | null;
+  review_label?: string;
+  topology_state?: "ASSIGNED" | "UNASSIGNED";
+  topology_confirmed?: boolean;
+  source_location_confirmed?: boolean;
+  source_observation?: SourceObservation;
+  source_review_reasons?: string[];
   line_id: string;
-  route: string;
+  route: string | null;
   takeoff_id?: string | null;
-  order: number;
+  order: number | null;
   kind: string;
   station_mm: string | null;
   proposed_station_mm?: string | null;
@@ -94,6 +128,11 @@ export interface Issue {
   material_id?: string;
 }
 export interface Project {
+  source_review?: {
+    prepared: boolean;
+    point_ids: string[];
+    engineering_approved: boolean;
+  };
   automation?: Automation;
   analysis_model?: {
     ambient_temperature_c?: string;
@@ -126,6 +165,7 @@ export interface Project {
   annotations?: DrawingNote[];
   graph?: {
     points: string[];
+    unassigned_points?: string[];
     edges: { from: string; to: string; route: string; line_id: string }[];
     source: string;
   };
@@ -159,6 +199,9 @@ export const label = (v: string) =>
     .toLowerCase()
     .replaceAll("_", " ")
     .replace(/^./, (c) => c.toUpperCase());
+export const pointLabel = (
+  n: Pick<PipeNode, "review_label"> & { number?: number | null },
+) => (n.number == null ? n.review_label || "Unnumbered" : String(n.number));
 export async function api<T>(
   path: string,
   options: RequestInit = {},

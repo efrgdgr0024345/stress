@@ -1,0 +1,3274 @@
+{
+  "source_sha256": "7b97d44bef3d544c4c98ed0667c29607ce58fa4a401dd2463f66010a9615bb59",
+  "profile_version": 1,
+  "status": "VISUAL_SOURCE_OBSERVATIONS_ONLY",
+  "drawing_coordinate_units": "PDF points, graphic only",
+  "engineering_values_accepted": false,
+  "notes": [
+    "No station, physical dimension, connectivity, route/order or engineering approval is established by this inventory.",
+    "All physical stations, route/order and absolute engineering XYZ remain null.",
+    "Source-specific seed for this exact reviewed PDF; not original/golden model data.",
+    "Occurrence indices distinguish repeated source symbols, not CAESAR route order.",
+    "Material proposals retain the actual prior page OCR and labelled visual item-3 size/count correction; all remain unreviewed."
+  ],
+  "observations": [
+    {
+      "id": "3dd7112e-2ef2-5f55-9297-6d7a26a7a045",
+      "source_label": "S2-TEE-3-1",
+      "page_index": 1,
+      "kind": "tee",
+      "anchor": [
+        1553.795654296875,
+        460.1932373046875
+      ],
+      "bbox": [
+        1541.795654296875,
+        448.1932373046875,
+        1565.795654296875,
+        472.1932373046875
+      ],
+      "evidence": "Visible three-way heavy centreline junction, boxed item 3 and 8x2 NS reducing tee callout. Main/branch geometry is graphic evidence only; main-series assignment and physical station require review.",
+      "callout_tag": "3 / 8x2 NS",
+      "material_item_no": "3",
+      "occurrence": 1,
+      "port": "centreline_intersection",
+      "source_path_ids": [
+        4997,
+        5035,
+        5316
+      ],
+      "verification": "proposed",
+      "station_mm": null,
+      "route": null,
+      "order": null,
+      "coordinates_mm": {
+        "X": null,
+        "Y": null,
+        "Z": null
+      },
+      "reason_codes": [
+        "TEE_INTERSECTION_SOURCE_REVIEW_REQUIRED",
+        "UNKNOWN_PHYSICAL_STATION"
+      ]
+    },
+    {
+      "id": "04e1fde0-e5ef-5ef1-a1f7-af0be02ec3f2",
+      "source_label": "S2-TEE-3-2",
+      "page_index": 1,
+      "kind": "tee",
+      "anchor": [
+        1144.19921875,
+        697.3531494140625
+      ],
+      "bbox": [
+        1132.19921875,
+        685.3531494140625,
+        1156.19921875,
+        709.3531494140625
+      ],
+      "evidence": "Visible three-way heavy centreline junction, boxed item 3 and 8x2 NS reducing tee callout. Main/branch geometry is graphic evidence only; main-series assignment and physical station require review.",
+      "callout_tag": "3 / 8x2 NS",
+      "material_item_no": "3",
+      "occurrence": 2,
+      "port": "centreline_intersection",
+      "source_path_ids": [
+        5542,
+        5575,
+        5854
+      ],
+      "verification": "proposed",
+      "station_mm": null,
+      "route": null,
+      "order": null,
+      "coordinates_mm": {
+        "X": null,
+        "Y": null,
+        "Z": null
+      },
+      "reason_codes": [
+        "TEE_INTERSECTION_SOURCE_REVIEW_REQUIRED",
+        "UNKNOWN_PHYSICAL_STATION"
+      ]
+    },
+    {
+      "id": "20653e72-b5ed-57e6-9c73-ac432fb33b48",
+      "source_label": "S2-TEE-3-3",
+      "page_index": 1,
+      "kind": "tee",
+      "anchor": [
+        588.8123168945312,
+        1018.3078002929688
+      ],
+      "bbox": [
+        576.8123168945312,
+        1006.3078002929688,
+        600.8123168945312,
+        1030.3078002929688
+      ],
+      "evidence": "Visible three-way heavy centreline junction, boxed item 3 and 8x2 NS reducing tee callout. Main/branch geometry is graphic evidence only; main-series assignment and physical station require review.",
+      "callout_tag": "3 / 8x2 NS",
+      "material_item_no": "3",
+      "occurrence": 3,
+      "port": "centreline_intersection",
+      "source_path_ids": [
+        6145,
+        6175,
+        6379
+      ],
+      "verification": "proposed",
+      "station_mm": null,
+      "route": null,
+      "order": null,
+      "coordinates_mm": {
+        "X": null,
+        "Y": null,
+        "Z": null
+      },
+      "reason_codes": [
+        "TEE_INTERSECTION_SOURCE_REVIEW_REQUIRED",
+        "UNKNOWN_PHYSICAL_STATION"
+      ]
+    },
+    {
+      "id": "53adb8b6-6462-5aa9-a2cf-435484a305da",
+      "source_label": "S1-S8-UPPER",
+      "page_index": 0,
+      "kind": "support",
+      "anchor": [
+        1020.5531005859375,
+        333.4788818359375
+      ],
+      "bbox": [
+        1008.5531005859375,
+        321.4788818359375,
+        1032.5531005859375,
+        345.4788818359375
+      ],
+      "evidence": "Boxed S8 leader/arrow points to a support-seat symbol at this actual heavy pipe centreline split. Source graphical cross-section only; no along-route station or six-inch distance inferred.",
+      "callout_tag": "S8",
+      "material_item_no": "8",
+      "occurrence": 1,
+      "port": "support_station",
+      "source_path_ids": [
+        4199,
+        4225
+      ],
+      "verification": "proposed",
+      "station_mm": null,
+      "route": null,
+      "order": null,
+      "coordinates_mm": {
+        "X": null,
+        "Y": null,
+        "Z": null
+      },
+      "reason_codes": [
+        "UNKNOWN_SUPPORT_STATION",
+        "SUPPORT_SOURCE_REVIEW_REQUIRED"
+      ]
+    },
+    {
+      "id": "5f5d5bc0-0a3e-5dcd-9387-5a5345e67e1c",
+      "source_label": "S1-S9",
+      "page_index": 0,
+      "kind": "support",
+      "anchor": [
+        1058.799072265625,
+        311.40478515625
+      ],
+      "bbox": [
+        1046.799072265625,
+        299.40478515625,
+        1070.799072265625,
+        323.40478515625
+      ],
+      "evidence": "Boxed S9 leader/arrow points to a support-seat symbol at this actual heavy pipe centreline split. Source graphical cross-section only; no along-route station or six-inch distance inferred.",
+      "callout_tag": "S9",
+      "material_item_no": "9",
+      "occurrence": 1,
+      "port": "support_station",
+      "source_path_ids": [
+        4225,
+        4243
+      ],
+      "verification": "proposed",
+      "station_mm": null,
+      "route": null,
+      "order": null,
+      "coordinates_mm": {
+        "X": null,
+        "Y": null,
+        "Z": null
+      },
+      "reason_codes": [
+        "UNKNOWN_SUPPORT_STATION",
+        "SUPPORT_SOURCE_REVIEW_REQUIRED"
+      ]
+    },
+    {
+      "id": "2b8d38c1-b5b6-54b1-96a1-146e44a1d510",
+      "source_label": "S1-S10",
+      "page_index": 0,
+      "kind": "support",
+      "anchor": [
+        1238.0985107421875,
+        709.2871704101562
+      ],
+      "bbox": [
+        1226.0985107421875,
+        697.2871704101562,
+        1250.0985107421875,
+        721.2871704101562
+      ],
+      "evidence": "Boxed S10 leader/arrow points to a support-seat symbol at this actual heavy pipe centreline split. Source graphical cross-section only; no along-route station or six-inch distance inferred.",
+      "callout_tag": "S10",
+      "material_item_no": "10",
+      "occurrence": 1,
+      "port": "support_station",
+      "source_path_ids": [
+        4483,
+        4515
+      ],
+      "verification": "proposed",
+      "station_mm": null,
+      "route": null,
+      "order": null,
+      "coordinates_mm": {
+        "X": null,
+        "Y": null,
+        "Z": null
+      },
+      "reason_codes": [
+        "UNKNOWN_SUPPORT_STATION",
+        "SUPPORT_SOURCE_REVIEW_REQUIRED"
+      ]
+    },
+    {
+      "id": "b9f3ce66-2e57-50c5-a894-5b38b2445694",
+      "source_label": "S1-S8-LOWER",
+      "page_index": 0,
+      "kind": "support",
+      "anchor": [
+        1055.7747802734375,
+        1221.869140625
+      ],
+      "bbox": [
+        1043.7747802734375,
+        1209.869140625,
+        1067.7747802734375,
+        1233.869140625
+      ],
+      "evidence": "Boxed S8 leader/arrow points to a support-seat symbol at this actual heavy pipe centreline split. Source graphical cross-section only; no along-route station or six-inch distance inferred.",
+      "callout_tag": "S8",
+      "material_item_no": "8",
+      "occurrence": 2,
+      "port": "support_station",
+      "source_path_ids": [
+        4641,
+        4669
+      ],
+      "verification": "proposed",
+      "station_mm": null,
+      "route": null,
+      "order": null,
+      "coordinates_mm": {
+        "X": null,
+        "Y": null,
+        "Z": null
+      },
+      "reason_codes": [
+        "UNKNOWN_SUPPORT_STATION",
+        "SUPPORT_SOURCE_REVIEW_REQUIRED"
+      ]
+    },
+    {
+      "id": "4fb70155-7d7c-55f8-815f-8e1acf951589",
+      "source_label": "S1-S13",
+      "page_index": 0,
+      "kind": "support",
+      "anchor": [
+        1018.4283447265625,
+        1243.5338134765625
+      ],
+      "bbox": [
+        1006.4283447265625,
+        1231.5338134765625,
+        1030.4283447265625,
+        1255.5338134765625
+      ],
+      "evidence": "Boxed S13 leader/arrow points to a support-seat symbol at this actual heavy pipe centreline split. Source graphical cross-section only; no along-route station or six-inch distance inferred.",
+      "callout_tag": "S13",
+      "material_item_no": "13",
+      "occurrence": 1,
+      "port": "support_station",
+      "source_path_ids": [
+        4669,
+        4694
+      ],
+      "verification": "proposed",
+      "station_mm": null,
+      "route": null,
+      "order": null,
+      "coordinates_mm": {
+        "X": null,
+        "Y": null,
+        "Z": null
+      },
+      "reason_codes": [
+        "UNKNOWN_SUPPORT_STATION",
+        "SUPPORT_SOURCE_REVIEW_REQUIRED"
+      ]
+    },
+    {
+      "id": "ba52024b-a80c-51b6-b79d-733872eb7192",
+      "source_label": "S2-S13-UPPER",
+      "page_index": 1,
+      "kind": "support",
+      "anchor": [
+        1363.872314453125,
+        570.2293701171875
+      ],
+      "bbox": [
+        1351.872314453125,
+        558.2293701171875,
+        1375.872314453125,
+        582.2293701171875
+      ],
+      "evidence": "Boxed S13 leader/arrow points to a support-seat symbol at this actual heavy pipe centreline split. Source graphical cross-section only; no along-route station or six-inch distance inferred.",
+      "callout_tag": "S13",
+      "material_item_no": "13",
+      "occurrence": 1,
+      "port": "support_station",
+      "source_path_ids": [
+        5322,
+        5387
+      ],
+      "verification": "proposed",
+      "station_mm": null,
+      "route": null,
+      "order": null,
+      "coordinates_mm": {
+        "X": null,
+        "Y": null,
+        "Z": null
+      },
+      "reason_codes": [
+        "UNKNOWN_SUPPORT_STATION",
+        "SUPPORT_SOURCE_REVIEW_REQUIRED"
+      ],
+      "coincident_graphic_candidate_group": "S2-S13-S14-CROSS-SECTION",
+      "coincidence_accepted": false,
+      "source_duplicate_support_seat_paths": [
+        5343,
+        5344,
+        5378,
+        5379
+      ]
+    },
+    {
+      "id": "8d788873-1a38-541f-850d-e6f6609c285a",
+      "source_label": "S2-S14",
+      "page_index": 1,
+      "kind": "support",
+      "anchor": [
+        1363.872314453125,
+        570.2293701171875
+      ],
+      "bbox": [
+        1351.872314453125,
+        558.2293701171875,
+        1375.872314453125,
+        582.2293701171875
+      ],
+      "evidence": "Boxed S14 leader/arrow points to a support-seat symbol at this actual heavy pipe centreline split. Source graphical cross-section only; no along-route station or six-inch distance inferred.",
+      "callout_tag": "S14",
+      "material_item_no": "14",
+      "occurrence": 1,
+      "port": "support_station",
+      "source_path_ids": [
+        5322,
+        5387
+      ],
+      "verification": "proposed",
+      "station_mm": null,
+      "route": null,
+      "order": null,
+      "coordinates_mm": {
+        "X": null,
+        "Y": null,
+        "Z": null
+      },
+      "reason_codes": [
+        "UNKNOWN_SUPPORT_STATION",
+        "SUPPORT_SOURCE_REVIEW_REQUIRED"
+      ],
+      "coincident_graphic_candidate_group": "S2-S13-S14-CROSS-SECTION",
+      "coincidence_accepted": false,
+      "source_duplicate_support_seat_paths": [
+        5343,
+        5344,
+        5378,
+        5379
+      ]
+    },
+    {
+      "id": "e2bea62b-942b-56db-bd63-f3ee3c8dd724",
+      "source_label": "S2-S13-MIDDLE",
+      "page_index": 1,
+      "kind": "support",
+      "anchor": [
+        984.0226440429688,
+        789.9757080078125
+      ],
+      "bbox": [
+        972.0226440429688,
+        777.9757080078125,
+        996.0226440429688,
+        801.9757080078125
+      ],
+      "evidence": "Boxed S13 leader/arrow points to a support-seat symbol at this actual heavy pipe centreline split. Source graphical cross-section only; no along-route station or six-inch distance inferred.",
+      "callout_tag": "S13",
+      "material_item_no": "13",
+      "occurrence": 2,
+      "port": "support_station",
+      "source_path_ids": [
+        5860,
+        5916
+      ],
+      "verification": "proposed",
+      "station_mm": null,
+      "route": null,
+      "order": null,
+      "coordinates_mm": {
+        "X": null,
+        "Y": null,
+        "Z": null
+      },
+      "reason_codes": [
+        "UNKNOWN_SUPPORT_STATION",
+        "SUPPORT_SOURCE_REVIEW_REQUIRED"
+      ]
+    },
+    {
+      "id": "6aefaad2-2152-5b27-8546-13a4e38c4728",
+      "source_label": "S2-S15-UPPER",
+      "page_index": 1,
+      "kind": "support",
+      "anchor": [
+        939.8118896484375,
+        815.4818725585938
+      ],
+      "bbox": [
+        927.8118896484375,
+        803.4818725585938,
+        951.8118896484375,
+        827.4818725585938
+      ],
+      "evidence": "Boxed S15 leader/arrow points to a support-seat symbol at this actual heavy pipe centreline split. Source graphical cross-section only; no along-route station or six-inch distance inferred.",
+      "callout_tag": "S15",
+      "material_item_no": "15",
+      "occurrence": 1,
+      "port": "support_station",
+      "source_path_ids": [
+        5916,
+        5943
+      ],
+      "verification": "proposed",
+      "station_mm": null,
+      "route": null,
+      "order": null,
+      "coordinates_mm": {
+        "X": null,
+        "Y": null,
+        "Z": null
+      },
+      "reason_codes": [
+        "UNKNOWN_SUPPORT_STATION",
+        "SUPPORT_SOURCE_REVIEW_REQUIRED"
+      ]
+    },
+    {
+      "id": "2ce6f54e-beec-56dc-8ea6-fbfc84ecc241",
+      "source_label": "S2-S15-LOWER",
+      "page_index": 1,
+      "kind": "support",
+      "anchor": [
+        758.3875122070312,
+        920.534423828125
+      ],
+      "bbox": [
+        746.3875122070312,
+        908.534423828125,
+        770.3875122070312,
+        932.534423828125
+      ],
+      "evidence": "Boxed S15 leader/arrow points to a support-seat symbol at this actual heavy pipe centreline split. Source graphical cross-section only; no along-route station or six-inch distance inferred.",
+      "callout_tag": "S15",
+      "material_item_no": "15",
+      "occurrence": 2,
+      "port": "support_station",
+      "source_path_ids": [
+        6052,
+        6085
+      ],
+      "verification": "proposed",
+      "station_mm": null,
+      "route": null,
+      "order": null,
+      "coordinates_mm": {
+        "X": null,
+        "Y": null,
+        "Z": null
+      },
+      "reason_codes": [
+        "UNKNOWN_SUPPORT_STATION",
+        "SUPPORT_SOURCE_REVIEW_REQUIRED"
+      ]
+    },
+    {
+      "id": "90e959ad-1bba-52b7-af9f-ec74723abf35",
+      "source_label": "S2-S13-LOWER",
+      "page_index": 1,
+      "kind": "support",
+      "anchor": [
+        715.8892211914062,
+        945.1406860351562
+      ],
+      "bbox": [
+        703.8892211914062,
+        933.1406860351562,
+        727.8892211914062,
+        957.1406860351562
+      ],
+      "evidence": "Boxed S13 leader/arrow points to a support-seat symbol at this actual heavy pipe centreline split. Source graphical cross-section only; no along-route station or six-inch distance inferred.",
+      "callout_tag": "S13",
+      "material_item_no": "13",
+      "occurrence": 3,
+      "port": "support_station",
+      "source_path_ids": [
+        6085,
+        6138
+      ],
+      "verification": "proposed",
+      "station_mm": null,
+      "route": null,
+      "order": null,
+      "coordinates_mm": {
+        "X": null,
+        "Y": null,
+        "Z": null
+      },
+      "reason_codes": [
+        "UNKNOWN_SUPPORT_STATION",
+        "SUPPORT_SOURCE_REVIEW_REQUIRED"
+      ]
+    },
+    {
+      "id": "b05afb41-f564-5622-9860-387b26cc0d43",
+      "source_label": "S1-FE7681-IN",
+      "page_index": 0,
+      "kind": "instrument",
+      "anchor": [
+        1238.0999755859375,
+        557.9261474609375
+      ],
+      "bbox": [
+        1226.0999755859375,
+        545.9261474609375,
+        1250.0999755859375,
+        569.9261474609375
+      ],
+      "evidence": "FE 7681 inline rectangular meter symbol between two item F4 flange plates; upper process interface uses the adjacent source flange face.",
+      "callout_tag": "FE 7681 / 7",
+      "material_item_no": "7",
+      "occurrence": 1,
+      "port": "process_in",
+      "source_path_ids": [],
+      "verification": "proposed",
+      "station_mm": null,
+      "route": null,
+      "order": null,
+      "coordinates_mm": {
+        "X": null,
+        "Y": null,
+        "Z": null
+      },
+      "shares_flange_face": {
+        "page_index": 0,
+        "anchor": [
+          1238.0999755859375,
+          557.9261474609375
+        ]
+      },
+      "reason_codes": [
+        "UNKNOWN_INSTRUMENT_STATION"
+      ],
+      "connection_type_proposal": "two_process_ends"
+    },
+    {
+      "id": "4f681749-268b-5322-a006-8b6699bd35f5",
+      "source_label": "S1-FE7681-OUT",
+      "page_index": 0,
+      "kind": "instrument",
+      "anchor": [
+        1238.0999755859375,
+        612.3314208984375
+      ],
+      "bbox": [
+        1226.0999755859375,
+        600.3314208984375,
+        1250.0999755859375,
+        624.3314208984375
+      ],
+      "evidence": "FE 7681 inline meter lower process interface uses its adjacent source F4 flange face.",
+      "callout_tag": "FE 7681 / 7",
+      "material_item_no": "7",
+      "occurrence": 1,
+      "port": "process_out",
+      "source_path_ids": [],
+      "verification": "proposed",
+      "station_mm": null,
+      "route": null,
+      "order": null,
+      "coordinates_mm": {
+        "X": null,
+        "Y": null,
+        "Z": null
+      },
+      "shares_flange_face": {
+        "page_index": 0,
+        "anchor": [
+          1238.0999755859375,
+          612.3314208984375
+        ]
+      },
+      "reason_codes": [
+        "UNKNOWN_INSTRUMENT_STATION"
+      ],
+      "connection_type_proposal": "two_process_ends"
+    },
+    {
+      "id": "3491cbf8-ea5f-58a7-b8e1-f5459958a644",
+      "source_label": "S1-BALL6-IN",
+      "page_index": 0,
+      "kind": "valve",
+      "anchor": [
+        889.0205993652344,
+        1317.9669189453125
+      ],
+      "bbox": [
+        877.0205993652344,
+        1305.9669189453125,
+        901.0205993652344,
+        1329.9669189453125
+      ],
+      "evidence": "Boxed item 6 / gearbox callout identifies a ball-valve bowtie. One process interface shares the clearly solid F4 flange face.",
+      "callout_tag": "6",
+      "material_item_no": "6",
+      "occurrence": 1,
+      "port": "process_in",
+      "source_path_ids": [],
+      "verification": "proposed",
+      "station_mm": null,
+      "route": null,
+      "order": null,
+      "coordinates_mm": {
+        "X": null,
+        "Y": null,
+        "Z": null
+      },
+      "shares_flange_face": {
+        "page_index": 0,
+        "anchor": [
+          889.0205993652344,
+          1317.9669189453125
+        ]
+      },
+      "reason_codes": [
+        "UNKNOWN_VALVE_END"
+      ]
+    },
+    {
+      "id": "8e1b26ba-2ded-5db9-8d58-cb4f48d18f7a",
+      "source_label": "S1-BALL6-OUT-DASHED",
+      "page_index": 0,
+      "kind": "valve",
+      "anchor": [
+        850.85546875,
+        1340.4073486328125
+      ],
+      "bbox": [
+        834,
+        1331,
+        863,
+        1351
+      ],
+      "evidence": "The continuation-side ball-valve flange is drawn dashed. The proposed anchor is the midpoint of its actual dashed inner face edge; no intersheet identity or engineering connection is accepted.",
+      "callout_tag": "6 / CONT. ON SHEET 2",
+      "material_item_no": "6",
+      "occurrence": 1,
+      "port": "process_out",
+      "source_path_ids": [],
+      "verification": "proposed",
+      "station_mm": null,
+      "route": null,
+      "order": null,
+      "coordinates_mm": {
+        "X": null,
+        "Y": null,
+        "Z": null
+      },
+      "source_dashed_face_paths": [
+        4876,
+        4877,
+        4878,
+        4879,
+        4880,
+        4881,
+        4882,
+        4883,
+        4884,
+        4885,
+        4886,
+        4887,
+        4888,
+        4889
+      ],
+      "reason_codes": [
+        "DASHED_BOUNDARY_INTERFACE_REVIEW_REQUIRED",
+        "UNKNOWN_VALVE_END"
+      ],
+      "source_interface_uncertain": true
+    },
+    {
+      "id": "a2553a2b-d56a-5f03-adb5-f93fb6138557",
+      "source_label": "S2-BALL10-IN",
+      "page_index": 1,
+      "kind": "valve",
+      "anchor": [
+        1255.7107543945312,
+        632.728515625
+      ],
+      "bbox": [
+        1243.7107543945312,
+        620.728515625,
+        1267.7107543945312,
+        644.728515625
+      ],
+      "evidence": "Boxed item 10 / gearbox callout points to the ball valve between source F5 plates; upper/right process end reuses the adjacent flange face.",
+      "callout_tag": "10",
+      "material_item_no": "10",
+      "occurrence": 1,
+      "port": "process_in",
+      "source_path_ids": [],
+      "verification": "proposed",
+      "station_mm": null,
+      "route": null,
+      "order": null,
+      "coordinates_mm": {
+        "X": null,
+        "Y": null,
+        "Z": null
+      },
+      "shares_flange_face": {
+        "page_index": 1,
+        "anchor": [
+          1255.7107543945312,
+          632.728515625
+        ]
+      },
+      "reason_codes": [
+        "UNKNOWN_VALVE_END"
+      ]
+    },
+    {
+      "id": "78b7b485-22bb-5860-bbf7-09b6364b04ec",
+      "source_label": "S2-BALL10-OUT",
+      "page_index": 1,
+      "kind": "valve",
+      "anchor": [
+        1218.119384765625,
+        654.841552734375
+      ],
+      "bbox": [
+        1206.119384765625,
+        642.841552734375,
+        1230.119384765625,
+        666.841552734375
+      ],
+      "evidence": "Item 10 ball-valve lower/left process end reuses the adjacent source F5 flange face.",
+      "callout_tag": "10",
+      "material_item_no": "10",
+      "occurrence": 1,
+      "port": "process_out",
+      "source_path_ids": [],
+      "verification": "proposed",
+      "station_mm": null,
+      "route": null,
+      "order": null,
+      "coordinates_mm": {
+        "X": null,
+        "Y": null,
+        "Z": null
+      },
+      "shares_flange_face": {
+        "page_index": 1,
+        "anchor": [
+          1218.119384765625,
+          654.841552734375
+        ]
+      },
+      "reason_codes": [
+        "UNKNOWN_VALVE_END"
+      ]
+    },
+    {
+      "id": "85a15297-32bc-5133-9c7d-b51aad294f0d",
+      "source_label": "S2-PV7680-IN",
+      "page_index": 1,
+      "kind": "instrument",
+      "anchor": [
+        868.5902099609375,
+        856.31787109375
+      ],
+      "bbox": [
+        856.5902099609375,
+        844.31787109375,
+        880.5902099609375,
+        868.31787109375
+      ],
+      "evidence": "PV 7680 circular tag and boxed item 11 leader point to the rectangular inline source body between two F5 flanges; upper/right graphical process end is at this face. Exact instrument/valve classification still requires review.",
+      "callout_tag": "PV 7680 / 11",
+      "material_item_no": "11",
+      "occurrence": 1,
+      "port": "process_in",
+      "source_path_ids": [],
+      "verification": "proposed",
+      "station_mm": null,
+      "route": null,
+      "order": null,
+      "coordinates_mm": {
+        "X": null,
+        "Y": null,
+        "Z": null
+      },
+      "shares_flange_face": {
+        "page_index": 1,
+        "anchor": [
+          868.5902099609375,
+          856.31787109375
+        ]
+      },
+      "reason_codes": [
+        "INSTRUMENT_CLASSIFICATION_REVIEW_REQUIRED",
+        "UNKNOWN_INSTRUMENT_STATION"
+      ],
+      "connection_type_proposal": "two_process_ends"
+    },
+    {
+      "id": "6e0fa0dd-fb97-5940-a00f-61393dc2f2b7",
+      "source_label": "S2-PV7680-OUT",
+      "page_index": 1,
+      "kind": "instrument",
+      "anchor": [
+        831.0376892089844,
+        878.4323425292969
+      ],
+      "bbox": [
+        819.0376892089844,
+        866.4323425292969,
+        843.0376892089844,
+        890.4323425292969
+      ],
+      "evidence": "PV 7680 inline source body lower/left graphical process end is at the adjacent F5 face; retain explicit classification review.",
+      "callout_tag": "PV 7680 / 11",
+      "material_item_no": "11",
+      "occurrence": 1,
+      "port": "process_out",
+      "source_path_ids": [],
+      "verification": "proposed",
+      "station_mm": null,
+      "route": null,
+      "order": null,
+      "coordinates_mm": {
+        "X": null,
+        "Y": null,
+        "Z": null
+      },
+      "shares_flange_face": {
+        "page_index": 1,
+        "anchor": [
+          831.0376892089844,
+          878.4323425292969
+        ]
+      },
+      "reason_codes": [
+        "INSTRUMENT_CLASSIFICATION_REVIEW_REQUIRED",
+        "UNKNOWN_INSTRUMENT_STATION"
+      ],
+      "connection_type_proposal": "two_process_ends"
+    },
+    {
+      "id": "9c60ad07-dd2e-5fba-a925-c7ca6d540fdd",
+      "source_label": "S2-DBB9-1-FLANGED",
+      "page_index": 1,
+      "kind": "valve",
+      "anchor": [
+        1420.8316650390625,
+        754.2919921875
+      ],
+      "bbox": [
+        1408.8316650390625,
+        742.2919921875,
+        1432.8316650390625,
+        766.2919921875
+      ],
+      "evidence": "Boxed item 9 / 2x3/4 NS DBB bowtie has a source F6 flange on its pipe-facing process end. Reuse that face; bleed/drain topology is not established.",
+      "callout_tag": "9 / 2x3/4 NS",
+      "material_item_no": "9",
+      "occurrence": 1,
+      "port": "process_in",
+      "source_path_ids": [],
+      "verification": "proposed",
+      "station_mm": null,
+      "route": null,
+      "order": null,
+      "coordinates_mm": {
+        "X": null,
+        "Y": null,
+        "Z": null
+      },
+      "shares_flange_face": {
+        "page_index": 1,
+        "anchor": [
+          1420.8316650390625,
+          754.2919921875
+        ]
+      },
+      "reason_codes": [
+        "UNKNOWN_VALVE_END",
+        "DBB_AUXILIARY_CONNECTION_REVIEW"
+      ]
+    },
+    {
+      "id": "f700c914-d641-5a4d-a647-942a05d6c0be",
+      "source_label": "S2-DBB9-1-FNPT",
+      "page_index": 1,
+      "kind": "valve",
+      "anchor": [
+        1387.2447509765625,
+        734.7125244140625
+      ],
+      "bbox": [
+        1375.2447509765625,
+        722.7125244140625,
+        1399.2447509765625,
+        746.7125244140625
+      ],
+      "evidence": "Opposite 3/4-inch FNPT process end is the midpoint of the visible far bowtie end edge. Its dimension witness/connection boundary must be accepted independently; no pipe station or bleed connection is inferred.",
+      "callout_tag": "9 / 2x3/4 NS",
+      "material_item_no": "9",
+      "occurrence": 1,
+      "port": "process_out",
+      "source_path_ids": [],
+      "verification": "proposed",
+      "station_mm": null,
+      "route": null,
+      "order": null,
+      "coordinates_mm": {
+        "X": null,
+        "Y": null,
+        "Z": null
+      },
+      "source_symbol_path_ids": [
+        5211
+      ],
+      "reason_codes": [
+        "UNKNOWN_VALVE_END",
+        "DBB_AUXILIARY_CONNECTION_REVIEW"
+      ]
+    },
+    {
+      "id": "0787ba60-2d40-5224-95e6-cc91b367bc76",
+      "source_label": "S2-DBB9-2-FLANGED",
+      "page_index": 1,
+      "kind": "valve",
+      "anchor": [
+        1011.1546020507812,
+        972.7723388671875
+      ],
+      "bbox": [
+        999.1546020507812,
+        960.7723388671875,
+        1023.1546020507812,
+        984.7723388671875
+      ],
+      "evidence": "Boxed item 9 / 2x3/4 NS DBB bowtie has a source F6 flange on its pipe-facing process end. Reuse that face; bleed/drain topology is not established.",
+      "callout_tag": "9 / 2x3/4 NS",
+      "material_item_no": "9",
+      "occurrence": 2,
+      "port": "process_in",
+      "source_path_ids": [],
+      "verification": "proposed",
+      "station_mm": null,
+      "route": null,
+      "order": null,
+      "coordinates_mm": {
+        "X": null,
+        "Y": null,
+        "Z": null
+      },
+      "shares_flange_face": {
+        "page_index": 1,
+        "anchor": [
+          1011.1546020507812,
+          972.7723388671875
+        ]
+      },
+      "reason_codes": [
+        "UNKNOWN_VALVE_END",
+        "DBB_AUXILIARY_CONNECTION_REVIEW"
+      ]
+    },
+    {
+      "id": "ecdc908d-0a9e-5fbf-a7db-0eabc4af9e59",
+      "source_label": "S2-DBB9-2-FNPT",
+      "page_index": 1,
+      "kind": "valve",
+      "anchor": [
+        977.6483154296875,
+        953.2331848144531
+      ],
+      "bbox": [
+        965.6483154296875,
+        941.2331848144531,
+        989.6483154296875,
+        965.2331848144531
+      ],
+      "evidence": "Opposite 3/4-inch FNPT process end is the midpoint of the visible far bowtie end edge. Its dimension witness/connection boundary must be accepted independently; no pipe station or bleed connection is inferred.",
+      "callout_tag": "9 / 2x3/4 NS",
+      "material_item_no": "9",
+      "occurrence": 2,
+      "port": "process_out",
+      "source_path_ids": [],
+      "verification": "proposed",
+      "station_mm": null,
+      "route": null,
+      "order": null,
+      "coordinates_mm": {
+        "X": null,
+        "Y": null,
+        "Z": null
+      },
+      "source_symbol_path_ids": [
+        5750
+      ],
+      "reason_codes": [
+        "UNKNOWN_VALVE_END",
+        "DBB_AUXILIARY_CONNECTION_REVIEW"
+      ]
+    },
+    {
+      "id": "f6f4e47a-f99e-594b-9cf4-b254376a22ae",
+      "source_label": "S2-DBB9-3-FLANGED",
+      "page_index": 1,
+      "kind": "valve",
+      "anchor": [
+        588.8109130859375,
+        822.3096923828125
+      ],
+      "bbox": [
+        576.8109130859375,
+        810.3096923828125,
+        600.8109130859375,
+        834.3096923828125
+      ],
+      "evidence": "Boxed item 9 / 2x3/4 NS DBB bowtie has a source F6 flange on its pipe-facing process end. Reuse that face; bleed/drain topology is not established.",
+      "callout_tag": "9 / 2x3/4 NS",
+      "material_item_no": "9",
+      "occurrence": 3,
+      "port": "process_in",
+      "source_path_ids": [],
+      "verification": "proposed",
+      "station_mm": null,
+      "route": null,
+      "order": null,
+      "coordinates_mm": {
+        "X": null,
+        "Y": null,
+        "Z": null
+      },
+      "shares_flange_face": {
+        "page_index": 1,
+        "anchor": [
+          588.8109130859375,
+          822.3096923828125
+        ]
+      },
+      "reason_codes": [
+        "UNKNOWN_VALVE_END",
+        "DBB_AUXILIARY_CONNECTION_REVIEW"
+      ]
+    },
+    {
+      "id": "46c47055-80a5-58ce-bf11-d33aa4bd4fa3",
+      "source_label": "S2-DBB9-3-FNPT",
+      "page_index": 1,
+      "kind": "valve",
+      "anchor": [
+        588.8109130859375,
+        783.1925659179688
+      ],
+      "bbox": [
+        576.8109130859375,
+        771.1925659179688,
+        600.8109130859375,
+        795.1925659179688
+      ],
+      "evidence": "Opposite 3/4-inch FNPT process end is the midpoint of the visible far bowtie end edge. Its dimension witness/connection boundary must be accepted independently; no pipe station or bleed connection is inferred.",
+      "callout_tag": "9 / 2x3/4 NS",
+      "material_item_no": "9",
+      "occurrence": 3,
+      "port": "process_out",
+      "source_path_ids": [],
+      "verification": "proposed",
+      "station_mm": null,
+      "route": null,
+      "order": null,
+      "coordinates_mm": {
+        "X": null,
+        "Y": null,
+        "Z": null
+      },
+      "source_symbol_path_ids": [
+        6235
+      ],
+      "reason_codes": [
+        "UNKNOWN_VALVE_END",
+        "DBB_AUXILIARY_CONNECTION_REVIEW"
+      ]
+    },
+    {
+      "id": "bd5d10ea-e81f-5008-83cb-a9ce758262a7",
+      "source_label": "S2-PIT7680-PROCESS",
+      "page_index": 1,
+      "kind": "instrument",
+      "anchor": [
+        588.8123168945312,
+        778.1224975585938
+      ],
+      "bbox": [
+        576.8123168945312,
+        766.1224975585938,
+        600.8123168945312,
+        790.1224975585938
+      ],
+      "evidence": "PIT 7680 tag stem ends at this actual source connection/leader point above the DBB. It is not the balloon centre. Confirm the NPT physical interface; do not merge with the nearby DBB end on graphic proximity.",
+      "callout_tag": "PIT 7680 / 12",
+      "material_item_no": "12",
+      "occurrence": 1,
+      "port": "process_connection",
+      "source_path_ids": [],
+      "verification": "proposed",
+      "station_mm": null,
+      "route": null,
+      "order": null,
+      "coordinates_mm": {
+        "X": null,
+        "Y": null,
+        "Z": null
+      },
+      "source_symbol_path_ids": [
+        6288
+      ],
+      "reason_codes": [
+        "UNKNOWN_INSTRUMENT_STATION",
+        "INSTRUMENT_INTERFACE_REVIEW_REQUIRED"
+      ],
+      "source_interface_uncertain": true,
+      "connection_type_proposal": "single_process_end"
+    },
+    {
+      "id": "4daa57ea-60f0-5d09-b0fb-84d813007eac",
+      "source_label": "S1-CONT-1093",
+      "page_index": 0,
+      "kind": "continuation",
+      "anchor": [
+        881.9932861328125,
+        413.39013671875
+      ],
+      "bbox": [
+        869.9932861328125,
+        401.39013671875,
+        893.9932861328125,
+        425.39013671875
+      ],
+      "evidence": "CONT. ON 8\"-PG-JE3LN2-1093. The nearby actual source end/face anchors this provisional reference only. Matching full line, size, topology, independent signed coordinates and any shared physical identity require review. Its own-sheet CONT arrow directly points to this visible flange-face boundary; any external connection remains unproved.",
+      "callout_tag": "CONT. ON 8\"-PG-JE3LN2-1093",
+      "material_item_no": null,
+      "occurrence": 1,
+      "port": null,
+      "source_path_ids": [],
+      "verification": "proposed",
+      "station_mm": null,
+      "route": null,
+      "order": null,
+      "coordinates_mm": {
+        "X": null,
+        "Y": null,
+        "Z": null
+      },
+      "reason_codes": [
+        "UNRESOLVED_CONTINUATION_REFERENCE"
+      ],
+      "source_interface_uncertain": false,
+      "callout_bbox": [
+        704,
+        407,
+        868,
+        490
+      ],
+      "shares_flange_face": {
+        "page_index": 0,
+        "anchor": [
+          881.9932861328125,
+          413.39013671875
+        ]
+      }
+    },
+    {
+      "id": "18360da6-e810-5b71-9ef8-76a102b94336",
+      "source_label": "S1-CONT-SHEET2",
+      "page_index": 0,
+      "kind": "continuation",
+      "anchor": [
+        855.6368408203125,
+        1337.54638671875
+      ],
+      "bbox": [
+        843,
+        1325,
+        868,
+        1350
+      ],
+      "evidence": "CONT. ON SHEET 2; the exact independent coordinate leader ends at this native source point on the dashed valve/flange assembly. This is adjacent to, not identical to, the dashed flange-face proposal. The physical interface and any same-sheet/cross-sheet shared identity require engineer review.",
+      "callout_tag": "CONT. ON SHEET 2",
+      "material_item_no": null,
+      "occurrence": 1,
+      "port": null,
+      "source_path_ids": [],
+      "verification": "proposed",
+      "station_mm": null,
+      "route": null,
+      "order": null,
+      "coordinates_mm": {
+        "X": null,
+        "Y": null,
+        "Z": null
+      },
+      "reason_codes": [
+        "UNRESOLVED_CONTINUATION_REFERENCE",
+        "CONTINUATION_INTERFACE_REVIEW_REQUIRED"
+      ],
+      "source_interface_uncertain": true,
+      "callout_bbox": [
+        680,
+        1368,
+        755,
+        1413
+      ],
+      "source_symbol_path_ids": [
+        4804,
+        4805
+      ]
+    },
+    {
+      "id": "0e11b051-da0a-5c6f-b5b1-d57e2aed480d",
+      "source_label": "S2-CONT-SHEET1",
+      "page_index": 1,
+      "kind": "continuation",
+      "anchor": [
+        1632.0028076171875,
+        415.0672607421875
+      ],
+      "bbox": [
+        1620,
+        403,
+        1644,
+        427
+      ],
+      "evidence": "CONT. FROM SHEET 1 text leader points to the dashed valve depiction. Its independent coordinate leader ends at this exact source point, adjacent to but not identical to the F5 flange face. Do not auto-alias the reference to the flange or accept cross-sheet physical identity.",
+      "callout_tag": "CONT. FROM SHEET 1",
+      "material_item_no": null,
+      "occurrence": 1,
+      "port": null,
+      "source_path_ids": [],
+      "verification": "proposed",
+      "station_mm": null,
+      "route": null,
+      "order": null,
+      "coordinates_mm": {
+        "X": null,
+        "Y": null,
+        "Z": null
+      },
+      "reason_codes": [
+        "UNRESOLVED_CONTINUATION_REFERENCE",
+        "CONTINUATION_INTERFACE_REVIEW_REQUIRED"
+      ],
+      "source_interface_uncertain": true,
+      "callout_bbox": [
+        1650,
+        370,
+        1780,
+        421
+      ],
+      "reference_leader_point": [
+        1661.3431396484375,
+        398.060302734375
+      ],
+      "source_symbol_path_ids": [
+        4887,
+        4888,
+        4916,
+        4917
+      ]
+    },
+    {
+      "id": "782d9a12-0f60-5ce5-9bcd-b8823e841141",
+      "source_label": "S2-CONT-EDUCTOR",
+      "page_index": 1,
+      "kind": "continuation",
+      "anchor": [
+        514.6471862792969,
+        1060.7775268554688
+      ],
+      "bbox": [
+        502.6471862792969,
+        1048.7775268554688,
+        526.6471862792969,
+        1072.7775268554688
+      ],
+      "evidence": "CONT. ON ZBA-7680_EDUCTOR. The nearby actual source end/face anchors this provisional reference only. Matching full line, size, topology, independent signed coordinates and any shared physical identity require review. Its own-sheet CONT arrow directly points to this visible flange-face boundary; any external connection remains unproved.",
+      "callout_tag": "CONT. ON ZBA-7680_EDUCTOR",
+      "material_item_no": null,
+      "occurrence": 1,
+      "port": null,
+      "source_path_ids": [],
+      "verification": "proposed",
+      "station_mm": null,
+      "route": null,
+      "order": null,
+      "coordinates_mm": {
+        "X": null,
+        "Y": null,
+        "Z": null
+      },
+      "reason_codes": [
+        "UNRESOLVED_CONTINUATION_REFERENCE"
+      ],
+      "source_interface_uncertain": false,
+      "callout_bbox": [
+        265,
+        1055,
+        470,
+        1130
+      ],
+      "shares_flange_face": {
+        "page_index": 1,
+        "anchor": [
+          514.6471862792969,
+          1060.7775268554688
+        ]
+      }
+    }
+  ],
+  "exceptions": [
+    {
+      "id": "6e17803b-c024-51b4-be6d-9700d74e9fe2",
+      "page_index": 0,
+      "material_item_no": "2",
+      "occurrence": 1,
+      "kind": "elbow",
+      "port": "theoretical_cod",
+      "anchor": null,
+      "source_region_bbox": [
+        1140,
+        235,
+        1178,
+        276
+      ],
+      "code": "UNCONFIRMED_ELBOW_COD",
+      "evidence": "Item 2: one 45-degree LR elbow. A visible drawn bend locates the component region, but no theoretical COD point is created from page angle/scale; accepted engineering chain and convention are required.",
+      "station_mm": null,
+      "coordinates_mm": {
+        "X": null,
+        "Y": null,
+        "Z": null
+      },
+      "route": null,
+      "order": null,
+      "verification": "unresolved"
+    },
+    {
+      "id": "e9d9335e-a295-5e50-9c7f-7d8e79bdb69e",
+      "page_index": 0,
+      "material_item_no": "3",
+      "occurrence": 1,
+      "kind": "elbow",
+      "port": "theoretical_cod",
+      "anchor": null,
+      "source_region_bbox": [
+        1218,
+        115,
+        1255,
+        148
+      ],
+      "code": "UNCONFIRMED_ELBOW_COD",
+      "evidence": "Item 3: first of two explicitly listed 8-inch 90-degree LR elbows. A visible drawn bend locates the component region, but no theoretical COD point is created from page angle/scale; accepted engineering chain and convention are required.",
+      "station_mm": null,
+      "coordinates_mm": {
+        "X": null,
+        "Y": null,
+        "Z": null
+      },
+      "route": null,
+      "order": null,
+      "verification": "unresolved"
+    },
+    {
+      "id": "9a98f677-4b6d-5d55-a232-3331a6af4c05",
+      "page_index": 0,
+      "material_item_no": "3",
+      "occurrence": 2,
+      "kind": "elbow",
+      "port": "theoretical_cod",
+      "anchor": null,
+      "source_region_bbox": [
+        1218,
+        1095,
+        1255,
+        1130
+      ],
+      "code": "UNCONFIRMED_ELBOW_COD",
+      "evidence": "Item 3: second 8-inch 90-degree LR elbow. A visible drawn bend locates the component region, but no theoretical COD point is created from page angle/scale; accepted engineering chain and convention are required.",
+      "station_mm": null,
+      "coordinates_mm": {
+        "X": null,
+        "Y": null,
+        "Z": null
+      },
+      "route": null,
+      "order": null,
+      "verification": "unresolved"
+    },
+    {
+      "id": "f0473163-11b5-579a-bc1e-8148958f5ade",
+      "page_index": 1,
+      "material_item_no": "4",
+      "occurrence": 1,
+      "kind": "elbow",
+      "port": "theoretical_cod",
+      "anchor": null,
+      "source_region_bbox": [
+        1538,
+        805,
+        1565,
+        835
+      ],
+      "code": "UNCONFIRMED_ELBOW_COD",
+      "evidence": "Item 4: first of two 2-inch 90-degree LR elbows. A visible drawn bend locates the component region, but no theoretical COD point is created from page angle/scale; accepted engineering chain and convention are required.",
+      "station_mm": null,
+      "coordinates_mm": {
+        "X": null,
+        "Y": null,
+        "Z": null
+      },
+      "route": null,
+      "order": null,
+      "verification": "unresolved"
+    },
+    {
+      "id": "cfcda3ae-d506-5342-8c7f-130db6eae689",
+      "page_index": 1,
+      "material_item_no": "4",
+      "occurrence": 2,
+      "kind": "elbow",
+      "port": "theoretical_cod",
+      "anchor": null,
+      "source_region_bbox": [
+        1128,
+        1028,
+        1158,
+        1058
+      ],
+      "code": "UNCONFIRMED_ELBOW_COD",
+      "evidence": "Item 4: second 2-inch 90-degree LR elbow. A visible drawn bend locates the component region, but no theoretical COD point is created from page angle/scale; accepted engineering chain and convention are required.",
+      "station_mm": null,
+      "coordinates_mm": {
+        "X": null,
+        "Y": null,
+        "Z": null
+      },
+      "route": null,
+      "order": null,
+      "verification": "unresolved"
+    },
+    {
+      "id": "037da701-3828-5dac-aedb-c49e93148aeb",
+      "page_index": 1,
+      "material_item_no": "11",
+      "code": "INSTRUMENT_CLASSIFICATION_REVIEW_REQUIRED",
+      "evidence": "The source lists PV-7680 / PV 7680, NPS 8, quantity 1, with an inline body and two process ends. OCR classified it other; it must not be silently omitted. Confirm valve versus inline-instrument domain classification."
+    },
+    {
+      "id": "a144ed44-cc85-5215-bf93-e8f885c5d60a",
+      "page_index": 0,
+      "material_item_no": "3",
+      "code": "SOURCE_INVENTORY_METADATA_CORRECTION_REQUIRED",
+      "evidence": "Visual source material row explicitly lists NPS 8 and quantity 2 for item 3; delayed-row OCR metadata omitted these fields. Both COD requirements must remain represented."
+    },
+    {
+      "id": "9d761cb7-b223-5be0-a716-3771a7aa254c",
+      "page_index": 1,
+      "material_item_no": "13/14",
+      "code": "COINCIDENT_SUPPORT_REVIEW_REQUIRED",
+      "evidence": "S13 and S14 leaders reference the same duplicated support-seat source paths [5343,5344] and [5378,5379]. This is a coincident graphic cross-section candidate; engineer confirmation is required before accepting a shared physical station/identity."
+    },
+    {
+      "id": "be323c00-3aee-52df-9276-a5cfcb93aaf0",
+      "page_index": 1,
+      "material_item_no": "9/12",
+      "code": "PROCESS_INTERFACE_BOUNDARY_REVIEW_REQUIRED",
+      "evidence": "PIT stem endpoint and adjacent DBB free-end edge are distinct source positions with source dimension witnesses nearby. Do not merge or infer their physical separation from page distance."
+    },
+    {
+      "id": "aff1e863-5b9d-5b45-81bc-304079e2adc2",
+      "page_index": 0,
+      "material_item_no": "6",
+      "code": "DASHED_BOUNDARY_INTERFACE_REVIEW_REQUIRED",
+      "evidence": "The downstream valve/flange depiction is dashed at CONT. ON SHEET 2. Its native source outline supports a provisional graphic anchor only; physical identity must be proved from independent source coordinates and topology."
+    },
+    {
+      "id": "source-inventory-cont-interface",
+      "page_index": 1,
+      "code": "CONTINUATION_INTERFACE_REVIEW_REQUIRED",
+      "evidence": "CONT. FROM SHEET 1 references the dashed valve assembly; its coordinate leader point [1632.0028076,415.0672607] differs from F5 face [1627.7531738,417.6412354]. No physical separation or coincidence is inferred from this page difference."
+    }
+  ],
+  "flange_material_associations": [
+    {
+      "feature_id": "961b9cb1-ba48-5674-83a9-32b276faf18b",
+      "page_index": 0,
+      "material_item_no": "4",
+      "occurrence": 1,
+      "flange_face": [
+        881.9932861328125,
+        413.39013671875
+      ],
+      "opposite_pipe_dot": [
+        896.8652648925781,
+        404.92999267578125
+      ],
+      "bbox": [
+        873.0444946289062,
+        400.678955078125,
+        904.0972900390625,
+        418.4991455078125
+      ],
+      "source_path_ids": [
+        4160,
+        4190
+      ],
+      "verification": "proposed",
+      "evidence": "Printed F4 flange callout and visible plate/filled pipe dot. Source graphic association only; size, physical station, vendor/manufacturer and engineering review remain unaccepted.",
+      "source_nps_text": "8"
+    },
+    {
+      "feature_id": "992baa76-1523-5a1e-b8fa-d93639030790",
+      "page_index": 0,
+      "material_item_no": "4",
+      "occurrence": 2,
+      "flange_face": [
+        1238.0999755859375,
+        557.9261474609375
+      ],
+      "opposite_pipe_dot": [
+        1238.1000366210938,
+        540.4722290039062
+      ],
+      "bbox": [
+        1229.1929931640625,
+        534.095703125,
+        1247.0069580078125,
+        563.03662109375
+      ],
+      "source_path_ids": [
+        4407,
+        4405
+      ],
+      "verification": "proposed",
+      "evidence": "Printed F4 flange callout and visible plate/filled pipe dot. Source graphic association only; size, physical station, vendor/manufacturer and engineering review remain unaccepted.",
+      "source_nps_text": "8"
+    },
+    {
+      "feature_id": "c5a7cb14-e325-561f-9a2a-d0d9fa5db342",
+      "page_index": 0,
+      "material_item_no": "4",
+      "occurrence": 3,
+      "flange_face": [
+        1238.0999755859375,
+        612.3314208984375
+      ],
+      "opposite_pipe_dot": [
+        1238.1000366210938,
+        629.7435913085938
+      ],
+      "bbox": [
+        1229.1929931640625,
+        607.2628173828125,
+        1247.0069580078125,
+        636.1201171875
+      ],
+      "source_path_ids": [
+        4468,
+        4481
+      ],
+      "verification": "proposed",
+      "evidence": "Printed F4 flange callout and visible plate/filled pipe dot. Source graphic association only; size, physical station, vendor/manufacturer and engineering review remain unaccepted.",
+      "source_nps_text": "8"
+    },
+    {
+      "feature_id": "7f81ac9c-fee3-5c9e-a2d4-35e57ebcdaf0",
+      "page_index": 0,
+      "material_item_no": "4",
+      "occurrence": 4,
+      "flange_face": [
+        889.0205993652344,
+        1317.9669189453125
+      ],
+      "opposite_pipe_dot": [
+        904.0986633300781,
+        1309.424560546875
+      ],
+      "bbox": [
+        880.3182373046875,
+        1305.173583984375,
+        911.2903442382812,
+        1323.077392578125
+      ],
+      "source_path_ids": [
+        4706,
+        4704
+      ],
+      "verification": "proposed",
+      "evidence": "Printed F4 flange callout and visible plate/filled pipe dot. Source graphic association only; size, physical station, vendor/manufacturer and engineering review remain unaccepted.",
+      "source_nps_text": "8"
+    },
+    {
+      "feature_id": "5e17ea23-8183-5cfb-acd6-82e4221da489",
+      "page_index": 1,
+      "material_item_no": "5",
+      "occurrence": 1,
+      "flange_face": [
+        1627.753173828125,
+        417.6412353515625
+      ],
+      "opposite_pipe_dot": [
+        1612.88134765625,
+        426.18505859375
+      ],
+      "bbox": [
+        1605.689697265625,
+        412.5322265625,
+        1636.66162109375,
+        430.43603515625
+      ],
+      "source_path_ids": [
+        4967,
+        4995
+      ],
+      "verification": "proposed",
+      "evidence": "Printed F5 flange callout and visible plate/filled pipe dot. Source graphic association only; size, physical station, vendor/manufacturer and engineering review remain unaccepted.",
+      "source_nps_text": "8"
+    },
+    {
+      "feature_id": "dd14c1b9-e982-5b8d-bacf-8c32de676a45",
+      "page_index": 1,
+      "material_item_no": "6",
+      "occurrence": 1,
+      "flange_face": [
+        1420.8316650390625,
+        754.2919921875
+      ],
+      "opposite_pipe_dot": [
+        1435.7051391601562,
+        762.7955017089844
+      ],
+      "bbox": [
+        1420.8316650390625,
+        744.1143798828125,
+        1439.5452880859375,
+        770.030029296875
+      ],
+      "source_path_ids": [
+        5171,
+        5169
+      ],
+      "verification": "proposed",
+      "evidence": "Printed F6 flange callout and visible plate/filled pipe dot. Source graphic association only; size, physical station, vendor/manufacturer and engineering review remain unaccepted.",
+      "source_nps_text": "2"
+    },
+    {
+      "feature_id": "79010076-a2bd-52d9-a69e-f1f96e732034",
+      "page_index": 1,
+      "material_item_no": "5",
+      "occurrence": 2,
+      "flange_face": [
+        1255.7107543945312,
+        632.728515625
+      ],
+      "opposite_pipe_dot": [
+        1270.8292236328125,
+        624.2669067382812
+      ],
+      "bbox": [
+        1247.0069580078125,
+        620.015869140625,
+        1278.0626220703125,
+        637.8389892578125
+      ],
+      "source_path_ids": [
+        5394,
+        5392
+      ],
+      "verification": "proposed",
+      "evidence": "Printed F5 flange callout and visible plate/filled pipe dot. Source graphic association only; size, physical station, vendor/manufacturer and engineering review remain unaccepted.",
+      "source_nps_text": "8"
+    },
+    {
+      "feature_id": "de6e9daf-8f2e-510a-b1df-4fe064ced03d",
+      "page_index": 1,
+      "material_item_no": "5",
+      "occurrence": 3,
+      "flange_face": [
+        1218.119384765625,
+        654.841552734375
+      ],
+      "opposite_pipe_dot": [
+        1203.2445678710938,
+        663.3450317382812
+      ],
+      "bbox": [
+        1196.0125732421875,
+        649.77294921875,
+        1227.0682373046875,
+        667.5960693359375
+      ],
+      "source_path_ids": [
+        5512,
+        5540
+      ],
+      "verification": "proposed",
+      "evidence": "Printed F5 flange callout and visible plate/filled pipe dot. Source graphic association only; size, physical station, vendor/manufacturer and engineering review remain unaccepted.",
+      "source_nps_text": "8"
+    },
+    {
+      "feature_id": "8145468d-aef9-5af8-8c12-bb48ebfa0873",
+      "page_index": 1,
+      "material_item_no": "6",
+      "occurrence": 2,
+      "flange_face": [
+        1011.1546020507812,
+        972.7723388671875
+      ],
+      "opposite_pipe_dot": [
+        1026.0697326660156,
+        981.3161315917969
+      ],
+      "bbox": [
+        1011.1546020507812,
+        962.5543212890625,
+        1029.8709716796875,
+        988.5506591796875
+      ],
+      "source_path_ids": [
+        5710,
+        5708
+      ],
+      "verification": "proposed",
+      "evidence": "Printed F6 flange callout and visible plate/filled pipe dot. Source graphic association only; size, physical station, vendor/manufacturer and engineering review remain unaccepted.",
+      "source_nps_text": "2"
+    },
+    {
+      "feature_id": "87d606f1-ec00-5bf0-bc41-c897b38063cb",
+      "page_index": 1,
+      "material_item_no": "5",
+      "occurrence": 4,
+      "flange_face": [
+        868.5902099609375,
+        856.31787109375
+      ],
+      "opposite_pipe_dot": [
+        883.7086791992188,
+        847.8576049804688
+      ],
+      "bbox": [
+        859.8864135742188,
+        843.6065673828125,
+        890.9420776367188,
+        861.4268798828125
+      ],
+      "source_path_ids": [
+        5950,
+        5948
+      ],
+      "verification": "proposed",
+      "evidence": "Printed F5 flange callout and visible plate/filled pipe dot. Source graphic association only; size, physical station, vendor/manufacturer and engineering review remain unaccepted.",
+      "source_nps_text": "8"
+    },
+    {
+      "feature_id": "82408665-c609-5261-8e89-ffcc2c1c4e07",
+      "page_index": 1,
+      "material_item_no": "5",
+      "occurrence": 5,
+      "flange_face": [
+        831.0376892089844,
+        878.4323425292969
+      ],
+      "opposite_pipe_dot": [
+        816.1239318847656,
+        886.9329528808594
+      ],
+      "bbox": [
+        808.8919067382812,
+        873.3637084960938,
+        839.9447021484375,
+        891.1839599609375
+      ],
+      "source_path_ids": [
+        6022,
+        6050
+      ],
+      "verification": "proposed",
+      "evidence": "Printed F5 flange callout and visible plate/filled pipe dot. Source graphic association only; size, physical station, vendor/manufacturer and engineering review remain unaccepted.",
+      "source_nps_text": "8"
+    },
+    {
+      "feature_id": "756dd732-3251-5aaa-9508-06d49f2ed7ef",
+      "page_index": 1,
+      "material_item_no": "6",
+      "occurrence": 3,
+      "flange_face": [
+        588.8109130859375,
+        822.3096923828125
+      ],
+      "opposite_pipe_dot": [
+        588.8109130859375,
+        839.76220703125
+      ],
+      "bbox": [
+        579.9038696289062,
+        817.20068359375,
+        597.7179565429688,
+        846.1387329101562
+      ],
+      "source_path_ids": [
+        6188,
+        6186
+      ],
+      "verification": "proposed",
+      "evidence": "Printed F6 flange callout and visible plate/filled pipe dot. Source graphic association only; size, physical station, vendor/manufacturer and engineering review remain unaccepted.",
+      "source_nps_text": "2"
+    },
+    {
+      "feature_id": "8e8807d9-bc01-5ddc-ba6f-0f99860b0443",
+      "page_index": 1,
+      "material_item_no": "5",
+      "occurrence": 6,
+      "flange_face": [
+        514.6471862792969,
+        1060.7775268554688
+      ],
+      "opposite_pipe_dot": [
+        529.76708984375,
+        1052.31591796875
+      ],
+      "bbox": [
+        505.94342041015625,
+        1048.06494140625,
+        536.9990844726562,
+        1065.887939453125
+      ],
+      "source_path_ids": [
+        6383,
+        6381
+      ],
+      "verification": "proposed",
+      "evidence": "Printed F5 flange callout and visible plate/filled pipe dot. Source graphic association only; size, physical station, vendor/manufacturer and engineering review remain unaccepted.",
+      "source_nps_text": "8"
+    }
+  ],
+  "summary": {
+    "flange_graphical_interfaces_already_recognized": 26,
+    "flange_material_tag_associations": 13,
+    "additional_role_observations": 33,
+    "support_role_observations": 11,
+    "tee_junction_observations": 3,
+    "continuation_label_observations": 4,
+    "elbow_cod_unlocated_requirements": 5,
+    "all_observations_provisional": true
+  },
+  "material_observations": [
+    {
+      "item_no": "1",
+      "family": "pipe",
+      "description": "PIPE SMLS BW WT 1.005\" ITCS ASTM A694 F60 MODIFIED NACE",
+      "size": "8",
+      "quantity": null,
+      "observed": 0,
+      "quantity_raw": "44.9",
+      "quantity_unit": "unresolved",
+      "quantity_value": "44.9",
+      "evidence": "Unreviewed source extraction; evidence e20ae511-5a7f-50e2-8e91-4f52bcc7a0ca",
+      "evidence_id": "e20ae511-5a7f-50e2-8e91-4f52bcc7a0ca",
+      "source_bbox": [
+        1843.0628662109375,
+        178.75563049316406,
+        2489.00244140625,
+        206.0
+      ],
+      "source_sha256": "7b97d44bef3d544c4c98ed0667c29607ce58fa4a401dd2463f66010a9615bb59",
+      "word_evidence_ids": [
+        "ac6d2c7d-6c79-522c-9404-d75fdf576753",
+        "ecc9fe06-3f3e-5919-adf4-4f7f0c9d7163",
+        "3ed72d22-8147-5fbd-89f9-ae72c27f2c17",
+        "41479032-891b-530c-8bd3-08b1e9678110",
+        "5102e785-0b36-5cfa-870b-20cdc2e82938",
+        "75545912-e46d-59ec-aa0d-d07addfda4cb",
+        "281c0b04-9386-5a6f-b5a5-5379faaffbff",
+        "8551181b-747f-5d1e-9257-ab574e479825",
+        "b55a10f2-9849-5b07-848f-be8dc314c008",
+        "57c0ab97-ac0a-583d-93ff-1d3a4159d952",
+        "3cb3dcec-43cf-5fe8-90c5-99f2a3d4429a",
+        "1d21525b-8ca0-5355-8600-56ab8f03bedc",
+        "915ab118-f317-561a-9b1e-48425c4adf66",
+        "89702793-db73-50c2-b781-6b645292502b"
+      ],
+      "recognition_confidence": 0.7679,
+      "verification": "proposed",
+      "origin": "automation",
+      "spec_proposal": {
+        "family": "pipe",
+        "nps": "8"
+      },
+      "page_index": 0
+    },
+    {
+      "item_no": "2",
+      "family": "elbow",
+      "description": "ELBOW 45 DEG LR BW WT 1.005\" ITCS ASTM A694 GR F60 MODIFIED NACE MRO175/MSS",
+      "size": "8",
+      "quantity": 1,
+      "observed": 0,
+      "quantity_raw": "1",
+      "quantity_unit": "count",
+      "quantity_value": "1",
+      "evidence": "Unreviewed source extraction; evidence 90395b75-7619-5134-864b-07daa74eb992",
+      "evidence_id": "90395b75-7619-5134-864b-07daa74eb992",
+      "source_bbox": [
+        1841.7294921875,
+        255.68844604492188,
+        2479.06298828125,
+        286.80096435546875
+      ],
+      "source_sha256": "7b97d44bef3d544c4c98ed0667c29607ce58fa4a401dd2463f66010a9615bb59",
+      "word_evidence_ids": [
+        "69fd4794-437a-522e-8c8b-7bf22c3d940c",
+        "0102582d-daf6-52c3-8973-638b948a688f",
+        "4dfc13e9-3c82-5576-a95c-e070aea1aabb",
+        "90a48385-0183-5ef4-ab3e-a17465eaff73",
+        "40dfec92-0e8c-5191-b7e8-fe94306669a4",
+        "8475fd40-e8eb-539e-b34a-1d3bc036d066",
+        "ea6619a9-fcb7-5a9e-9df2-a464fcaaea7f",
+        "acad0ed8-ac86-5465-9691-8563f3e64dd2",
+        "f18af322-a410-5478-a327-2f56e0973400",
+        "e5f08914-7387-56c3-9980-3149d745d42b",
+        "3475f6c7-4ea3-5178-aff4-18473d1c55ae",
+        "e6884286-9b86-572e-a5af-082542d3b197",
+        "a6a1babd-9783-5c93-b373-a8626656566b",
+        "0c90b3fa-b06e-565b-98a7-0601cab07fac",
+        "166c01f1-2190-59a0-a22d-8711ee1c4281"
+      ],
+      "recognition_confidence": 0.5715,
+      "verification": "proposed",
+      "origin": "automation",
+      "spec_proposal": {
+        "family": "elbow",
+        "nps": "8"
+      },
+      "page_index": 0
+    },
+    {
+      "item_no": "3",
+      "family": "elbow",
+      "description": "ELBOW 90 DEG LR BW WT 1.005\" ITCS ASTM A694 GR F60 MODIFIED NACE MRO175/MSS",
+      "size": "8",
+      "quantity": 2,
+      "observed": 0,
+      "quantity_raw": "2",
+      "quantity_unit": "count",
+      "quantity_value": "2",
+      "evidence": "Unreviewed source extraction; evidence ece6dad2-0f51-50ab-88f1-0d6bc6ab380a",
+      "evidence_id": "ece6dad2-0f51-50ab-88f1-0d6bc6ab380a",
+      "source_bbox": [
+        1880.8939208984375,
+        303.7714538574219,
+        2426.211669921875,
+        331.4898681640625
+      ],
+      "source_sha256": "7b97d44bef3d544c4c98ed0667c29607ce58fa4a401dd2463f66010a9615bb59",
+      "word_evidence_ids": [
+        "a2968246-0a73-5034-9036-88828d93e4a8",
+        "b99411c0-b7a9-51cf-bf09-d5679416cb06",
+        "f619f25a-bdf5-5188-871e-94dcae3f8aee",
+        "2c56b127-b67a-5da6-a58f-5fda3262d97c",
+        "8f767de6-286f-5d37-9808-ce82dfa61cda",
+        "9a6a1622-8502-551d-bc74-09adb8753fb8",
+        "b5f37d32-098a-51c6-85d8-bfc0133da7e4",
+        "13986931-4d29-51a4-8227-54853018042c",
+        "837f85a2-3088-5a43-b0f9-1b0a764e642b",
+        "966523e1-2a09-5c5d-bbc3-7129801526c6"
+      ],
+      "recognition_confidence": 0.606,
+      "verification": "proposed",
+      "origin": "automation",
+      "spec_proposal": {
+        "family": "elbow",
+        "nps": ""
+      },
+      "page_index": 0,
+      "source_review_notes": "Visual source row explicitly lists NPS 8 and quantity 2; original delayed OCR observations remain separately pinned. This is a proposal, not an engineering approval."
+    },
+    {
+      "item_no": "4",
+      "family": "flange",
+      "description": "FLANGE 10000LB RTJWN 6.615\u201d BORE API 6A TYPE 6BX SIZE 7-1.16\" ITCS A694 GR F60 MODIFIED NACE MRO175 ALLOY 625 OVERLAY ON RING GROOVE",
+      "size": "8",
+      "quantity": 4,
+      "observed": 0,
+      "quantity_raw": "4",
+      "quantity_unit": "count",
+      "quantity_value": "4",
+      "evidence": "Unreviewed source extraction; evidence f6f98b72-3e0b-5a46-ae19-a4e75a7cb349",
+      "evidence_id": "f6f98b72-3e0b-5a46-ae19-a4e75a7cb349",
+      "source_bbox": [
+        1841.7294921875,
+        395.6666564941406,
+        2481.7294921875,
+        455.37432861328125
+      ],
+      "source_sha256": "7b97d44bef3d544c4c98ed0667c29607ce58fa4a401dd2463f66010a9615bb59",
+      "word_evidence_ids": [
+        "b7e8fccc-b2d0-5371-a6f8-b510bdbb17f0",
+        "856c8b7b-0c49-561b-9c24-c12c06ff0e78",
+        "428f9c03-3891-5e08-9a73-97ed5b0b421e",
+        "5ca9c9c5-8b6f-50f5-a018-6c0998321d66",
+        "c8b887a9-1f3d-58a8-9e6f-d4144dfc4951",
+        "1e6b3ec1-23f1-56a1-897d-76eb3205e8b6",
+        "bd173163-8e7b-5486-a1ef-d5bfa2ceba3d",
+        "e5188aaf-e997-511c-8213-4314c72ebff9",
+        "45e6d582-e672-5dbf-aa9c-ec6a756c739b",
+        "761e49a3-fa41-578e-8458-e6fbc133585b",
+        "a17c339b-388e-5479-a2aa-65da933d1266"
+      ],
+      "recognition_confidence": 0.6878,
+      "verification": "proposed",
+      "origin": "automation",
+      "spec_proposal": {
+        "family": "flange",
+        "nps": "8",
+        "standard": "API 6A",
+        "rating": "10000",
+        "component_type": "WN",
+        "facing": "RTJ",
+        "pipe_bore": "6.615"
+      },
+      "page_index": 0
+    },
+    {
+      "item_no": "5",
+      "family": "other",
+      "description": "GASKET RTJ 10000# OCTAGONAL BX156 316L SS ANNEALED (135 HB MAX) NACE MRO175",
+      "size": "8",
+      "quantity": 4,
+      "observed": 0,
+      "quantity_raw": "4",
+      "quantity_unit": "count",
+      "quantity_value": "4",
+      "evidence": "Unreviewed source extraction; evidence afb2232e-3f09-50e5-afa6-e787f23cb603",
+      "evidence_id": "afb2232e-3f09-50e5-afa6-e787f23cb603",
+      "source_bbox": [
+        1842.0628662109375,
+        502.89166259765625,
+        2481.7294921875,
+        530.610107421875
+      ],
+      "source_sha256": "7b97d44bef3d544c4c98ed0667c29607ce58fa4a401dd2463f66010a9615bb59",
+      "word_evidence_ids": [
+        "57e4cbf4-fc54-5fd8-a9c1-15bde3c3d3fc",
+        "c91cc613-d431-5d09-9032-69b418216546",
+        "a98c910c-43bc-51a0-a756-692d8efa2350",
+        "8f9a5e80-ecd1-5286-a70e-6830ac2a413c",
+        "5acebf7b-64e5-5ea7-848a-e66a3e65e006",
+        "c5f801cb-43cd-513a-a19c-d4327a90f8f8",
+        "61afb865-5ede-5e16-b6b5-690de93ee480",
+        "5056c9a7-d38e-52ee-8cb8-77502d0b72a3",
+        "2febf099-b448-5cde-ab47-27906bdac4d2",
+        "147dd2e4-83a7-5b21-a6e0-e58ba0bbed58"
+      ],
+      "recognition_confidence": 0.2519,
+      "verification": "proposed",
+      "origin": "automation",
+      "spec_proposal": {
+        "family": "other",
+        "nps": "8",
+        "rating": "10000",
+        "end_connection": "RTJ"
+      },
+      "page_index": 0
+    },
+    {
+      "item_no": "6",
+      "family": "valve",
+      "description": "BALL VALVE FULL BORE 10000 PSI RTJ TYPE 6BX G.O. BA9901",
+      "size": "8",
+      "quantity": 1,
+      "observed": 0,
+      "quantity_raw": "1",
+      "quantity_unit": "count",
+      "quantity_value": "1",
+      "evidence": "Unreviewed source extraction; evidence 85b701e7-ce4c-595d-be40-28f405ea4533",
+      "evidence_id": "85b701e7-ce4c-595d-be40-28f405ea4533",
+      "source_bbox": [
+        1842.0628662109375,
+        579.6666870117188,
+        2479.06298828125,
+        604.1488037109375
+      ],
+      "source_sha256": "7b97d44bef3d544c4c98ed0667c29607ce58fa4a401dd2463f66010a9615bb59",
+      "word_evidence_ids": [
+        "ebfeaaf7-598e-50d5-bd6d-0afcae570dc3",
+        "4ae9f310-ca39-5165-bcc6-18e2e33effac",
+        "3ffc1f04-0032-54b9-9807-8c0694b0d00f",
+        "fb05ca19-d566-567c-86c5-58f7c5f36f71",
+        "df582adc-9bed-5a84-9ada-fbede6669571",
+        "6aa7033f-6c2c-5481-88b9-a781516701da",
+        "6ae54323-0860-5a9c-b47c-19536365158b",
+        "1d7dace6-c3ef-5086-9bd9-109e86c501c7",
+        "92f1392e-73e2-5deb-b1fc-5db8cdefce36",
+        "68d4cf3a-837c-5d5b-ac65-952e8fe31733",
+        "ed3465f7-5a8d-5cd1-9d8e-57734de4e2a4",
+        "3d70aa93-05e1-573b-b05b-668117af5abc"
+      ],
+      "recognition_confidence": 0.7815,
+      "verification": "proposed",
+      "origin": "automation",
+      "spec_proposal": {
+        "family": "valve",
+        "nps": "8",
+        "rating": "10000",
+        "component_type": "BALL",
+        "end_connection": "RTJ"
+      },
+      "page_index": 0
+    },
+    {
+      "item_no": "7",
+      "family": "instrument",
+      "description": "FLOW METER FE 7681",
+      "size": "8",
+      "quantity": 1,
+      "observed": 0,
+      "quantity_raw": "1",
+      "quantity_unit": "count",
+      "quantity_value": "1",
+      "evidence": "Unreviewed source extraction; evidence 09091efb-008e-5515-ac96-df5efdcd4032",
+      "evidence_id": "09091efb-008e-5515-ac96-df5efdcd4032",
+      "source_bbox": [
+        1842.0628662109375,
+        656.1915893554688,
+        2479.06298828125,
+        666.0
+      ],
+      "source_sha256": "7b97d44bef3d544c4c98ed0667c29607ce58fa4a401dd2463f66010a9615bb59",
+      "word_evidence_ids": [
+        "30f36f61-3042-5707-95bd-0e30881aa149",
+        "0c14955b-e3f1-5d4b-8740-e47deae56dfd",
+        "02cd6e51-71d6-5ed9-a043-c09d3c97540b",
+        "a8019a4a-eff8-5eb3-9bd4-393b272ab956",
+        "95ee372e-586e-54e2-836f-751204ac4f8d",
+        "e1afa634-a3a4-5a6f-9ee7-a3ae8c7b849f",
+        "b950639d-510b-5232-97e9-d884c8a75018"
+      ],
+      "recognition_confidence": 0.4977,
+      "verification": "proposed",
+      "origin": "automation",
+      "spec_proposal": {
+        "family": "instrument",
+        "nps": "8"
+      },
+      "page_index": 0
+    },
+    {
+      "item_no": "8",
+      "family": "support",
+      "description": "WELDED CRADLE FOR UNINSULATED PIPE",
+      "size": "8",
+      "quantity": 2,
+      "observed": 0,
+      "quantity_raw": "2",
+      "quantity_unit": "count",
+      "quantity_value": "2",
+      "evidence": "Unreviewed source extraction; evidence e2d70fec-007d-50f3-9a67-322d660f1818",
+      "evidence_id": "e2d70fec-007d-50f3-9a67-322d660f1818",
+      "source_bbox": [
+        1841.7294921875,
+        717.6666870117188,
+        2481.396240234375,
+        727.467529296875
+      ],
+      "source_sha256": "7b97d44bef3d544c4c98ed0667c29607ce58fa4a401dd2463f66010a9615bb59",
+      "word_evidence_ids": [
+        "ca862d32-3e28-5d3e-b8e2-1ff3ac8450aa",
+        "890e574e-4391-55c3-aaba-0b417ef48b8c",
+        "5c946e71-240a-5d46-9454-74bc1e54e665",
+        "3754c003-4970-5840-b689-f3ad82c911a7",
+        "dec769d5-b2cf-57bc-ab39-41ac2143fd75",
+        "da4c39fc-d2db-5afa-bc39-a8196c5dc5fa",
+        "1258d303-c0a5-5cde-a9c6-56761b41ece6",
+        "9a4f5994-5a51-54be-b242-378dd7e0a9c4",
+        "ce6853a6-006c-52b4-b5ce-288afbbde9ff"
+      ],
+      "recognition_confidence": 0.7944,
+      "verification": "proposed",
+      "origin": "automation",
+      "spec_proposal": {
+        "family": "support",
+        "nps": "8"
+      },
+      "page_index": 0
+    },
+    {
+      "item_no": "9",
+      "family": "support",
+      "description": "U-BOLT TYPE PS-UG2",
+      "size": "8",
+      "quantity": 1,
+      "observed": 0,
+      "quantity_raw": "1",
+      "quantity_unit": "count",
+      "quantity_value": "1",
+      "evidence": "Unreviewed source extraction; evidence 9362fa68-0b13-5d58-b6c8-3d31d59a12b3",
+      "evidence_id": "9362fa68-0b13-5d58-b6c8-3d31d59a12b3",
+      "source_bbox": [
+        1841.7294921875,
+        748.3333129882812,
+        2479.06298828125,
+        758.014404296875
+      ],
+      "source_sha256": "7b97d44bef3d544c4c98ed0667c29607ce58fa4a401dd2463f66010a9615bb59",
+      "word_evidence_ids": [
+        "9c00ba12-e865-5a2f-8e6d-53b702b1ca7b",
+        "19d358e9-1f17-5c5a-8def-68077449027b",
+        "72308e34-ec15-5e6a-bc9b-b22a40a6d704",
+        "7e2eb668-c922-55d7-94c5-50a8cf783ca5",
+        "5b2f8a33-60bc-5b8b-8c51-6cc39b104e13",
+        "af908c71-bf14-5d6e-9dcd-84f78fc57810",
+        "bc1a2d50-836b-5d6d-b26d-49f2f781081a"
+      ],
+      "recognition_confidence": 0.7213,
+      "verification": "proposed",
+      "origin": "automation",
+      "spec_proposal": {
+        "family": "support",
+        "nps": "8"
+      },
+      "page_index": 0
+    },
+    {
+      "item_no": "10",
+      "family": "support",
+      "description": "SUPPORT LUGS FOR VERTICAL PIPES",
+      "size": "8",
+      "quantity": 1,
+      "observed": 0,
+      "quantity_raw": "1",
+      "quantity_unit": "count",
+      "quantity_value": "1",
+      "evidence": "Unreviewed source extraction; evidence 74937e61-bb32-599f-8f59-6355b4f30fab",
+      "evidence_id": "74937e61-bb32-599f-8f59-6355b4f30fab",
+      "source_bbox": [
+        1835.639404296875,
+        763.6666870117188,
+        2479.06298828125,
+        773.3333129882812
+      ],
+      "source_sha256": "7b97d44bef3d544c4c98ed0667c29607ce58fa4a401dd2463f66010a9615bb59",
+      "word_evidence_ids": [
+        "01c6a776-97a8-5ef9-88c6-1edb436b3fb1",
+        "a18ffb54-3731-5816-a98b-0ee112c15c9a",
+        "36368f7c-61dc-505c-b536-09ce2778f2a8",
+        "0cd197f6-f531-51f3-81f6-4e500e3d108b",
+        "51071887-e416-5909-b865-b06e3f1f0905",
+        "f63a6367-0276-526e-b724-26a98a6e35d5",
+        "2c7dd327-d4f5-551a-8ae1-fdcbe078b78a",
+        "5f21dfbb-a8d3-5c0d-9129-86d87446cf92",
+        "32f52e7e-cf98-536d-b215-6f9ceebaa2bf"
+      ],
+      "recognition_confidence": 0.8552,
+      "verification": "proposed",
+      "origin": "automation",
+      "spec_proposal": {
+        "family": "support",
+        "nps": "8"
+      },
+      "page_index": 0
+    },
+    {
+      "item_no": "11",
+      "family": "other",
+      "description": "11.1/2 LG STUD BOLT A320 GR L7 BLACK XYLAN 1424 COATED",
+      "size": "1.1/2",
+      "quantity": 24,
+      "observed": 0,
+      "quantity_raw": "24",
+      "quantity_unit": "count",
+      "quantity_value": "24",
+      "evidence": "Unreviewed source extraction; evidence 0a9b0770-8486-5e14-9d65-2d39c38f9877",
+      "evidence_id": "0a9b0770-8486-5e14-9d65-2d39c38f9877",
+      "source_bbox": [
+        1835.639404296875,
+        947.5180053710938,
+        2481.648681640625,
+        972.4080200195312
+      ],
+      "source_sha256": "7b97d44bef3d544c4c98ed0667c29607ce58fa4a401dd2463f66010a9615bb59",
+      "word_evidence_ids": [
+        "04e84e38-8f5b-5ec5-8694-cefe25f8cb82",
+        "c378c019-a852-5070-9026-c88f214e404f",
+        "729f1734-048f-5539-b5bf-1de105b8b22f",
+        "fbcdf324-7a4b-5cab-9fd0-b68591e0881b",
+        "afad2206-7e41-5c0f-92b6-e8fe784d0711",
+        "5a6e20a7-de77-59a7-9da6-026749bbf7dc",
+        "d3c9476d-166a-5cf1-ab32-883c86094118",
+        "f888d73a-ab8e-5607-815a-4ccf6804fdbf",
+        "10d28a40-e82b-5717-aa04-013b9f38f481",
+        "e3cbc98a-6fdc-5ac6-b559-21b0f7df3652",
+        "f16b0dee-9fc6-56e9-9636-d85540cc8fce",
+        "7e1f4d3c-4e4d-5877-8c98-190d7508fe43"
+      ],
+      "recognition_confidence": 0.7034,
+      "verification": "proposed",
+      "origin": "automation",
+      "spec_proposal": {
+        "family": "other",
+        "nps": "1.1/2"
+      },
+      "page_index": 0
+    },
+    {
+      "item_no": "12",
+      "family": "other",
+      "description": "HVY HEX NUTS A194 GR 7 BLACK XYLAN 1424",
+      "size": "1.1/2",
+      "quantity": 48,
+      "observed": 0,
+      "quantity_raw": "48",
+      "quantity_unit": "count",
+      "quantity_value": "48",
+      "evidence": "Unreviewed source extraction; evidence 5a1904d7-078c-58ec-9cb6-e3540b78ca33",
+      "evidence_id": "5a1904d7-078c-58ec-9cb6-e3540b78ca33",
+      "source_bbox": [
+        1835.639404296875,
+        978.0648803710938,
+        2481.648681640625,
+        990.5098876953125
+      ],
+      "source_sha256": "7b97d44bef3d544c4c98ed0667c29607ce58fa4a401dd2463f66010a9615bb59",
+      "word_evidence_ids": [
+        "10b8b8bf-893b-59e5-b71e-63f0c2615279",
+        "1037d806-f09c-5f4b-8016-f4199f2ee81c",
+        "2ccfd296-09f0-571e-a09d-b4c64835400d",
+        "351fa0cf-7208-5c1e-b683-39ab03aded56",
+        "03b187d9-21fa-5a0e-ba7e-64fc8789ccc0",
+        "37dbd148-fd4a-5e3f-8f59-198129f5dbf4",
+        "9642d542-1826-5972-b406-0c3fbfdb171a",
+        "003bd6e6-1e3b-520c-9acd-235285c69740",
+        "0e87a179-7c36-5e96-8031-7af180bfd985",
+        "d74ee8cc-0450-517f-85f2-4e3359f05bea",
+        "db789b15-1a8d-5454-8c0c-e3c291c0e306",
+        "76a07496-0d93-5f18-86c1-728ac244e8d5",
+        "3dececb8-04de-544b-97a1-fdabad928d3d"
+      ],
+      "recognition_confidence": 0.8486,
+      "verification": "proposed",
+      "origin": "automation",
+      "spec_proposal": {
+        "family": "other",
+        "nps": "1.1/2"
+      },
+      "page_index": 0
+    },
+    {
+      "item_no": "13",
+      "family": "support",
+      "description": "BEAM GUIDE FOR UNINSULATED PIPE (PS-GB1)",
+      "size": "8",
+      "quantity": 1,
+      "observed": 0,
+      "quantity_raw": "1",
+      "quantity_unit": "count",
+      "quantity_value": "1",
+      "evidence": "Unreviewed source extraction; evidence 26305eaf-caf9-58fb-b093-5fd4fe33407b",
+      "evidence_id": "26305eaf-caf9-58fb-b093-5fd4fe33407b",
+      "source_bbox": [
+        1835.639404296875,
+        1054.6666259765625,
+        2479.06298828125,
+        1067.442626953125
+      ],
+      "source_sha256": "7b97d44bef3d544c4c98ed0667c29607ce58fa4a401dd2463f66010a9615bb59",
+      "word_evidence_ids": [
+        "c043494a-6c11-558d-96cf-3e81b09d05d2",
+        "346140cd-8ca4-5732-b46f-019fa9b2afeb",
+        "94eb3d55-b7cb-5a67-a84f-51059ad7e7ea",
+        "258f6763-f72a-59a3-bce4-f1678132bacd",
+        "ba823b9a-6486-57d9-86d8-9b8421010d6b",
+        "d497f5aa-987a-516c-b820-84d02c25c98c",
+        "03a4bdbe-6d12-550c-8972-162ae0c73dac",
+        "5492a2e7-44b5-5dec-8100-005c87e5af26",
+        "a14a5dc8-c64d-568d-9ee6-589829b9f9e0",
+        "67fbdb67-51e2-5280-b14c-5500ff6c5e82"
+      ],
+      "recognition_confidence": 0.8408,
+      "verification": "proposed",
+      "origin": "automation",
+      "spec_proposal": {
+        "family": "support",
+        "nps": "8"
+      },
+      "page_index": 0
+    },
+    {
+      "item_no": "1",
+      "family": "pipe",
+      "description": "PIPE SMLS BW WT 1.005\" ITCS ASTM A694 F60 MODIFIED NACE",
+      "size": "8",
+      "quantity": null,
+      "observed": 0,
+      "quantity_raw": "5.9",
+      "quantity_unit": "unresolved",
+      "quantity_value": "5.9",
+      "evidence": "Unreviewed source extraction; evidence a31743d7-9b55-5fe3-b87f-b9000c1efb76",
+      "evidence_id": "a31743d7-9b55-5fe3-b87f-b9000c1efb76",
+      "source_bbox": [
+        1843.0628662109375,
+        178.75563049316406,
+        2489.00244140625,
+        206.0
+      ],
+      "source_sha256": "7b97d44bef3d544c4c98ed0667c29607ce58fa4a401dd2463f66010a9615bb59",
+      "word_evidence_ids": [
+        "a1a781f9-0973-5081-b825-5dc17f50cbd1",
+        "36c48dc4-792a-58ad-b670-5ea5b2c17cdf",
+        "11a2e9f8-fd73-51b1-b780-cfabf12429da",
+        "e557dba0-a06d-56be-bd7e-5166117be9bd",
+        "3d1f0f47-9468-5b0b-a072-5b43cde92925",
+        "edd468ff-d2ba-5463-a384-8ddafa6ddf89",
+        "5b6f5189-3475-595d-b58b-28dd878be615",
+        "7aa89bb9-3224-5851-8a68-6c6b659a3800",
+        "e3826049-46c5-53a5-93dd-b7a4c13df549",
+        "d730a1db-c46a-5fd6-86e9-6faa4671817b",
+        "08af5da7-6554-57a3-92ed-b988ec167232",
+        "c744713b-74dd-5b0b-a078-0a5a3a4c69c8",
+        "f6c61e7f-8bbc-58fe-b86e-dbcefd10d825"
+      ],
+      "recognition_confidence": 0.8977,
+      "verification": "proposed",
+      "origin": "automation",
+      "spec_proposal": {
+        "family": "pipe",
+        "nps": "8"
+      },
+      "page_index": 1
+    },
+    {
+      "item_no": "2",
+      "family": "pipe",
+      "description": "PIPE SMLS SCH XXS ITCS ASTM A694 F60 MODIFIED NACE",
+      "size": "2",
+      "quantity": null,
+      "observed": 0,
+      "quantity_raw": "1.4",
+      "quantity_unit": "unresolved",
+      "quantity_value": "1.4",
+      "evidence": "Unreviewed source extraction; evidence d2a1791e-0abe-5830-93bd-dccc682d73ec",
+      "evidence_id": "d2a1791e-0abe-5830-93bd-dccc682d73ec",
+      "source_bbox": [
+        1841.7294921875,
+        209.8681640625,
+        2489.568115234375,
+        236.4552459716797
+      ],
+      "source_sha256": "7b97d44bef3d544c4c98ed0667c29607ce58fa4a401dd2463f66010a9615bb59",
+      "word_evidence_ids": [
+        "c73218e2-d69f-555a-a878-9454e60d4b2e",
+        "a8ebddec-f942-5336-bdc9-480b902c43be",
+        "bcf50a3f-3a98-5ffd-952d-167721810477",
+        "302c65c3-ea11-5508-887d-af9af48b4d2c",
+        "9afa0f2f-9fbc-5ade-90e4-a40ff215e4d8",
+        "079c7e01-2f69-5072-b51a-6ff5d4b5ccaf",
+        "4e5a00b5-37c8-57e0-9453-82eac2462dbb",
+        "74f59f8a-4df6-5cf4-96a4-3246dfd22a11",
+        "23b109ac-a87e-5715-8ad0-42900b501099",
+        "b23eaf4a-82cf-5eab-96ae-58610fb8efa4",
+        "413aed04-be96-5f84-8381-16b9eb334f81",
+        "798da0fa-736c-5c28-b483-73232b0c115f",
+        "93b6ed2f-383c-54c0-aba4-683a3acc991c"
+      ],
+      "recognition_confidence": 0.77,
+      "verification": "proposed",
+      "origin": "automation",
+      "spec_proposal": {
+        "family": "pipe",
+        "nps": "2"
+      },
+      "page_index": 1
+    },
+    {
+      "item_no": "3",
+      "family": "tee",
+      "description": "TEE REDUCING FORGED BW WT. 1.005\" x SCH XXS ITCS SMLS ASTM A694 F60 MODIFIED NACE MRO175/MSS. SP-75",
+      "size": "8 x 2",
+      "quantity": 3,
+      "observed": 0,
+      "quantity_raw": "3",
+      "quantity_unit": "count",
+      "quantity_value": "3",
+      "evidence": "Unreviewed source extraction; evidence 878db916-3ff8-555b-b2b8-d1866ff1cec3",
+      "evidence_id": "878db916-3ff8-555b-b2b8-d1866ff1cec3",
+      "source_bbox": [
+        1841.7294921875,
+        288.4980163574219,
+        2481.7294921875,
+        331.0
+      ],
+      "source_sha256": "7b97d44bef3d544c4c98ed0667c29607ce58fa4a401dd2463f66010a9615bb59",
+      "word_evidence_ids": [
+        "b8337d1a-0f4e-5b4f-8c63-a0e5ec9a3412",
+        "baf9b479-2f4e-529d-98a3-8e7d1fa41f0d",
+        "174cbce0-bd02-568d-b5bb-a57c2583dda0",
+        "f447caef-9fca-5ed8-be99-03a0f2f5568e",
+        "107317a8-b737-59df-885e-4b35718ced43",
+        "def02df9-69cd-5726-82b9-da63c6ef9c44",
+        "c5cd9dc1-61bd-516c-8752-63b9322cf093",
+        "af7ca103-2d76-5215-abee-44cc6762d602",
+        "634afcb4-96f8-5300-ad9c-c58cefb41fa7",
+        "59ddf599-dcab-557c-a92c-3ad69c82f63d",
+        "5e55551a-1c8c-5ffb-bfaa-dec490238f69",
+        "cbd45e0b-a865-5672-9ee2-166801bced1e",
+        "a7cd31f0-3471-531c-938f-f4e4e8e2c859",
+        "1786bdfb-c376-5ff1-99b6-d44167c6e8ff",
+        "4c11fe63-d250-50da-932e-146e3def718a"
+      ],
+      "recognition_confidence": 0.4074,
+      "verification": "proposed",
+      "origin": "automation",
+      "spec_proposal": {
+        "family": "tee",
+        "nps": "8 x 2"
+      },
+      "page_index": 1
+    },
+    {
+      "item_no": "4",
+      "family": "elbow",
+      "description": "ELBOW 90 DEG LR BW SCH XxS ITCS ASTM A694 GR F60 MODIFIED NACE MRO175/MSS",
+      "size": "2",
+      "quantity": 2,
+      "observed": 0,
+      "quantity_raw": "2",
+      "quantity_unit": "count",
+      "quantity_value": "2",
+      "evidence": "Unreviewed source extraction; evidence 55c442c4-1e9f-59a8-bb8c-ffa3b64e5a9e",
+      "evidence_id": "55c442c4-1e9f-59a8-bb8c-ffa3b64e5a9e",
+      "source_bbox": [
+        1841.7294921875,
+        334.31829833984375,
+        2481.396240234375,
+        362.0367431640625
+      ],
+      "source_sha256": "7b97d44bef3d544c4c98ed0667c29607ce58fa4a401dd2463f66010a9615bb59",
+      "word_evidence_ids": [
+        "0bd5dae3-ba97-56f2-8615-f48d4526badd",
+        "7df73ed8-7a17-5bcb-bfbb-3db245489e3c",
+        "1c51a254-beb3-5cae-90e9-575f38ab2cda",
+        "d1c0a71d-2989-581d-b487-1e7e6a5960ca",
+        "8b499547-401e-59dc-b8d1-5a903a61d59a",
+        "42de9686-b3f8-54e6-b640-7db966794cff",
+        "3413ebd1-ba67-553f-97da-2c1957e955d4",
+        "66768e04-be7d-573f-b3a7-9d84fc560823",
+        "feee8339-7f28-5000-8f8f-974157d44708",
+        "62ad9787-34ef-5dc7-abd2-fecddbce05f3",
+        "5f31369c-7ea3-5697-a74d-4d926ce28e57",
+        "2f2fa76e-2fd2-5b2c-b0c2-abec38d1a767",
+        "765d2c29-a411-5816-9ab5-6bba83da4640"
+      ],
+      "recognition_confidence": 0.3174,
+      "verification": "proposed",
+      "origin": "automation",
+      "spec_proposal": {
+        "family": "elbow",
+        "nps": "2"
+      },
+      "page_index": 1
+    },
+    {
+      "item_no": "5",
+      "family": "flange",
+      "description": "FLANGE 10000LB RTJWN 6.615\u201d BORE API 6A TYPE 6BX SIZE 7-1.16\" ITCS A694 GR F60 MODIFIED NACE MRO175 ALLOY 625 OVERLAY ON RING GROOVE",
+      "size": "8",
+      "quantity": 6,
+      "observed": 0,
+      "quantity_raw": "6",
+      "quantity_unit": "count",
+      "quantity_value": "6",
+      "evidence": "Unreviewed source extraction; evidence 84398cc5-8b55-56ae-8ea1-3537d74d1114",
+      "evidence_id": "84398cc5-8b55-56ae-8ea1-3537d74d1114",
+      "source_bbox": [
+        1841.7294921875,
+        426.3333435058594,
+        2481.7294921875,
+        486.4868469238281
+      ],
+      "source_sha256": "7b97d44bef3d544c4c98ed0667c29607ce58fa4a401dd2463f66010a9615bb59",
+      "word_evidence_ids": [
+        "955980d0-e500-5fcf-9fab-7f25c205a696",
+        "de08cb3e-44c2-5734-860b-0599a0793349",
+        "1cc5b5bb-7caf-5ef9-b679-2b7a2e5a9da7",
+        "37cf4779-c6d9-5cee-96c6-12ecf837d002",
+        "8836fda4-4870-5654-b74b-de44e7002d2a",
+        "9259f1d6-dec4-514f-930b-25ee5cbf44f9",
+        "c86c464f-9421-586f-9778-179de247104f",
+        "84f5dd3d-9603-5197-a3ae-63d93ceda33d",
+        "d8666839-9e8d-5582-b359-349ab48ca330",
+        "86a75882-5673-540e-b52f-a088f926c17a",
+        "40c3df47-5953-5a1e-b16d-9918a5db2075"
+      ],
+      "recognition_confidence": 0.7611,
+      "verification": "proposed",
+      "origin": "automation",
+      "spec_proposal": {
+        "family": "flange",
+        "nps": "8",
+        "standard": "API 6A",
+        "rating": "10000",
+        "component_type": "WN",
+        "facing": "RTJ",
+        "pipe_bore": "6.615"
+      },
+      "page_index": 1
+    },
+    {
+      "item_no": "6",
+      "family": "flange",
+      "description": "FLANGE 10000LB RTJWN SCH XXS API 6A TYPE 6BX SIZE ITCS A694 GR F60 MODIFIED NACE MRO175 ALLOY 625 OVERLAY ON RING GROOVE",
+      "size": "2",
+      "quantity": 3,
+      "observed": 0,
+      "quantity_raw": "3",
+      "quantity_unit": "count",
+      "quantity_value": "3",
+      "evidence": "Unreviewed source extraction; evidence 68520348-b14e-56ef-afcd-ecaa97ffd018",
+      "evidence_id": "68520348-b14e-56ef-afcd-ecaa97ffd018",
+      "source_bbox": [
+        1842.0628662109375,
+        485.3554992675781,
+        2481.7294921875,
+        542.4894409179688
+      ],
+      "source_sha256": "7b97d44bef3d544c4c98ed0667c29607ce58fa4a401dd2463f66010a9615bb59",
+      "word_evidence_ids": [
+        "f7ae2e6c-c814-5f9a-aad0-37f56dfa5f30",
+        "02316c40-cb67-5c81-bdd2-0e3fe14e0be4",
+        "2873531d-5aa1-5c02-8c38-f8da6931d157",
+        "ef448f5d-e4dd-50c3-894b-367ea6cb2131",
+        "e8a61097-d0bb-5d00-8af9-6acaa952dc24",
+        "925095f8-d486-5798-8235-3e02f2ce9056",
+        "1db798f3-ea3b-5a48-b751-13324deb90af",
+        "0a6ead8f-a266-5f01-abb7-4a5daedb84b8",
+        "95b61dc2-e7c0-59a6-b4de-2d205d5a8030",
+        "b4c2bf54-5028-5393-86eb-db5c4a8a26ac",
+        "b0335254-141a-50f9-9e50-de9ab2034832",
+        "653dd0ae-0d97-5844-a842-093070d9dffa",
+        "dc9ec398-7fde-5e2a-9f60-9516c446a7a7"
+      ],
+      "recognition_confidence": 0.3891,
+      "verification": "proposed",
+      "origin": "automation",
+      "spec_proposal": {
+        "family": "flange",
+        "nps": "2",
+        "standard": "API 6A",
+        "rating": "10000",
+        "component_type": "WN",
+        "facing": "RTJ"
+      },
+      "page_index": 1
+    },
+    {
+      "item_no": "7",
+      "family": "other",
+      "description": "GASKET RTJ 10000# OCTAGONAL BX156 316L SS ANNEALED (135 HB MAX) NACE MRO175",
+      "size": "8",
+      "quantity": 6,
+      "observed": 0,
+      "quantity_raw": "6",
+      "quantity_unit": "count",
+      "quantity_value": "6",
+      "evidence": "Unreviewed source extraction; evidence 0f08e686-2243-53f5-9f7d-5a699693e7df",
+      "evidence_id": "0f08e686-2243-53f5-9f7d-5a699693e7df",
+      "source_bbox": [
+        1841.86181640625,
+        595.0,
+        2481.7294921875,
+        622.8163452148438
+      ],
+      "source_sha256": "7b97d44bef3d544c4c98ed0667c29607ce58fa4a401dd2463f66010a9615bb59",
+      "word_evidence_ids": [
+        "c3f980b6-c4dc-51ed-95f1-597a5d698c00",
+        "08bddfbd-7a76-5709-a810-9a841fa5573d",
+        "a853382b-a6fc-5538-80bd-91c7294e9aca",
+        "65540d32-b808-5f3f-8072-c27a199d1767",
+        "970a0886-dfdf-5857-b19c-ca181c4d5d56",
+        "f6c734e8-f12b-5aec-9c5d-0d748682fadf",
+        "75cc0b36-67d0-565b-af00-2783383fad94",
+        "929ad250-16e6-545e-a72b-70867828419e",
+        "2001b330-82cb-5edc-8800-510ded6f6dd9",
+        "ade06051-528e-5eeb-96db-653fe5fa9c9f"
+      ],
+      "recognition_confidence": 0.7252,
+      "verification": "proposed",
+      "origin": "automation",
+      "spec_proposal": {
+        "family": "other",
+        "nps": "8",
+        "rating": "10000",
+        "end_connection": "RTJ"
+      },
+      "page_index": 1
+    },
+    {
+      "item_no": "8",
+      "family": "other",
+      "description": "GASKET RTJ 10000# OCTAGONAL BX152 316L SS ANNEALED (135 HB MAX) NACE MRO175",
+      "size": "2",
+      "quantity": 3,
+      "observed": 0,
+      "quantity_raw": "3",
+      "quantity_unit": "count",
+      "quantity_value": "3",
+      "evidence": "Unreviewed source extraction; evidence 796e5b92-a1c5-566b-a4a3-619339b7adea",
+      "evidence_id": "796e5b92-a1c5-566b-a4a3-619339b7adea",
+      "source_bbox": [
+        1841.86181640625,
+        625.6447143554688,
+        2481.7294921875,
+        653.3631591796875
+      ],
+      "source_sha256": "7b97d44bef3d544c4c98ed0667c29607ce58fa4a401dd2463f66010a9615bb59",
+      "word_evidence_ids": [
+        "ad7ec0fb-ac74-574b-ac25-0c3773b8efff",
+        "a866b38e-6f08-5802-87af-3182f0640523",
+        "d7db4dae-af1b-5f52-992b-78c60b3488af",
+        "92dafcaf-5fde-5b97-87e5-1a7d31d9afc7",
+        "2e2fa5f9-9f56-5cdd-9bd4-693ec25ce760",
+        "7cd69281-1127-51b4-bbb8-e5fcbb8c32a0",
+        "81e875ea-5cf8-5faf-b18f-3c14ba272773",
+        "6e866504-7a99-5ef9-8f80-6e826bfc5af8",
+        "5e01289c-8bb0-5fcc-8133-0ae0d52dece8",
+        "9d1a4d4c-f89e-54a2-a2b1-5f0b862fe42b"
+      ],
+      "recognition_confidence": 0.8227,
+      "verification": "proposed",
+      "origin": "automation",
+      "spec_proposal": {
+        "family": "other",
+        "nps": "2",
+        "rating": "10000",
+        "end_connection": "RTJ"
+      },
+      "page_index": 1
+    },
+    {
+      "item_no": "9",
+      "family": "valve",
+      "description": "VALVE DBB 10000LB RTJ x FNPT W/ PLUG",
+      "size": "2 x 3/4",
+      "quantity": 3,
+      "observed": 0,
+      "quantity_raw": "3",
+      "quantity_unit": "count",
+      "quantity_value": "3",
+      "evidence": "Unreviewed source extraction; evidence 93f4ea4c-5d5a-51cb-bd3e-37d730f4709f",
+      "evidence_id": "93f4ea4c-5d5a-51cb-bd3e-37d730f4709f",
+      "source_bbox": [
+        1841.86181640625,
+        702.0118408203125,
+        2481.7294921875,
+        714.4568481445312
+      ],
+      "source_sha256": "7b97d44bef3d544c4c98ed0667c29607ce58fa4a401dd2463f66010a9615bb59",
+      "word_evidence_ids": [
+        "f25e2eb4-d0e5-5240-ba9d-c455cc12b96f",
+        "0170a2a5-d0e3-5324-a7b2-696441c5b4c5",
+        "a3657e96-2d2e-595a-9300-8412c3d0bb0d",
+        "71e44f27-94ee-5dcd-8f6e-5bfb5f8dfa9a",
+        "08164d6c-0474-51a1-b580-27dfc29e9719",
+        "80224ea8-7a95-5611-b323-69eed6f49bd2",
+        "078ecdbf-ff92-5f53-b08c-8353e47de1b2",
+        "8e150d94-5c05-50a6-a754-89ec4fb859ff",
+        "46b7c56a-b4ef-59e9-a2a0-fab34e9f1bf0",
+        "2af8df1f-257a-54a9-b466-0338531252c7",
+        "405c8754-4a4b-5746-bc4b-d5fb45fe53c4",
+        "a076c6e8-e14c-5e68-956c-b8a0e2b0a7f1",
+        "891a5127-a430-5051-a91f-f90f962f9a5d",
+        "c30c1841-292e-55cd-bc93-ccd0e965ad51"
+      ],
+      "recognition_confidence": 0.7776,
+      "verification": "proposed",
+      "origin": "automation",
+      "spec_proposal": {
+        "family": "valve",
+        "nps": "2 x 3/4",
+        "rating": "10000",
+        "end_connection": "RTJ"
+      },
+      "page_index": 1
+    },
+    {
+      "item_no": "10",
+      "family": "valve",
+      "description": "BALL VALVE FULL BORE 10000 PSI RTJ TYPE 6BX G.O. BA9901",
+      "size": "8",
+      "quantity": 1,
+      "observed": 0,
+      "quantity_raw": "1",
+      "quantity_unit": "count",
+      "quantity_value": "1",
+      "evidence": "Unreviewed source extraction; evidence 824152ac-4567-56bf-ace8-b783956ae6f0",
+      "evidence_id": "824152ac-4567-56bf-ace8-b783956ae6f0",
+      "source_bbox": [
+        1835.639404296875,
+        733.0,
+        2479.06298828125,
+        760.2771606445312
+      ],
+      "source_sha256": "7b97d44bef3d544c4c98ed0667c29607ce58fa4a401dd2463f66010a9615bb59",
+      "word_evidence_ids": [
+        "c959f07d-03c6-54cc-85d6-8168c6c6ef7a",
+        "20c5cc06-90f6-5a56-bfcb-3d3dd919f0c8",
+        "e9984106-8b5a-5e6b-aef1-cee853474cf7",
+        "a33c0b89-3a07-57af-98fc-b6f02ea72c47",
+        "ba637136-1717-57d5-9137-00e1283b5f24",
+        "a803c65d-3a0e-5f2b-a908-253e8f5efa0a",
+        "36398779-b55f-5bf0-80b4-b62e9c381021",
+        "483608bf-9896-5f02-b2ad-d8662a0bfa92",
+        "25a55119-99a0-541b-9104-9baf7f421c2f",
+        "4b5ecf72-2508-50db-a996-ea4a22518da8",
+        "33722312-57ad-5819-9b9e-20eecc6777b2",
+        "64e78d43-f8f2-54d1-ab29-ae956b0a6e96"
+      ],
+      "recognition_confidence": 0.8106,
+      "verification": "proposed",
+      "origin": "automation",
+      "spec_proposal": {
+        "family": "valve",
+        "nps": "8",
+        "rating": "10000",
+        "component_type": "BALL",
+        "end_connection": "RTJ"
+      },
+      "page_index": 1
+    },
+    {
+      "item_no": "11",
+      "family": "other",
+      "description": "PV-7680 PV 7680",
+      "size": "8",
+      "quantity": 1,
+      "observed": 0,
+      "quantity_raw": "1",
+      "quantity_unit": "count",
+      "quantity_value": "1",
+      "evidence": "Unreviewed source extraction; evidence 4d788552-0b94-5367-a022-6d28814f8396",
+      "evidence_id": "4d788552-0b94-5367-a022-6d28814f8396",
+      "source_bbox": [
+        1835.639404296875,
+        809.4915161132812,
+        2479.06298828125,
+        819.3333129882812
+      ],
+      "source_sha256": "7b97d44bef3d544c4c98ed0667c29607ce58fa4a401dd2463f66010a9615bb59",
+      "word_evidence_ids": [
+        "01de121f-d39a-5ff7-9a03-507f6bbe0a60",
+        "8bcc785b-c1b3-5d6f-b18f-1eec8fcf67ca",
+        "359a35cb-bd87-58e7-a833-90ccb4ca2a27",
+        "ceb4d1a2-4b09-51b4-a0cb-0db4c0942af3",
+        "9bc5777f-0227-56d1-9636-60fb9ca3730a",
+        "1b637c0e-7ad3-526f-8c4d-78dc014bb783"
+      ],
+      "recognition_confidence": 0.9076,
+      "verification": "proposed",
+      "origin": "automation",
+      "spec_proposal": {
+        "family": "other",
+        "nps": "8"
+      },
+      "page_index": 1
+    },
+    {
+      "item_no": "12",
+      "family": "instrument",
+      "description": "PRESSURE INDICATING TRANSMITTER PIT",
+      "size": "3/4",
+      "quantity": 1,
+      "observed": 0,
+      "quantity_raw": "1",
+      "quantity_unit": "count",
+      "quantity_value": "1",
+      "evidence": "Unreviewed source extraction; evidence 402a4dde-b1e3-58a3-bb36-e48170cd488a",
+      "evidence_id": "402a4dde-b1e3-58a3-bb36-e48170cd488a",
+      "source_bbox": [
+        1835.639404296875,
+        824.7649536132812,
+        2479.06298828125,
+        837.2099609375
+      ],
+      "source_sha256": "7b97d44bef3d544c4c98ed0667c29607ce58fa4a401dd2463f66010a9615bb59",
+      "word_evidence_ids": [
+        "fd071f38-a439-5613-a413-51190c41c009",
+        "cc680cdd-8b11-5d09-8b0f-4bed50eb05ce",
+        "070515ef-529b-5bfe-bba9-b00cfaa7a684",
+        "a4b92be6-a9bc-51e2-8f89-f1f502f23b79",
+        "c07f86e0-998a-5304-b654-ce5c51d88603",
+        "11ca30a4-0e3f-554e-8322-bb48ecb34936",
+        "ba86dbd5-af32-53ba-a484-3785a583eb90"
+      ],
+      "recognition_confidence": 0.9533,
+      "verification": "proposed",
+      "origin": "automation",
+      "spec_proposal": {
+        "family": "instrument",
+        "nps": "3/4"
+      },
+      "page_index": 1
+    },
+    {
+      "item_no": "13",
+      "family": "support",
+      "description": "WELDED CRADLE FOR UNINSULATED PIPE",
+      "size": "8",
+      "quantity": 3,
+      "observed": 0,
+      "quantity_raw": "3",
+      "quantity_unit": "count",
+      "quantity_value": "3",
+      "evidence": "Unreviewed source extraction; evidence e84bee99-5f2a-5e6f-9b4f-aea8798f6d02",
+      "evidence_id": "e84bee99-5f2a-5e6f-9b4f-aea8798f6d02",
+      "source_bbox": [
+        1835.639404296875,
+        901.6666870117188,
+        2481.7294921875,
+        911.3333129882812
+      ],
+      "source_sha256": "7b97d44bef3d544c4c98ed0667c29607ce58fa4a401dd2463f66010a9615bb59",
+      "word_evidence_ids": [
+        "36381a84-7467-5d03-80d7-e7c0955b378a",
+        "7be3b1d4-b406-5ed3-b92b-93c23e16b0a5",
+        "cdbfd585-dfc2-5707-9feb-e37cfafd6382",
+        "f19d3193-8a6d-5ad4-bf63-af9b9d80ebe5",
+        "ed75c825-6a22-5018-ac73-f317cf227158",
+        "a3153c9e-bab4-5db1-b2ce-2a20c840474e",
+        "df6c2dea-5f63-5062-9fac-f67c34a7097d",
+        "c9bcc291-afa3-52fa-bf11-8ba33e6aa5c0",
+        "dbcbe697-3e11-5247-af59-5ecafc28d7a1"
+      ],
+      "recognition_confidence": 0.8128,
+      "verification": "proposed",
+      "origin": "automation",
+      "spec_proposal": {
+        "family": "support",
+        "nps": "8"
+      },
+      "page_index": 1
+    },
+    {
+      "item_no": "14",
+      "family": "support",
+      "description": "BEAM GUIDE FOR UNINSULATED PIPE (PS-GB1)",
+      "size": "8",
+      "quantity": 1,
+      "observed": 0,
+      "quantity_raw": "1",
+      "quantity_unit": "count",
+      "quantity_value": "1",
+      "evidence": "Unreviewed source extraction; evidence 259c545c-bdb2-5a4b-aabc-256d0636c29e",
+      "evidence_id": "259c545c-bdb2-5a4b-aabc-256d0636c29e",
+      "source_bbox": [
+        1835.639404296875,
+        932.2445678710938,
+        2479.06298828125,
+        944.6895751953125
+      ],
+      "source_sha256": "7b97d44bef3d544c4c98ed0667c29607ce58fa4a401dd2463f66010a9615bb59",
+      "word_evidence_ids": [
+        "9b0b791d-6e9c-5cd8-b7c5-ea01bf455c06",
+        "eb6319e2-d835-51eb-8d80-7241f0784fc2",
+        "ec3502b1-cf26-5cae-a7bc-623f484f2c2f",
+        "f62186d4-3edf-5fbb-95e3-b4d8d8f2829b",
+        "96a46307-74e8-56ef-be05-700fc77e0114",
+        "0480f592-e3e1-573c-9d8f-7d97dcb48070",
+        "41e54c11-27e8-5d93-a24c-31c5005a00cb",
+        "85981050-347c-524e-9dda-f988493b569b",
+        "c047b336-aac8-550c-adc2-e9f76e9bd37c",
+        "eafbf220-a7c4-5bf3-907e-5f60c55de628"
+      ],
+      "recognition_confidence": 0.7965,
+      "verification": "proposed",
+      "origin": "automation",
+      "spec_proposal": {
+        "family": "support",
+        "nps": "8"
+      },
+      "page_index": 1
+    },
+    {
+      "item_no": "15",
+      "family": "support",
+      "description": "U-BOLT TYPE PS-UG2",
+      "size": "8",
+      "quantity": 2,
+      "observed": 0,
+      "quantity_raw": "2",
+      "quantity_unit": "count",
+      "quantity_value": "2",
+      "evidence": "Unreviewed source extraction; evidence 90379fc7-6551-5282-9314-055897e061f0",
+      "evidence_id": "90379fc7-6551-5282-9314-055897e061f0",
+      "source_bbox": [
+        1835.639404296875,
+        962.7914428710938,
+        2481.396240234375,
+        972.6666870117188
+      ],
+      "source_sha256": "7b97d44bef3d544c4c98ed0667c29607ce58fa4a401dd2463f66010a9615bb59",
+      "word_evidence_ids": [
+        "77532fa2-84b5-5431-aeb5-32c98886545e",
+        "3cf4a550-b826-5a9b-9616-e894326e2b98",
+        "a5985c16-4dd0-5025-add1-4b5e49a8a6ab",
+        "7b072ac5-5052-5b7a-b573-77eb7af3b1ba",
+        "cdf64809-3cb4-571c-9f3e-a2c22a930947",
+        "a07ce17e-796f-5599-987b-5e4712e34db8",
+        "9578500f-497f-5c5a-967f-b196fd88abf8"
+      ],
+      "recognition_confidence": 0.8852,
+      "verification": "proposed",
+      "origin": "automation",
+      "spec_proposal": {
+        "family": "support",
+        "nps": "8"
+      },
+      "page_index": 1
+    },
+    {
+      "item_no": "16",
+      "family": "other",
+      "description": "11.1/2 \" LG STUD BOLT A320 GR L7 BLACK XYLAN 1424 COATED",
+      "size": "1.1/2",
+      "quantity": 60,
+      "observed": 0,
+      "quantity_raw": "60",
+      "quantity_unit": "count",
+      "quantity_value": "60",
+      "evidence": "Unreviewed source extraction; evidence c7542a42-1a61-5d79-9659-2526dc041c7c",
+      "evidence_id": "c7542a42-1a61-5d79-9659-2526dc041c7c",
+      "source_bbox": [
+        1835.639404296875,
+        1131.36474609375,
+        2481.0830078125,
+        1157.38623046875
+      ],
+      "source_sha256": "7b97d44bef3d544c4c98ed0667c29607ce58fa4a401dd2463f66010a9615bb59",
+      "word_evidence_ids": [
+        "e495f077-9b60-5701-bf94-b0598a4a71ec",
+        "79722a93-6c30-528c-bbdf-6090f9b20976",
+        "b29152d0-7f2c-57e4-a61f-c0e42c72027f",
+        "307300a0-be7d-5f4d-8606-e3a2f8b015f4",
+        "ef98601c-82af-54b6-91df-197db94d3fba",
+        "14988392-1eeb-50ba-bc82-0fa30d89306b",
+        "3b318942-5c0f-5a65-b5f8-f5c91a0aa07b",
+        "7df2d0ed-f87b-5030-998c-1c29b3087a05",
+        "2aa21cbb-a13e-5f22-bce0-f863c36ec1e4",
+        "f3f0ea36-1d35-5d52-8837-5e6acd750af2",
+        "95679901-2e38-5819-853a-0e8c8d46e2ee",
+        "2b03ffb5-3390-5695-8ab2-8e7a706c4c0a",
+        "e8d8ff8f-31cc-5888-91d2-44a045980bc8"
+      ],
+      "recognition_confidence": 0.5847,
+      "verification": "proposed",
+      "origin": "automation",
+      "spec_proposal": {
+        "family": "other",
+        "nps": "1.1/2"
+      },
+      "page_index": 1
+    },
+    {
+      "item_no": "17",
+      "family": "other",
+      "description": "HVY HEX NUTS A194 GR 7 BLACK XYLAN 1424",
+      "size": "1.1/2",
+      "quantity": 120,
+      "observed": 0,
+      "quantity_raw": "120",
+      "quantity_unit": "count",
+      "quantity_value": "120",
+      "evidence": "Unreviewed source extraction; evidence beb81b3a-13e2-50d3-804a-1272017934d0",
+      "evidence_id": "beb81b3a-13e2-50d3-804a-1272017934d0",
+      "source_bbox": [
+        1835.639404296875,
+        1161.91162109375,
+        2481.0830078125,
+        1174.356689453125
+      ],
+      "source_sha256": "7b97d44bef3d544c4c98ed0667c29607ce58fa4a401dd2463f66010a9615bb59",
+      "word_evidence_ids": [
+        "5d46560f-4098-523e-8b9b-f5ed4de0ddf2",
+        "dfda6c9e-a537-5dc7-a6b8-d271c7837590",
+        "14cb9374-8fe5-5722-8403-8929c9933d82",
+        "9cb71550-512b-5877-b8c9-83229da97d68",
+        "63d8d545-78e9-580f-be7b-752a289c2315",
+        "1623b5a3-57c1-587d-a286-0ea47fcb7cf5",
+        "6e69247a-cc0b-5833-b850-d17e7d79d2bb",
+        "0b685698-bfde-5959-bda9-c08b37502f55",
+        "4e61ee2b-0fae-5461-85ad-bfaabcbc3662",
+        "8da8f843-eb7f-541b-b73e-6e747851b6e0",
+        "7c0a19dc-9a30-59f6-ba53-6b6575d3b101",
+        "31b16f76-ed6f-5b88-ae0f-d367243bb7ec",
+        "cbb338aa-68e5-5ad7-be22-45a7403a4fd7"
+      ],
+      "recognition_confidence": 0.855,
+      "verification": "proposed",
+      "origin": "automation",
+      "spec_proposal": {
+        "family": "other",
+        "nps": "1.1/2"
+      },
+      "page_index": 1
+    },
+    {
+      "item_no": "18",
+      "family": "other",
+      "description": "5.1/2 \" LG STUD BOLT A320 GR L7 BLACK XYLAN 1424 COATED",
+      "size": "3/4",
+      "quantity": 24,
+      "observed": 0,
+      "quantity_raw": "24",
+      "quantity_unit": "count",
+      "quantity_value": "24",
+      "evidence": "Unreviewed source extraction; evidence b7951fdd-4900-55bc-91f6-45e56ec790e3",
+      "evidence_id": "b7951fdd-4900-55bc-91f6-45e56ec790e3",
+      "source_bbox": [
+        1835.639404296875,
+        1192.45849609375,
+        2481.648681640625,
+        1217.3485107421875
+      ],
+      "source_sha256": "7b97d44bef3d544c4c98ed0667c29607ce58fa4a401dd2463f66010a9615bb59",
+      "word_evidence_ids": [
+        "8a365584-7a26-5a59-8e36-f91ede7a1627",
+        "cac70a98-0b16-5169-8dcc-507cbdf40e10",
+        "e5b911aa-0306-5ed2-9f75-7fde1bf2bd1e",
+        "03617dca-a775-5dfd-8baa-951b4a134bba",
+        "8abceb64-f29e-5192-a52b-ce250db044f2",
+        "fb2d49dd-b7e6-5107-ab5c-3feaded8ffc1",
+        "ad7f1ca5-c0e4-5195-8c8b-655abf206c36",
+        "734fe2a1-aaa2-5c1d-ba27-ec56383d013a",
+        "9a87b599-a63e-51a6-9036-e6101b091432",
+        "034a9472-c2a7-5e7c-893e-d5bc07824741",
+        "84f61a0b-8239-573e-9f14-1e9987fa230f",
+        "211a3c63-1163-5df2-885e-e276e8af0999",
+        "e07ec82c-4496-5ed5-82d1-3dfc684b133a"
+      ],
+      "recognition_confidence": 0.8168,
+      "verification": "proposed",
+      "origin": "automation",
+      "spec_proposal": {
+        "family": "other",
+        "nps": "3/4"
+      },
+      "page_index": 1
+    },
+    {
+      "item_no": "19",
+      "family": "other",
+      "description": "HVY HEX NUTS A194 GR 7 BLACK XYLAN 1424",
+      "size": "3/4",
+      "quantity": 48,
+      "observed": 0,
+      "quantity_raw": "48",
+      "quantity_unit": "count",
+      "quantity_value": "48",
+      "evidence": "Unreviewed source extraction; evidence d88edc57-e420-5403-8bad-f4e4669a9ac2",
+      "evidence_id": "d88edc57-e420-5403-8bad-f4e4669a9ac2",
+      "source_bbox": [
+        1835.639404296875,
+        1223.571044921875,
+        2481.648681640625,
+        1236.0159912109375
+      ],
+      "source_sha256": "7b97d44bef3d544c4c98ed0667c29607ce58fa4a401dd2463f66010a9615bb59",
+      "word_evidence_ids": [
+        "f0f985d4-b37e-533f-8664-65ae59a4b4fa",
+        "3a9dbfb3-6d12-517c-8457-259d68ad4d1a",
+        "0b99a7be-b206-5917-ae36-affe1c7c9f55",
+        "ffdff60c-6d67-5ed3-9bea-a83fbca272ad",
+        "bbbf20a3-ba4d-5a49-9de2-c0550b557a02",
+        "47f59f0a-09fe-59ba-824b-98c760512b1b",
+        "598d4064-99a3-57ba-aaaa-424ac872b198",
+        "fde9e646-c7a4-5578-9fda-83e421b46efb",
+        "dc505574-5163-59e0-b359-b1aeed6cc7f1",
+        "ed4d16d3-cc67-52f8-964f-da9db586a0f5",
+        "245fcda3-eb2d-565d-a7ce-860d00c5f021",
+        "2c7f0089-ad16-55d6-992a-93f0cd04983c",
+        "dc094c19-2333-58b4-bb72-011463c29384"
+      ],
+      "recognition_confidence": 0.885,
+      "verification": "proposed",
+      "origin": "automation",
+      "spec_proposal": {
+        "family": "other",
+        "nps": "3/4"
+      },
+      "page_index": 1
+    }
+  ],
+  "material_observation_provenance": {
+    "kind": "ACTUAL_RETAINED_OCR_PLUS_LABELLED_VISUAL_CORRECTION",
+    "source_sha256": "7b97d44bef3d544c4c98ed0667c29607ce58fa4a401dd2463f66010a9615bb59",
+    "engineering_approved": false,
+    "capture": "DigitalOcean page extraction, 23 November 2026",
+    "purpose": "Reproducible source-specific review proposals; never original/golden acceptance"
+  }
+}

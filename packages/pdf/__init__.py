@@ -9,6 +9,7 @@ import zipfile
 
 import fitz
 from packages.catalogs import schedule_lines
+from packages.physical.source_review import point_label
 
 RED = (0.82, 0.19, 0.19)
 BLUE = (0.12, 0.34, 0.85)
@@ -258,7 +259,7 @@ def export_bundle(project, source_path, output_path):
                 register(circle, page, sheet, "bubble", node["id"], color)
                 label = page.add_freetext_annot(
                     fitz.Rect(x - 12, y - 6, x + 12, y + 9),
-                    str(node["number"]),
+                    point_label(node),
                     fontsize=8,
                     text_color=color,
                     align=1,

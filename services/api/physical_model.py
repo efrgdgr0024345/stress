@@ -23,7 +23,7 @@ class PortInput(BaseModel):
 class ComponentInput(BaseModel):
     model_config=ConfigDict(extra='forbid')
     version:int=Field(ge=1)
-    kind:Literal['flange','valve','inline_instrument','single_instrument','instrument_unclassified','tee','elbow','support']
+    kind:Literal['flange','valve','inline_instrument','single_instrument','instrument_unclassified','inline_component_unclassified','tee','elbow','support']
     ports:dict[str,PortInput|None]=Field(max_length=3)
     evidence:str=Field(min_length=10,max_length=3000)
     confirmed:Literal[True]
@@ -83,6 +83,7 @@ def install(api):
             model=prepare(p);target=next((c for c in model['components'] if c['id']==component_id),None)
             if not target:raise HTTPException(404,'Current component occurrence not found.')
             allowed={'inline_instrument','single_instrument','instrument_unclassified'} if target['family']=='instrument' else {target['family']}
+            if target['kind']=='inline_component_unclassified' and target['family']=='other':allowed={'inline_component_unclassified'}
             if body.kind not in allowed:raise HTTPException(422,'Correct the material family first; this occurrence cannot silently change component family.')
             policy=POLICIES[body.kind]
             if set(body.ports)-set(policy['ports']):raise HTTPException(422,'This component has unsupported process connections. A single-ended PIT has only one process port.')

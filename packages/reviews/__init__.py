@@ -54,7 +54,7 @@ def scopes(project, processing_sources=()):
     component_state=component_audit(project);components=component_state['components']
     dimensional_state=solve_dimensions(project)
     for line in lines:
-        nodes=[{k:n.get(k) for k in ('id','line_id','route','order','takeoff_id','kind','station_mm','coordinates_mm','dimension_input','evidence','verification','component_ports')}
+        nodes=[{k:n.get(k) for k in ('id','line_id','route','order','takeoff_id','kind','station_mm','coordinates_mm','dimension_input','evidence','verification','component_ports','topology_state','source_observation','source_review_reasons')}
                for n in project['nodes'] if n['line_id']==line]
         point_ids={n['id'] for n in nodes}
         component_ids={c['id'] for c in components if c['line_id']==line}

@@ -66,6 +66,20 @@ class UpdateApiTests(unittest.TestCase):
         finally:main.LOCAL_DEMO=previous
 
 class ReleaseTests(unittest.TestCase):
+    def test_unassigned_source_and_unclassified_process_requirements_block_older_code(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root,public,data,directory,config,release=self.fixture(Path(temporary))
+            with sqlite3.connect(data/'workspace.sqlite3') as conn:
+                conn.execute('DROP TABLE projects');conn.execute('CREATE TABLE projects (data TEXT)')
+            for project in ({'nodes':[{'topology_state':'UNASSIGNED'}]}, {'nodes':[{'source_observation':{'verification':'proposed'}}]},
+                            {'materials':[{'connection_profile':{'kind':'TWO_PROCESS_ENDS_CLASSIFICATION_UNCONFIRMED'}}]}):
+                with sqlite3.connect(data/'workspace.sqlite3') as conn:
+                    conn.execute('DELETE FROM projects');conn.execute('INSERT INTO projects VALUES (?)',(json.dumps(project),))
+                self.assertEqual(u.required_security_contract(data),4)
+                u.write(root/'RELEASE.json',{'security_contract':3})
+                with self.assertRaisesRegex(ValueError,'predates'):u.security_compatible(data,root)
+                u.write(root/'RELEASE.json',{'security_contract':4});u.security_compatible(data,root)
+
     def test_rollback_contract_includes_later_identity_and_derived_geometry_records(self):
         with tempfile.TemporaryDirectory() as temporary:
             root,public,data,directory,config,release=self.fixture(Path(temporary))

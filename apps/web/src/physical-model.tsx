@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { GitBranch, Ruler, CheckCircle2, Loader2 } from "lucide-react";
-import { api, label, type Project } from "./types";
+import { api, label, pointLabel, type Project } from "./types";
 import { Dialog } from "./ui";
 
 type Port = {
@@ -135,7 +135,7 @@ export function PhysicalModelControls({
   const pointName = (id: string) => {
     const n = project.nodes.find((p) => p.id === id);
     return n
-      ? `${n.line_id} · Node ${n.number ?? "?"} · ${n.route} · station ${n.station_mm ?? "unknown"} mm`
+      ? `${n.line_id} · ${pointLabel(n)} · ${n.route ?? "unassigned topology"} · station ${n.station_mm ?? "unknown"} mm`
       : "";
   };
   const complete = data?.solution.elements.some((e) =>
@@ -143,6 +143,34 @@ export function PhysicalModelControls({
   );
   return (
     <div className="physical-controls">
+      <button
+        className="button secondary"
+        disabled={busy || !data?.can_edit}
+        onClick={async () => {
+          setBusy(true);
+          setError("");
+          try {
+            onUpdate(
+              await api<Project>(path + "/source-points", {
+                method: "POST",
+                body: JSON.stringify({
+                  version: project.version,
+                  confirmed: true,
+                }),
+              }),
+            );
+          } catch (e) {
+            setError((e as Error).message);
+          } finally {
+            setBusy(false);
+          }
+        }}
+      >
+        <GitBranch size={15} />{" "}
+        {project.source_review?.prepared
+          ? "Refresh source review"
+          : "Locate source interfaces"}
+      </button>
       <div className="review-actions">
         <button
           className="button secondary"
